@@ -497,11 +497,14 @@ def extract_symptoms(state: Dict[str, Any]) -> Dict[str, Any]:
             }
         
         # Get model name based on client type
-        model_name = "meta-llama/llama-3.1-8b-instruct"
-        if hasattr(llm_client, 'model'):  # Groq client
-            model_name = "meta-llama/llama-3.1-8b-instruct"
-        else:  # OpenAI client
-            model_name = "hosted_vllm/Llama-3.1-70B-Instruct"
+        # Check if it's a Groq client by checking the type
+        is_groq = 'groq' in str(type(llm_client)).lower() or hasattr(llm_client, 'models')
+        if is_groq:
+            # Use working Groq model
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+        else:  # OpenAI-compatible client
+            # Use a standard OpenAI model or fallback to Groq model
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
         
         # Prompt for symptom extraction
         prompt = f"""Extract medical symptoms from the following user input. Identify:

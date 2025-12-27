@@ -175,8 +175,9 @@ Select 3-5 most relevant conditions. Return ONLY JSON:
 }}"""
         
         try:
+            # Use working Groq model (replaced non-existent hosted_vllm model)
             response = client.chat.completions.create(
-                model="hosted_vllm/Llama-3.1-70B-Instruct",
+                model="meta-llama/llama-4-scout-17b-16e-instruct",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
                 max_tokens=500,

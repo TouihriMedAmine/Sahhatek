@@ -478,11 +478,14 @@ Task:
     
     try:
         # Get model name
-        model_name = "meta-llama/llama-3.1-8b-instruct"
-        if hasattr(llm_client, 'model'):
-            model_name = "meta-llama/llama-3.1-8b-instruct"
-        else:
-            model_name = "hosted_vllm/Llama-3.1-70B-Instruct"
+        # Check if it's a Groq client by checking the type
+        is_groq = 'groq' in str(type(llm_client)).lower() or hasattr(llm_client, 'models')
+        if is_groq:
+            # Use working Groq model
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
+        else:  # OpenAI-compatible client
+            # Use a standard OpenAI model or fallback to Groq model
+            model_name = "meta-llama/llama-4-scout-17b-16e-instruct"
         
         response = llm_client.chat.completions.create(
             model=model_name,
