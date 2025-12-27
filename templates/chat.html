@@ -1,0 +1,2323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sahatek – AI Health Assistant</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <!-- Leaflet Routing Machine CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+  
+  <style>
+    /* Custom colors for medical theme */
+    .medical-primary { color: #d80027; }
+    .bg-medical-primary { background-color: #d80027; }
+    .bg-medical-primary\/10 { background-color: rgba(216, 0, 39, 0.1); }
+    .bg-medical-primary\/20 { background-color: rgba(216, 0, 39, 0.2); }
+    .border-medical-primary { border-color: #d80027; }
+    
+    .medical-dark { color: #b30020; }
+    .bg-medical-dark { background-color: #b30020; }
+    
+    .medical-neutral { color: #2d3748; }
+    .bg-medical-neutral { background-color: #2d3748; }
+    
+    .medical-light { color: #f8f9fa; }
+    .bg-medical-light { background-color: #f8f9fa; }
+    
+    /* Glass effect */
+    .sidebar-glass {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    /* Scrollbar styling */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    /* Button styles - Professional Minimalist */
+    .btn-primary {
+      background: #212121;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(216, 0, 39, 0.15);
+    }
+    .btn-primary:hover {
+      background: #323232;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(216, 0, 39, 0.25);
+    }
+    
+    /* Medical card styles - Enhanced */
+    .medical-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      border: 1px solid #e5e7eb;
+      position: relative;
+      overflow: hidden;
+    }
+    .medical-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #d80027, transparent);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .medical-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.1);
+      border-color: #d80027;
+    }
+    .medical-card:hover::after {
+      transform: translateX(0);
+    }
+    .medical-card.loading {
+      opacity: 0.7;
+      cursor: wait;
+    }
+    
+    /* Input styles */
+    .medical-input {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      resize: none;
+      font-family: 'Open Sans', sans-serif;
+    }
+    .medical-input:focus {
+      outline: none;
+      border-color: #d80027;
+      box-shadow: 0 0 0 3px rgba(216, 0, 39, 0.1);
+    }
+    
+    /* User avatar */
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #d80027, #b30020);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 16px;
+    }
+    
+    /* Typing dots animation */
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #d80027;
+      border-radius: 50%;
+      display: inline-block;
+      animation: typing 1.4s infinite ease-in-out both;
+    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1); }
+    }
+    
+    /* Enhanced Sidebar Animations */
+    .sidebar-transform {
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .sidebar-transform.open {
+      transform: translateX(0);
+    }
+    
+    .sidebar-overlay {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s;
+    }
+    
+    .sidebar-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Main content adjustment for sidebar */
+    .main-content-adjusted {
+      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      margin-left: 0;
+      width: 100%;
+    }
+    
+    @media (min-width: 1024px) {
+      .main-content-adjusted.sidebar-open {
+        margin-left: 320px;
+        width: calc(100% - 320px);
+      }
+    }
+    
+    /* Smooth page transitions */
+    .page-fade-in {
+      animation: pageFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    /* Chat interface transitions */
+    .chat-enter {
+      animation: chatEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    .chat-exit {
+      animation: chatExit 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes pageFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes chatEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    @keyframes chatExit {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-30px);
+      }
+    }
+    
+    /* Conversation item animations */
+    .conversation-item-enter {
+      animation: itemEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+    
+    @keyframes itemEnter {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    /* Message bubble styles - UPDATED */
+    .message-bubble {
+      max-width: 85%;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      position: relative;
+      word-wrap: break-word;
+    }
+    
+    .user-bubble {
+      background: linear-gradient(135deg, #910a0a, #b30020);
+      color: rgb(255, 255, 255);
+      border-bottom-right-radius: 0.5rem;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    
+    .bot-bubble {
+      background: white;
+      color: #2b2b2b;
+      border: 1px solid #e5e7eb;
+      border-bottom-left-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-right: auto;
+      margin-left: 0;
+    }
+    
+    /* Message container - UPDATED */
+    .message-container {
+      display: flex;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      align-items: flex-end;
+    }
+    
+    .bot-message-container {
+      justify-content: flex-start;
+    }
+    
+    .user-message-container {
+      justify-content: flex-end;
+    }
+    
+    /* Map container styles */
+    .healthcare-map {
+      height: 400px;
+      width: 100%;
+      border-radius: 12px;
+      z-index: 1;
+      margin-top: 1rem;
+    }
+
+    .recommendation-card {
+      background: linear-gradient(135deg, rgba(216, 0, 39, 0.1) 0%, rgba(179, 0, 32, 0.1) 100%);
+      border: 1px solid rgba(216, 0, 39, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .place-item {
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(216, 0, 39, 0.2);
+      border-radius: 8px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .place-item::before {
+      content: "🗺️ Click to see route";
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.7rem;
+      color: rgba(216, 0, 39, 0.6);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .place-item:hover {
+      background: rgba(216, 0, 39, 0.1);
+      border-color: rgba(216, 0, 39, 0.5);
+      transform: translateX(4px);
+      box-shadow: 0 4px 8px rgba(216, 0, 39, 0.3);
+    }
+
+    .place-item:hover::before {
+      opacity: 1;
+    }
+
+    .place-item:active {
+      transform: translateX(2px);
+      background: rgba(216, 0, 39, 0.2);
+    }
+
+    /* Routing control styling */
+    .leaflet-routing-container {
+      background: rgba(255, 255, 255, 0.95);
+      color: #2b2b2b;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .leaflet-routing-container h3 {
+      color: #d80027;
+    }
+
+    .leaflet-routing-alt {
+      background: rgba(245, 245, 245, 0.9);
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    }
+    
+    /* Avatar styles - UPDATED */
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin: 0 0.75rem;
+    }
+    
+    .bot-avatar {
+      background: linear-gradient(135deg, #f8e4e4, #f0d9d9);
+      color: white;
+    }
+    
+    .user-avatar-small {
+      background:#910a0a;
+      color: white;
+    }
+    
+    /* Minimalist New Conversation Button */
+    .minimalist-btn {
+      background: white;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .minimalist-btn:hover {
+      border-color: #d80027;
+      color: #d80027;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(216, 0, 39, 0.1);
+    }
+    
+    .minimalist-btn:active {
+      transform: translateY(0);
+    }
+    
+    /* Line clamp utility */
+    .line-clamp-1 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 1;
+    }
+    
+    .line-clamp-2 {
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+    
+    /* Professional tag styles */
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    /* Card content animation */
+    .card-content {
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    
+    .medical-card:hover .card-content {
+      transform: translateX(4px);
+    }
+
+    /* For smaller screens, adjust max-width */
+    @media (max-width: 640px) {
+      .message-bubble {
+        max-width: 90%;
+      }
+      
+      .message-avatar {
+        width: 32px;
+        height: 32px;
+        margin: 0 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-white to-gray-50/50">
+  {% csrf_token %}
+  
+
+  <!-- Sidebar -->
+  <aside id="sidebar" class="glass-effect sidebar-transform w-80 h-screen fixed left-0 top-0 z-40 flex flex-col shadow-2xl">
+    <!-- Sidebar Header -->
+    <div class="p-6 border-b border-gray-100 bg-white">
+      <div class="flex items-center justify-between">
+        <a href="{% url 'home' %}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+          <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-10 w-10">
+          <h1 class="text-xl font-bold" style="color: #d80027;">Sahatek</h1>
+        </a>
+        <button id="closeSidebar" class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100 transition-colors">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- New Chat Button - Professional Minimalist -->
+    <div class="p-4 border-b border-gray-100 bg-white">
+      <button id="new-chat-btn" class="minimalist-btn group">
+        <div class="relative">
+          <i class="fas fa-plus text-medical-primary group-hover:scale-110 transition-transform duration-200"></i>
+        </div>
+        <span class="font-medium">New Conversation</span>
+      </button>
+    </div>
+    
+    <!-- Conversations List -->
+    <div id="chats-list" class="flex-1 p-4 overflow-y-auto custom-scrollbar bg-white">
+      <h3 class="text-sm font-semibold text-gray-500 mb-3 px-2">Recent Conversations</h3>
+      <div id="chats-loading" class="flex flex-col items-center justify-center p-8">
+        <div class="flex space-x-2 mb-2">
+          <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse"></div>
+          <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+          <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+        </div>
+        <span class="text-xs text-gray-500">Loading conversations...</span>
+      </div>
+    </div>
+    
+    <!-- User Profile -->
+    <div class="p-4 border-t border-gray-100 bg-white">
+      <div class="flex items-center space-x-3">
+        
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-gray-900 truncate">{{ request.user.username }}</p>
+          <p class="text-xs text-gray-500 truncate">{{ request.user.email|default:"No email" }}</p>
+        </div>
+        <div class="flex items-center space-x-1">
+          <button id="profile-btn" class="p-1.5 text-gray-500 hover:text-medical-primary rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-user"></i>
+          </button>
+          <button id="logout-btn" class="p-1.5 text-gray-500 hover:text-red-500 rounded-lg hover:bg-gray-100 transition-colors">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile Overlay -->
+  <div id="sidebarOverlay" class="sidebar-overlay fixed inset-0 bg-black/50 z-30 lg:hidden"></div>
+
+  <!-- Main Content -->
+  <main id="chat-main" class="main-content-adjusted w-full min-h-screen overflow-x-hidden">
+    <!-- Welcome Screen (Initial View) -->
+    <div id="welcomeScreen" class="page-fade-in min-h-screen flex flex-col">
+      <!-- Header -->
+      <div class="w-full max-w-6xl mx-auto px-4 py-8">
+        <div class="flex items-center justify-between mb-8">
+          <div class="flex items-center space-x-3">
+            <button id="backBtnWelcome" onclick="handleBackButton()" class="text-medical-primary hover:text-medical-dark font-semibold mr-2 flex items-center gap-1 px-3 py-1 rounded-lg hover:bg-gray-100 transition-all">
+              <span>←</span>
+              <span>Back</span>
+            </button>
+            <a href="{% url 'home' %}" class="flex items-center space-x-2 hover:opacity-80 transition-opacity cursor-pointer">
+              <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-8 w-8">
+              <h2 class="text-xl font-bold medical-primary">Sahatek AI</h2>
+            </a>
+            <button id="toggle-sidebar" class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-medical-primary">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Content Area -->
+      <div class="flex-1 flex flex-col items-center justify-center px-4">
+        <!-- Welcome Message -->
+        <div class="text-center mb-12 max-w-2xl">
+          <h1 class="text-4xl font-bold mb-4 text-gray-900">Hello, I'm your AI Health Assistant</h1>
+          <p class="text-lg text-gray-600">Describe your symptoms, ask medical questions, or get health guidance.</p>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="w-full max-w-3xl mx-auto mb-12">
+          <div class="relative">
+            <textarea id="chat-input" 
+                      rows="3"
+                      placeholder="Describe your symptoms or ask a health question..."
+                      class="medical-input w-full bg-white shadow-lg text-gray-900 placeholder-gray-500 text-lg"></textarea>
+            <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+              <button id="upload-btn" class="p-2 text-gray-500 hover:text-medical-primary rounded-lg hover:bg-gray-100 transition-colors">
+                <i class="fas fa-paperclip"></i>
+              </button>
+              <button id="send-btn" class="btn-primary px-4">
+                <i class="fas fa-paper-plane mr-2"></i>
+                Send
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3 text-center">
+            <i class="fas fa-shield-alt mr-1"></i> Your conversations are private and secure
+          </p>
+        </div>
+        
+        <!-- Feature Cards Grid - Enhanced -->
+        <div class="w-full max-w-6xl mx-auto">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+            <!-- Mental Health Card -->
+            <div class="medical-card" data-agent="mental-health">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-purple-50 to-purple-100 text-purple-600">
+                  <i class="fas fa-brain text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Mental Health Support</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Get emotional support and coping strategies for mental wellbeing</p>
+                  <div class="mt-2">
+                    <span class="tag bg-purple-50 text-purple-700">Therapy • Support</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Symptoms Checker Card -->
+            <div class="medical-card" data-agent="symptoms-checker">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 text-blue-600">
+                  <i class="fas fa-stethoscope text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Symptoms Checker</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Describe symptoms for possible causes and guidance</p>
+                  <div class="mt-2">
+                    <span class="tag bg-blue-50 text-blue-700">Diagnosis • Analysis</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Medical Info Card -->
+            <div class="medical-card" data-agent="general-info">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-green-50 to-green-100 text-green-600">
+                  <i class="fas fa-book-medical text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Medical Information</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Evidence-based health information and resources</p>
+                  <div class="mt-2">
+                    <span class="tag bg-green-50 text-green-700">Research • Facts</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Medical Guidance Card -->
+            <div class="medical-card" data-agent="orientation">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100 text-yellow-600">
+                  <i class="fas fa-directions text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Medical Guidance</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Step-by-step medical procedures and first aid</p>
+                  <div class="mt-2">
+                    <span class="tag bg-yellow-50 text-yellow-700">Instructions • Steps</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Fact Checker Card -->
+            <div class="medical-card" data-agent="rumor-check">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-red-50 to-red-100 text-red-600">
+                  <i class="fas fa-check-double text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Health Fact Check</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Verify medical claims and debunk health myths</p>
+                  <div class="mt-2">
+                    <span class="tag bg-red-50 text-red-700">Verification • Evidence</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Wound Analyzer Card -->
+            <div class="medical-card" data-agent="computer-vision">
+              <div class="card-content flex items-start space-x-4">
+                <div class="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-indigo-50 to-indigo-100 text-indigo-600">
+                  <i class="fas fa-eye text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <h3 class="font-semibold text-gray-900 mb-1">Wound Analyzer</h3>
+                  <p class="text-sm text-gray-600 line-clamp-2">Upload images for analysis and recommendations</p>
+                  <div class="mt-2">
+                    <span class="tag bg-indigo-50 text-indigo-700">Visual • AI Analysis</span>
+                  </div>
+                </div>
+                <div class="flex-shrink-0">
+                  <i class="fas fa-chevron-right text-gray-400 mt-1 transition-transform group-hover:translate-x-1"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Interface (Initially hidden) - UPDATED WITH CENTERED LAYOUT -->
+    <div id="chatInterface" class="hidden h-screen flex flex-col overflow-hidden">
+      <!-- Chat Header (Fixed) -->
+      <div class="border-b border-gray-100 bg-white/95 backdrop-blur-sm px-4 lg:px-6 py-4 sticky top-0 z-10">
+        <div class="flex items-center justify-between max-w-5xl mx-auto">
+          <div class="flex items-center space-x-4">
+            <button id="toggleSidebarChat" class="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600 hover:text-medical-primary">
+              <i class="fas fa-bars"></i>
+            </button>
+            <button id="backBtnChat" onclick="handleBackButton()" class="text-medical-primary hover:text-medical-dark font-semibold mr-2 flex items-center gap-1 px-3 py-1 rounded-lg hover:bg-gray-100 transition-all">
+              <span>←</span>
+              <span>Back</span>
+            </button>
+            <a href="{% url 'home' %}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+              <div>
+                <h3 id="chat-title" class="font-semibold text-gray-900">Sahatek AI</h3>
+                <p id="chatSubtitle" class="text-xs text-gray-500">Online • 24/7 Support</p>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages (Scrollable) - CENTERED CONTAINER -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar">
+        <div class="max-w-5xl mx-auto px-4 lg:px-6 py-8">
+          <div id="chat-messages">
+            <div id="initial-message" class="text-center py-12 text-gray-500">
+              <div class="mb-4">
+                <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-16 w-16 mx-auto">
+              </div>
+              <h3 class="text-lg font-semibold mb-2">Select a conversation or start a new chat</h3>
+              <p class="text-sm">Your messages will appear here</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Input (Fixed Bottom) - CENTERED CONTAINER -->
+      <div class="border-t border-gray-100 bg-white/95 backdrop-blur-sm">
+        <div class="max-w-4xl mx-auto p-4">
+          <div class="relative">
+            <textarea id="chatInput" 
+                      rows="1"
+                      placeholder="Type your message..."
+                      class="medical-input w-full bg-gray-50 text-gray-900 placeholder-gray-500"
+                      style="max-height: 150px;"></textarea>
+            <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+              <button id="mic-btn" class="p-2 text-gray-500 hover:text-medical-primary rounded-lg hover:bg-gray-100 transition-colors relative group">
+                <span id="mic-pulse" class="absolute inset-0 rounded-full bg-red-500 opacity-0 transition-opacity"></span>
+                <i class="fas fa-microphone"></i>
+              </button>
+              <button id="sendChatBtn" class="btn-primary px-4">
+                <i class="fas fa-paper-plane mr-0"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Disclaimer -->
+          <p class="text-xs text-gray-500 mt-4 text-center">
+            <i class="fas fa-info-circle mr-1"></i> For educational purposes only. Consult a healthcare professional for medical advice.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- File input (hidden) -->
+  <input type="file" id="fileInput" class="hidden" accept="image/*">
+
+  <!-- External JavaScript -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
+  <script src="{% static 'js/map.js' %}"></script>
+
+  <script>
+    // Enhanced main.js with FIXED card click functionality
+    (() => {
+      // DOM Elements
+      const chatsListEl = document.getElementById('chats-list');
+      const chatsLoadingEl = document.getElementById('chats-loading');
+      const newChatBtn = document.getElementById('new-chat-btn');
+      const chatMessagesEl = document.getElementById('chat-messages');
+      const chatTitleEl = document.getElementById('chat-title');
+      
+      // State
+      let currentChatId = null;
+      
+      // 🌍 AUTOMATIC GEOLOCATION REQUEST ON PAGE LOAD
+      // Request location permission and store coordinates for healthcare facility search
+      console.log("🔍 Page loaded - checking geolocation support...");
+      
+      if (navigator.geolocation) {
+        console.log("✅ Geolocation API supported by browser");
+        console.log("📍 Requesting location permission (check browser prompt at top)...");
+        
+        const geolocationTimeout = setTimeout(() => {
+          console.warn("⚠️ Geolocation request timed out after 10 seconds");
+          console.warn("💡 Hint: You may have denied permission or location is disabled");
+        }, 10000);
+        
+        // Request geolocation NOW with aggressive settings
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            clearTimeout(geolocationTimeout);
+            const locationData = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            };
+            window.userLocation = locationData;
+            console.log("✅✅✅ GEOLOCATION SUCCESS ✅✅✅");
+            console.log("📍 Coordinates:", locationData);
+            console.log("🔬 Accuracy:", position.coords.accuracy + " meters");
+            console.log("📍 Location will be used for healthcare facility searches");
+            
+            // Show success notification
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-600/30 border border-green-400 text-green-200 px-4 py-3 rounded-lg text-sm z-40 font-semibold';
+            notification.innerHTML = '✅ Location enabled - Facilities will be found automatically!';
+            notification.style.boxShadow = '0 4px 20px rgba(34, 197, 94, 0.3)';
+            notification.style.animation = 'slideIn 0.3s ease-out';
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+              notification.style.opacity = '0';
+              notification.style.transition = 'opacity 0.3s ease-out';
+              setTimeout(() => notification.remove(), 300);
+            }, 5000);
+          },
+          (error) => {
+            clearTimeout(geolocationTimeout);
+            console.error("❌ GEOLOCATION ERROR ❌");
+            console.error("Error Code:", error.code);
+            console.error("Error Message:", error.message);
+            
+            // Detailed error messages
+            if (error.code === 1) {
+              console.warn("💡 PERMISSION DENIED - User denied location access");
+              console.warn("   Fix steps:");
+              console.warn("   1. Click the lock/icon next to the address in address bar");
+              console.warn("   2. Find 'Location' or 'Location permissions'");
+              console.warn("   3. Change from 'Block' to 'Allow'");
+              console.warn("   4. Reload the page");
+              console.warn("   OR click 'Share Location' button when prompted");
+            } else if (error.code === 2) {
+              console.warn("💡 POSITION UNAVAILABLE - Location services may be disabled");
+            } else if (error.code === 3) {
+              console.warn("💡 TIMEOUT - Location request took too long");
+            }
+            
+            // Show error notification
+            const errorNotification = document.createElement('div');
+            errorNotification.className = 'fixed bottom-4 right-4 bg-orange-600/30 border border-orange-400 text-orange-200 px-4 py-3 rounded-lg text-sm z-40 font-semibold';
+            errorNotification.innerHTML = '📍 Location denied - You can manually enter location when needed';
+            errorNotification.style.boxShadow = '0 4px 20px rgba(234, 88, 12, 0.3)';
+            errorNotification.style.animation = 'slideIn 0.3s ease-out';
+            document.body.appendChild(errorNotification);
+            
+            // Auto-remove after 6 seconds
+            setTimeout(() => {
+              errorNotification.style.opacity = '0';
+              errorNotification.style.transition = 'opacity 0.3s ease-out';
+              setTimeout(() => errorNotification.remove(), 300);
+            }, 6000);
+          },
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      } else {
+        console.warn("⚠️ Geolocation not supported by this browser");
+      }
+      let conversations = [];
+      let isProcessing = false;
+
+      // --- CSRF TOKEN ---
+      function getCSRFToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+      }
+      const csrftoken = getCSRFToken();
+
+      // --- API FUNCTIONS ---
+      async function fetchConversations() {
+        try {
+          const res = await fetch('/chat/api/conversations/');
+          const data = await res.json();
+          return data.conversations || [];
+        } catch (err) {
+          console.error("Failed to fetch conversations:", err);
+          showNotification('Failed to load conversations', 'error');
+          return [];
+        }
+      }
+
+      async function createConversation(title = 'New conversation', metadata = {}) {
+        try {
+          const res = await fetch('/chat/api/conversations/create/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ title, metadata })
+          });
+          const data = await res.json();
+          return data.success ? data.conversation : null;
+        } catch (err) {
+          console.error("Failed to create conversation:", err);
+          showNotification('Failed to create conversation', 'error');
+          return null;
+        }
+      }
+
+      async function fetchMessages(conversationId) {
+        try {
+          const res = await fetch(`/chat/api/conversations/${conversationId}/messages/`);
+          const data = await res.json();
+          return data.messages || [];
+        } catch (err) {
+          console.error("Failed to fetch messages:", err);
+          return [];
+        }
+      }
+
+      async function addMessage(conversationId, content, role = 'user', locationData = null) {
+        try {
+          const payload = { role, content };
+          
+          // Add location data if available
+          if (locationData) {
+            payload.latitude = locationData.latitude;
+            payload.longitude = locationData.longitude;
+          } else if (window.userLocation) {
+            // Use stored location if available
+            payload.latitude = window.userLocation.latitude;
+            payload.longitude = window.userLocation.longitude;
+            console.log("📍 Message sending with stored location from geolocation:", window.userLocation);
+          } else {
+            console.warn("⚠️ Message sending WITHOUT location data");
+          }
+          
+          const res = await fetch(`/chat/api/conversations/${conversationId}/messages/add/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          return data.success ? data : null;
+        } catch (err) {
+          console.error("Failed to add message:", err);
+          return null;
+        }
+      }
+
+      // --- UI FUNCTIONS ---
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ${type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'}`;
+        notification.innerHTML = `
+          <div class="flex items-center">
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
+            <span>${message}</span>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+
+      // --- SIDEBAR MANAGEMENT ---
+      async function loadAndRenderSidebar() {
+        if (!chatsListEl) return;
+        
+        conversations = await fetchConversations();
+        
+        // Hide loading
+        if (chatsLoadingEl) {
+          chatsLoadingEl.style.opacity = '0';
+          setTimeout(() => chatsLoadingEl.remove(), 300);
+        }
+        
+        // Clear and render
+        chatsListEl.innerHTML = '<h3 class="text-sm font-semibold text-gray-500 mb-3 px-2">Recent Conversations</h3>';
+        
+        if (conversations.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'text-sm text-gray-500 p-4 text-center';
+          empty.textContent = 'No conversations yet. Start a new chat!';
+          chatsListEl.appendChild(empty);
+          return;
+        }
+        
+        // Sort: pinned first, then by date
+        const sorted = [...conversations].sort((a, b) => {
+          if (a.is_pinned && !b.is_pinned) return -1;
+          if (!a.is_pinned && b.is_pinned) return 1;
+          return new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at);
+        });
+        
+        sorted.forEach((conv, index) => {
+          const item = createConversationItem(conv);
+          chatsListEl.appendChild(item);
+          
+          // Staggered animation
+          item.style.animationDelay = `${index * 0.05}s`;
+          item.classList.add('conversation-item-enter');
+        });
+      }
+
+      function createConversationItem(conv) {
+        const item = document.createElement('div');
+        item.className = `conversation-item group/item relative p-3 rounded-lg cursor-pointer hover:bg-gray-100 flex justify-between items-center transition-all duration-200 ${conv.id === currentChatId ? 'active bg-medical-primary/10 border-l-4 border-medical-primary' : 'border-l-4 border-transparent'}`;
+        item.dataset.chatId = conv.id;
+        
+        // Content
+        const contentDiv = document.createElement('div');
+        contentDiv.className = 'flex-1 overflow-hidden min-w-0 mr-2';
+        
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'font-medium truncate flex items-center gap-1.5 text-sm text-gray-800';
+        
+        if (conv.is_pinned) {
+          const pinIcon = document.createElement('span');
+          pinIcon.className = 'text-medical-primary flex-shrink-0';
+          pinIcon.innerHTML = '<i class="fas fa-thumbtack text-xs"></i>';
+          titleDiv.appendChild(pinIcon);
+        }
+        
+        const titleText = document.createElement('span');
+        titleText.className = 'truncate';
+        titleText.textContent = conv.title;
+        titleDiv.appendChild(titleText);
+        
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'text-xs text-gray-500 mt-1 truncate';
+        previewDiv.textContent = conv.preview || 'No messages yet';
+        
+        contentDiv.appendChild(titleDiv);
+        contentDiv.appendChild(previewDiv);
+        
+        // Menu button
+        const menuBtn = document.createElement('button');
+        menuBtn.className = 'p-1.5 text-gray-400 hover:text-gray-700 opacity-0 group-hover/item:opacity-100 transition-all duration-200 rounded hover:bg-gray-200';
+        menuBtn.innerHTML = '<i class="fas fa-ellipsis-v text-xs"></i>';
+        menuBtn.onclick = (e) => {
+          e.stopPropagation();
+          showConversationMenu(e, conv);
+        };
+        
+        item.appendChild(contentDiv);
+        item.appendChild(menuBtn);
+        
+        // Click handler
+        item.addEventListener('click', () => {
+          switchChat(conv.id);
+        });
+        
+        return item;
+      }
+
+      function showConversationMenu(event, conv) {
+        // Remove any existing menus
+        document.querySelectorAll('.conversation-menu').forEach(el => el.remove());
+        
+        const menu = document.createElement('div');
+        menu.className = 'conversation-menu fixed bg-white border border-gray-200 rounded-lg shadow-xl z-50 py-1 min-w-[120px]';
+        menu.style.left = `${event.clientX - 100}px`;
+        menu.style.top = `${event.clientY + 10}px`;
+        
+        const menuItems = [
+          { label: conv.is_pinned ? 'Unpin' : 'Pin', icon: 'thumbtack', action: () => togglePin(conv) },
+          { label: 'Rename', icon: 'edit', action: () => renameConversation(conv) },
+          { label: 'Delete', icon: 'trash', action: () => deleteConversation(conv), destructive: true }
+        ];
+        
+        menuItems.forEach(item => {
+          const btn = document.createElement('button');
+          btn.className = `w-full text-left px-3 py-2 text-sm flex items-center gap-2 hover:bg-gray-100 ${item.destructive ? 'text-red-600' : 'text-gray-700'}`;
+          btn.innerHTML = `<i class="fas fa-${item.icon} text-xs"></i><span>${item.label}</span>`;
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            item.action();
+            menu.remove();
+          };
+          menu.appendChild(btn);
+        });
+        
+        document.body.appendChild(menu);
+        
+        // Close menu on outside click
+        setTimeout(() => {
+          const closeMenu = (e) => {
+            if (!menu.contains(e.target)) {
+              menu.remove();
+              document.removeEventListener('click', closeMenu);
+            }
+          };
+          document.addEventListener('click', closeMenu);
+        }, 10);
+      }
+
+      async function togglePin(conv) {
+        try {
+          const res = await fetch(`/chat/api/conversations/${conv.id}/update/`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': csrftoken
+            },
+            body: JSON.stringify({ is_pinned: !conv.is_pinned })
+          });
+          
+          if (res.ok) {
+            await loadAndRenderSidebar();
+            showNotification(conv.is_pinned ? 'Unpinned conversation' : 'Pinned conversation');
+          }
+        } catch (err) {
+          console.error('Error toggling pin:', err);
+        }
+      }
+
+      async function renameConversation(conv) {
+        const newTitle = prompt('Enter new conversation title:', conv.title);
+        if (newTitle && newTitle !== conv.title) {
+          try {
+            const res = await fetch(`/chat/api/conversations/${conv.id}/update/`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken
+              },
+              body: JSON.stringify({ title: newTitle })
+            });
+            
+            if (res.ok) {
+              await loadAndRenderSidebar();
+              if (currentChatId === conv.id && chatTitleEl) {
+                chatTitleEl.textContent = newTitle;
+              }
+              showNotification('Conversation renamed');
+            }
+          } catch (err) {
+            console.error('Error renaming conversation:', err);
+          }
+        }
+      }
+
+      async function deleteConversation(conv) {
+        if (confirm(`Delete "${conv.title}"? This action cannot be undone.`)) {
+          try {
+            const res = await fetch(`/chat/api/conversations/${conv.id}/delete/`, {
+              method: 'POST',
+              headers: { 'X-CSRFToken': csrftoken }
+            });
+            
+            if (res.ok) {
+              // If deleting active chat, switch to welcome screen
+              if (currentChatId === conv.id) {
+                currentChatId = null;
+                if (window.uiManager) {
+                  window.uiManager.switchToWelcomeScreen();
+                }
+              }
+              
+              await loadAndRenderSidebar();
+              showNotification('Conversation deleted');
+            }
+          } catch (err) {
+            console.error('Error deleting conversation:', err);
+          }
+        }
+      }
+
+      // --- CHAT MANAGEMENT ---
+      async function switchChat(chatId) {
+        if (isProcessing || currentChatId === chatId) return;
+        
+        isProcessing = true;
+        currentChatId = chatId;
+        
+        // Update URL
+        updateUrlWithChatId(chatId);
+        
+        // Update active state in sidebar
+        updateSidebarActiveState(chatId);
+        
+        // Always switch to chat interface when switching chats
+        if (window.uiManager) {
+          await window.uiManager.switchToChatInterface(chatId);
+          // Load messages after switching to interface
+          await loadChatMessages(chatId);
+        }
+        
+        isProcessing = false;
+      }
+
+      function updateUrlWithChatId(chatId) {
+        const url = new URL(window.location);
+        url.searchParams.set('chat', chatId);
+        window.history.replaceState({}, '', url);
+      }
+
+      function updateSidebarActiveState(chatId) {
+        if (!chatsListEl) return;
+        
+        document.querySelectorAll('.conversation-item').forEach(item => {
+          const itemChatId = parseInt(item.dataset.chatId);
+          if (itemChatId === chatId) {
+            item.classList.add('active', 'bg-medical-primary/10', 'border-medical-primary');
+            item.classList.remove('border-transparent');
+          } else {
+            item.classList.remove('active', 'bg-medical-primary/10', 'border-medical-primary');
+            item.classList.add('border-transparent');
+          }
+        });
+      }
+
+      async function loadChatMessages(chatId) {
+        if (!chatMessagesEl) return;
+        
+        // Show loading state
+        chatMessagesEl.innerHTML = `
+          <div class="flex items-center justify-center py-12">
+            <div class="flex flex-col items-center">
+              <div class="flex space-x-2 mb-2">
+                <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse"></div>
+                <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+              </div>
+              <span class="text-xs text-gray-500">Loading messages...</span>
+            </div>
+          </div>
+        `;
+        
+        const messages = await fetchMessages(chatId);
+        renderChatMessages(messages);
+        
+        // Update chat title
+        const conversation = conversations.find(c => c.id === chatId);
+        if (conversation && chatTitleEl) {
+          chatTitleEl.textContent = conversation.title;
+        }
+      }
+
+      function renderChatMessages(messages) {
+        if (!chatMessagesEl) return;
+        
+        chatMessagesEl.innerHTML = '';
+        
+        if (messages.length === 0) {
+          const welcomeMsg = document.createElement('div');
+          welcomeMsg.className = 'text-center py-12 text-gray-500 message-enter';
+          welcomeMsg.innerHTML = `
+            <div class="mb-4">
+              <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-16 w-16 mx-auto">
+            </div>
+            <h3 class="text-lg font-semibold mb-2">Hello! I'm Sahatek</h3>
+            <p class="text-sm">Your AI health assistant. How can I help you today?</p>
+          `;
+          chatMessagesEl.appendChild(welcomeMsg);
+          return;
+        }
+        
+        messages.forEach((msg, index) => {
+          appendMessage(msg.role, msg.content, msg.metadata, index);
+        });
+        
+        scrollToBottom();
+      }
+
+      // Helper function to escape HTML
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Format recommendation message with places list and map
+      function formatRecommendationMessage(text, recommendation) {
+        console.log("📍 formatRecommendationMessage called with:", { text, recommendation });
+        console.log("📍 Recommendation details:", {
+          service_type: recommendation.service_type,
+          places_count: recommendation.places ? recommendation.places.length : 0,
+          places: recommendation.places,
+          latitude: recommendation.latitude,
+          longitude: recommendation.longitude
+        });
+        
+        let html = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(text)}</div>`;
+        
+        // Skip map/recommendations for STAY_HOME
+        if (recommendation.service_type === 'STAY_HOME') {
+          return html;
+        }
+        
+        // Show places list even if location isn't available (location needed for routing)
+        if (recommendation.places && recommendation.places.length > 0) {
+          console.log("✅ Showing places list with", recommendation.places.length, "places");
+          html += `<div class="recommendation-card mt-4">`;
+          html += `<h4 class="font-semibold text-medical-primary mb-3">📍 Nearby Healthcare Facilities</h4>`;
+          
+          // Places list - make it clear these are clickable
+          html += `<div class="places-list mb-4">`;
+          recommendation.places.forEach((place, index) => {
+            const safeName = place.name.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            html += `
+              <div class="place-item cursor-pointer transition-all duration-200" 
+                   data-place-index="${index}" 
+                   onclick="window.showRouteFromList(${place.latitude}, ${place.longitude}, '${safeName}')"
+                   title="Click to see route on map">
+                <div class="flex justify-between items-start">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-medical-primary font-bold">${index + 1}.</span>
+                      <div class="font-medium text-gray-800">${escapeHtml(place.name)}</div>
+                    </div>
+                    <div class="text-sm text-gray-600 mt-1 ml-6">
+                      ${escapeHtml(place.type)} • ${place.distance} km away
+                    </div>
+                    ${place.address ? `<div class="text-xs text-gray-500 mt-1 ml-6">📍 ${escapeHtml(place.address)}</div>` : ''}
+                  </div>
+                  <div class="ml-2 text-medical-primary flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          html += `</div>`;
+          
+          // Add location sharing prompt if no location provided (but places exist)
+          if (!recommendation.latitude || !recommendation.longitude) {
+            html += `
+              <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-3">
+                <p class="text-sm text-blue-700 mb-2">📍 Share your location to see the route on the map</p>
+                <button onclick="window.requestLocation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                  Share Location
+                </button>
+              </div>
+            `;
+          }
+          
+          // Map container (only if we have location)
+          if (recommendation.latitude && recommendation.longitude) {
+            const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            html += `<div id="${mapId}" class="healthcare-map"></div>`;
+            
+            // Initialize map after DOM update
+            setTimeout(() => {
+              initializeRecommendationMap(mapId, recommendation);
+            }, 100);
+          }
+          
+          html += `</div>`;
+        } else if (!recommendation.latitude || !recommendation.longitude) {
+          // No places and no location - show location prompt
+          html += `
+            <div class="recommendation-card mt-4">
+              <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p class="text-sm text-blue-700 mb-2">📍 Share your location to see nearby healthcare facilities on the map</p>
+                <button onclick="window.requestLocation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                  Share Location
+                </button>
+              </div>
+            </div>
+          `;
+        } else if (recommendation.latitude && recommendation.longitude) {
+          // No places found but location is available - show map anyway
+          html += `<div class="recommendation-card mt-4">`;
+          html += `<p class="text-sm text-gray-600 mb-3">No nearby facilities found in your area. Try expanding your search radius.</p>`;
+          const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          html += `<div id="${mapId}" class="healthcare-map"></div>`;
+          html += `</div>`;
+          
+          setTimeout(() => {
+            initializeRecommendationMap(mapId, recommendation);
+          }, 100);
+        }
+        
+        return html;
+      }
+
+      function initializeRecommendationMap(mapId, recommendation) {
+        const mapContainer = document.getElementById(mapId);
+        if (!mapContainer) return;
+        
+        let userLat = recommendation.latitude;
+        let userLon = recommendation.longitude;
+        
+        // Check if we have a stored user location (prefer browser location)
+        if (window.userLocation && window.userLocation.latitude && window.userLocation.longitude) {
+          userLat = window.userLocation.latitude;
+          userLon = window.userLocation.longitude;
+          console.log("📍 Using stored browser location for map:", userLat, userLon);
+        }
+        
+        if (userLat && userLon) {
+          renderMap(mapId, userLat, userLon, recommendation);
+        } else {
+          // Try to get user's current location
+          if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+              (position) => {
+                userLat = position.coords.latitude;
+                userLon = position.coords.longitude;
+                // Store for future use
+                window.userLocation = { latitude: userLat, longitude: userLon };
+                renderMap(mapId, userLat, userLon, recommendation);
+              },
+              () => {
+                // Fallback to recommendation location if available
+                if (recommendation.latitude && recommendation.longitude) {
+                  renderMap(mapId, recommendation.latitude, recommendation.longitude, recommendation);
+                }
+              }
+            );
+          }
+        }
+      }
+
+      function renderMap(mapId, userLat, userLon, recommendation) {
+        console.log('Rendering map:', mapId, userLat, userLon);
+        const map = new HealthcareMap(mapId);
+        map.init(userLat, userLon);
+        
+        // Store map instance globally for route functionality
+        // Use the map container ID as key to support multiple maps if needed
+        window.currentMapInstance = map;
+        window[`mapInstance_${mapId}`] = map;
+        
+        // Ensure map has user location stored
+        if (window.userLocation) {
+          map.userLat = window.userLocation.latitude;
+          map.userLon = window.userLocation.longitude;
+        }
+        
+        if (recommendation.places && recommendation.places.length > 0) {
+          map.addPlaces(recommendation.places);
+        }
+        
+        console.log('Map instance stored:', window.currentMapInstance);
+        
+        // Scroll map into view after a short delay to ensure it's rendered
+        setTimeout(() => {
+          const mapElement = document.getElementById(mapId);
+          if (mapElement) {
+            mapElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        }, 200);
+      }
+
+      // Global function to show route from place items (called from map popup)
+      window.showRouteToFacility = function(lat, lon, name) {
+        console.log('showRouteToFacility called:', lat, lon, name);
+        
+        // Try to find the map instance - check currentMapInstance first, then search for any map
+        let mapInstance = window.currentMapInstance;
+        
+        if (!mapInstance) {
+          // Try to find any map instance in the window
+          for (let key in window) {
+            if (key.startsWith('mapInstance_') && window[key]) {
+              mapInstance = window[key];
+              window.currentMapInstance = mapInstance; // Set as current
+              break;
+            }
+          }
+        }
+        
+        if (mapInstance) {
+          mapInstance.showRoute(parseFloat(lat), parseFloat(lon), name);
+          
+          // Scroll map into view
+          setTimeout(() => {
+            const mapElement = document.querySelector('.healthcare-map');
+            if (mapElement) {
+              mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }, 100);
+        } else {
+          console.error('Map instance not found');
+          alert('Map not initialized. Please wait for the map to load.');
+        }
+      };
+
+      // Global function to show route from list items
+      window.showRouteFromList = function(lat, lon, name) {
+        console.log('showRouteFromList called:', lat, lon, name);
+        
+        // Check if we have user location stored
+        if (!window.userLocation || !window.userLocation.latitude || !window.userLocation.longitude) {
+          // Prompt user to share location
+          if (confirm('To see the route, we need your location. Would you like to share it now?')) {
+            window.requestLocation();
+            // After location is shared, try again
+            setTimeout(() => {
+              if (window.userLocation && window.userLocation.latitude) {
+                window.showRouteFromList(lat, lon, name);
+              }
+            }, 1000);
+          }
+          return;
+        }
+        
+        // Try to find the map instance - check currentMapInstance first, then search for any map
+        let mapInstance = window.currentMapInstance;
+        
+        if (!mapInstance) {
+          // Try to find any map instance in the window
+          for (let key in window) {
+            if (key.startsWith('mapInstance_') && window[key]) {
+              mapInstance = window[key];
+              window.currentMapInstance = mapInstance; // Set as current
+              break;
+            }
+          }
+        }
+        
+        // If no map instance, create one
+        if (!mapInstance) {
+          // Create a map container if it doesn't exist
+          let mapContainer = document.querySelector('.healthcare-map');
+          if (!mapContainer) {
+            // Find the last recommendation card and add a map
+            const lastRecommendation = document.querySelector('.recommendation-card');
+            if (lastRecommendation) {
+              const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+              mapContainer = document.createElement('div');
+              mapContainer.id = mapId;
+              mapContainer.className = 'healthcare-map';
+              lastRecommendation.appendChild(mapContainer);
+            } else {
+              alert('Please wait for the map to load.');
+              return;
+            }
+          }
+          
+          // Initialize map
+          const mapId = mapContainer.id || `map-${Date.now()}`;
+          mapInstance = new HealthcareMap(mapId);
+          mapInstance.init(window.userLocation.latitude, window.userLocation.longitude);
+          window.currentMapInstance = mapInstance;
+          window[`mapInstance_${mapId}`] = mapInstance;
+        }
+        
+        // Ensure map has user location
+        if (!mapInstance.userLat || !mapInstance.userLon) {
+          mapInstance.userLat = window.userLocation.latitude;
+          mapInstance.userLon = window.userLocation.longitude;
+          mapInstance.addUserMarker(mapInstance.userLat, mapInstance.userLon);
+        }
+        
+        // Show route
+        mapInstance.showRoute(parseFloat(lat), parseFloat(lon), name);
+        
+        // Scroll map into view
+        setTimeout(() => {
+          const mapElement = document.querySelector('.healthcare-map');
+          if (mapElement) {
+            mapElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      };
+
+      // Global function to request location
+      window.requestLocation = function() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              const locationData = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              };
+              // Store location for next message
+              window.userLocation = locationData;
+              console.log("✅ Location stored:", locationData);
+              
+              // Show success notification
+              const notification = document.createElement('div');
+              notification.className = 'fixed bottom-4 right-4 bg-green-600/30 border border-green-400 text-green-200 px-4 py-3 rounded-lg text-sm z-40 font-semibold';
+              notification.innerHTML = '✅ Location shared successfully!';
+              notification.style.boxShadow = '0 4px 20px rgba(34, 197, 94, 0.3)';
+              document.body.appendChild(notification);
+              
+              setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+              }, 3000);
+              
+              // If there's a map instance, update it with the new location
+              if (window.currentMapInstance) {
+                window.currentMapInstance.userLat = locationData.latitude;
+                window.currentMapInstance.userLon = locationData.longitude;
+                window.currentMapInstance.addUserMarker(locationData.latitude, locationData.longitude);
+              }
+            },
+            (error) => {
+              console.error('❌ Location access denied:', error);
+              console.error('Error Code:', error.code);
+              console.error('Error Message:', error.message);
+              
+              // Show specific error message
+              let errorMsg = 'Could not get your location. ';
+              if (error.code === 1) {
+                errorMsg += 'Please allow location access in your browser settings.';
+              } else if (error.code === 2) {
+                errorMsg += 'Location services may be disabled.';
+              } else if (error.code === 3) {
+                errorMsg += 'Location request timed out.';
+              }
+              
+              alert(errorMsg);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by your browser.');
+        }
+      };
+
+      // UPDATED: appendMessage function with better avatar and bubble styling
+      function appendMessage(role, content, metadata = null, index = 0) {
+        if (!chatMessagesEl) return;
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message-container ${role === 'user' ? 'user-message-container' : 'bot-message-container'} message-enter`;
+        messageDiv.style.animationDelay = `${index * 0.05}s`;
+        
+        if (role === 'assistant') {
+          // Bot message with Sahatek logo
+          let messageContent = content;
+          
+          // Check if metadata contains recommendation with places
+          if (metadata && metadata.recommendation) {
+            console.log("📍 Found recommendation in metadata:", metadata.recommendation);
+            messageContent = formatRecommendationMessage(content, metadata.recommendation);
+          } else {
+            messageContent = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
+          }
+          
+          messageDiv.innerHTML = `
+            <div class="message-avatar bot-avatar flex-shrink-0">
+              <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+            </div>
+            <div class="message-bubble bot-bubble">
+              ${messageContent}
+              <div class="text-xs text-gray-400 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+          `;
+        } else {
+          // User message with user icon
+          messageDiv.innerHTML = `
+            <div class="message-bubble user-bubble">
+              <div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>
+              <div class="text-xs text-white/80 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+            </div>
+            <div class="message-avatar user-avatar-small flex-shrink-0">
+              <i class="fas fa-user text-sm"></i>
+            </div>
+          `;
+        }
+        
+        chatMessagesEl.appendChild(messageDiv);
+        scrollToBottom();
+      }
+
+      function scrollToBottom() {
+        if (chatMessagesEl) {
+          setTimeout(() => {
+            const container = chatMessagesEl.parentElement;
+            container.scrollTop = container.scrollHeight;
+          }, 100);
+        }
+      }
+
+      // --- MESSAGE SENDING ---
+      async function sendMessage(content) {
+        if (!content.trim() || isProcessing) return;
+        
+        if (!currentChatId) {
+          // Create new conversation
+          const conv = await createConversation(content.substring(0, 30));
+          if (!conv) return;
+          
+          currentChatId = conv.id;
+          await loadAndRenderSidebar();
+          updateUrlWithChatId(conv.id);
+          
+          // Switch to chat interface
+          if (window.uiManager) {
+            await window.uiManager.switchToChatInterface(conv.id);
+          }
+        }
+        
+        // Add user message
+        appendMessage('user', content);
+        
+        // Show typing indicator
+        showTypingIndicator();
+        
+        // Send to server with location if available
+        const locationData = window.userLocation || null;
+        if (locationData) {
+          console.log("📍 Sending message with location:", locationData);
+        }
+        const result = await addMessage(currentChatId, content, 'user', locationData);
+        
+        // Remove typing indicator and add bot response
+        removeTypingIndicator();
+        
+        if (result && result.bot_message) {
+          setTimeout(() => {
+            appendMessage('assistant', result.bot_message.content, result.bot_message.metadata);
+          }, 500);
+        } else {
+          setTimeout(() => {
+            appendMessage('assistant', "I've received your message. How can I assist you further?");
+          }, 1000);
+        }
+        
+        // Refresh sidebar preview
+        setTimeout(() => loadAndRenderSidebar(), 1000);
+      }
+
+      function showTypingIndicator() {
+        if (!chatMessagesEl) return;
+        
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'message-container bot-message-container';
+        typingDiv.id = 'typing-indicator';
+        typingDiv.innerHTML = `
+          <div class="message-avatar bot-avatar flex-shrink-0">
+            <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+          </div>
+          <div class="message-bubble bot-bubble">
+            <div class="flex items-center space-x-1">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        `;
+        chatMessagesEl.appendChild(typingDiv);
+        scrollToBottom();
+      }
+
+      function removeTypingIndicator() {
+        const typingDiv = document.getElementById('typing-indicator');
+        if (typingDiv) typingDiv.remove();
+      }
+
+      // --- AGENT CHAT CREATION - FIXED VERSION ---
+      async function createAgentChat(agentName) {
+        const title = getAgentTitle(agentName);
+        const metadata = { agent: agentName };
+        
+        const conv = await createConversation(title, metadata);
+        if (conv) {
+          await loadAndRenderSidebar();
+          
+          // Send agent-specific welcome message
+          setTimeout(async () => {
+            const welcomeMessage = getAgentWelcomeMessage(agentName);
+            await addMessage(conv.id, welcomeMessage, 'assistant');
+            
+            // Load messages for the new chat
+            if (currentChatId === conv.id) {
+              await loadChatMessages(conv.id);
+            }
+          }, 500);
+          
+          return conv.id;
+        }
+        return null;
+      }
+
+      function getAgentTitle(agentName) {
+        const titles = {
+          'mental-health': 'Mental Health Support',
+          'general-info': 'Medical Information',
+          'symptoms-checker': 'Symptoms Checker',
+          'orientation': 'Medical Guidance',
+          'rumor-check': 'Health Fact Check',
+          'computer-vision': 'Wound Analyzer'
+        };
+        return titles[agentName] || 'Specialized Chat';
+      }
+
+      function getAgentWelcomeMessage(agentName) {
+        const messages = {
+          'mental-health': "Hello! I'm your mental health assistant. I'm here to provide emotional support and coping strategies. How are you feeling today?",
+          'general-info': "Hello! I'm your medical information assistant. I can provide evidence-based information about health conditions, medications, and treatments. What would you like to know?",
+          'symptoms-checker': "Hello! I'm your symptoms checker. Please describe your symptoms in detail, and I'll help you understand possible causes and when to seek medical attention.",
+          'orientation': "Hello! I'm your medical guidance assistant. I provide step-by-step instructions for medical procedures and first aid. How can I guide you today?",
+          'rumor-check': "Hello! I'm your health fact checker. I can verify medical claims and provide evidence-based information. What health claim would you like me to check?",
+          'computer-vision': "Hello! I'm your wound analysis assistant. You can upload images of wounds, rashes, or skin conditions for analysis."
+        };
+        return messages[agentName] || "Hello! I'm your specialized health assistant. How can I help you today?";
+      }
+
+      // --- CARD CLICK HANDLER - FIXED VERSION ---
+      function handleCardClick(agent) {
+        return async function() {
+          const card = this;
+          
+          // Don't process if already processing
+          if (isProcessing) return;
+          
+          // Add loading state to card
+          const originalContent = card.innerHTML;
+          card.innerHTML = `
+            <div class="flex items-center justify-center py-8">
+              <div class="flex flex-col items-center">
+                <div class="flex space-x-1.5 mb-2">
+                  <div class="w-1.5 h-1.5 bg-medical-primary rounded-full animate-pulse"></div>
+                  <div class="w-1.5 h-1.5 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                  <div class="w-1.5 h-1.5 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                </div>
+                <span class="text-xs text-gray-500">Starting chat...</span>
+              </div>
+            </div>
+          `;
+          card.classList.add('loading');
+          
+          try {
+            // Create agent chat
+            const chatId = await createAgentChat(agent);
+            
+            if (chatId) {
+              // Switch to the new chat immediately
+              await switchChat(chatId);
+              
+              // Show success notification
+              showNotification(`${getAgentTitle(agent)} started`, 'success');
+            } else {
+              throw new Error('Failed to create chat');
+            }
+          } catch (error) {
+            console.error('Error creating agent chat:', error);
+            
+            // Restore original content on error
+            card.innerHTML = originalContent;
+            card.classList.remove('loading');
+            
+            // Show error notification
+            showNotification('Failed to start chat', 'error');
+          }
+        };
+      }
+
+      // --- EVENT LISTENERS ---
+      function initEventListeners() {
+        // New Chat Button
+        if (newChatBtn) {
+          newChatBtn.addEventListener('click', async () => {
+            // Add click effect
+            newChatBtn.style.transform = 'scale(0.98)';
+            
+            setTimeout(async () => {
+              newChatBtn.style.transform = '';
+              
+              // Create new conversation
+              const conv = await createConversation();
+              if (conv) {
+                await loadAndRenderSidebar();
+                
+                // Switch to the new chat immediately
+                await switchChat(conv.id);
+                
+                showNotification('New conversation started', 'success');
+              }
+            }, 200);
+          });
+        }
+        
+        // Send buttons
+        const sendBtn = document.getElementById('send-btn');
+        const sendChatBtn = document.getElementById('sendChatBtn');
+        const chatInput = document.getElementById('chat-input');
+        const chatInputChat = document.getElementById('chatInput');
+        
+        function handleSend() {
+          const input = document.getElementById('chatInterface').classList.contains('hidden') ? chatInput : chatInputChat;
+          const content = input?.value.trim();
+          if (content) {
+            sendMessage(content);
+            input.value = '';
+            if (input.style.height !== 'auto') {
+              input.style.height = 'auto';
+            }
+          }
+        }
+        
+        if (sendBtn) sendBtn.addEventListener('click', handleSend);
+        if (sendChatBtn) sendChatBtn.addEventListener('click', handleSend);
+        
+        // Enter key
+        if (chatInput) {
+          chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          });
+        }
+        
+        if (chatInputChat) {
+          chatInputChat.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSend();
+            }
+          });
+        }
+        
+        // Auto-resize textareas
+        const textareas = [chatInput, chatInputChat];
+        textareas.forEach(textarea => {
+          if (textarea) {
+            textarea.addEventListener('input', function() {
+              this.style.height = 'auto';
+              this.style.height = (this.scrollHeight) + 'px';
+            });
+          }
+        });
+        
+        // Feature cards - FIXED: Use direct handler instead of window.chatManager
+        const featureCards = document.querySelectorAll('.medical-card[data-agent]');
+        featureCards.forEach(card => {
+          const agent = card.dataset.agent;
+          card.addEventListener('click', handleCardClick(agent));
+        });
+      }
+
+      // --- INITIALIZATION ---
+      function init() {
+        console.log('Chat Manager initialized v9 - Fixed Card Click');
+        
+        // Load sidebar conversations
+        setTimeout(() => loadAndRenderSidebar(), 300);
+        
+        // Set up event listeners
+        initEventListeners();
+        
+        // Expose public API
+        window.chatManager = {
+          loadChatFromUrl: async (chatId) => {
+            const chatIdNum = parseInt(chatId);
+            if (!isNaN(chatIdNum)) {
+              await loadAndRenderSidebar();
+              await switchChat(chatIdNum);
+            }
+          },
+          createAgentChat: async (agentName) => {
+            const chatId = await createAgentChat(agentName);
+            if (chatId) {
+              await switchChat(chatId);
+            }
+            return chatId;
+          },
+          setActiveChat: (chatId) => {
+            currentChatId = chatId;
+            loadChatMessages(chatId);
+          },
+          sendMessage,
+          switchChat
+        };
+      }
+
+      // Start initialization
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+      } else {
+        init();
+      }
+    })();
+  </script>
+
+  <script>
+    // Core UI Logic for Sidebar and Chat Switching
+    (() => {
+      // DOM Elements
+      const sidebar = document.getElementById('sidebar');
+      const sidebarOverlay = document.getElementById('sidebarOverlay');
+      const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+      const toggleSidebarChatBtn = document.getElementById('toggleSidebarChat');
+      const closeSidebarBtn = document.getElementById('closeSidebar');
+      const welcomeScreen = document.getElementById('welcomeScreen');
+      const chatInterface = document.getElementById('chatInterface');
+      const mainContent = document.getElementById('chat-main');
+      
+      // State
+      let sidebarOpen = false;
+      let isSwitchingChat = false;
+
+      // Initialize UI
+      function initUI() {
+        // Set initial sidebar state
+        if (window.innerWidth >= 1024) {
+          openSidebar(); // Open on desktop by default
+        }
+        
+        // Check URL for chat parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatId = urlParams.get('chat');
+        
+        if (chatId) {
+          // Wait for main.js to load, then load the chat
+          setTimeout(() => {
+            if (window.chatManager) {
+              window.chatManager.loadChatFromUrl(chatId);
+            }
+          }, 500);
+        }
+        
+        console.log('UI initialized with sidebar management');
+      }
+
+      // Sidebar Management
+      function toggleSidebar() {
+        if (sidebarOpen) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+      }
+
+      function openSidebar() {
+        sidebarOpen = true;
+        sidebar.classList.add('open');
+        sidebarOverlay.classList.add('open');
+        mainContent.classList.add('sidebar-open');
+        
+        // Trigger animation for sidebar items
+        setTimeout(() => {
+          const items = sidebar.querySelectorAll('.conversation-item');
+          items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.05}s`;
+            item.classList.add('conversation-item-enter');
+          });
+        }, 100);
+      }
+
+      function closeSidebar() {
+        sidebarOpen = false;
+        sidebar.classList.remove('open');
+        sidebarOverlay.classList.remove('open');
+        mainContent.classList.remove('sidebar-open');
+      }
+
+      // Chat Interface Switching - FIXED to properly load messages
+      async function switchToChatInterface(chatId = null) {
+        if (isSwitchingChat) return;
+        isSwitchingChat = true;
+        
+        // Add exit animation to welcome screen
+        welcomeScreen.classList.add('chat-exit');
+        
+        setTimeout(() => {
+          welcomeScreen.classList.add('hidden');
+          welcomeScreen.classList.remove('chat-exit');
+          
+          // Show chat interface with enter animation
+          chatInterface.classList.remove('hidden');
+          chatInterface.classList.add('chat-enter');
+          
+          setTimeout(() => {
+            chatInterface.classList.remove('chat-enter');
+            isSwitchingChat = false;
+            
+            // Close sidebar on mobile when switching to chat
+            if (window.innerWidth < 1024) {
+              closeSidebar();
+            }
+            
+            // Focus input
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) chatInput.focus();
+          }, 400);
+        }, 300);
+      }
+
+      function switchToWelcomeScreen() {
+        if (isSwitchingChat) return;
+        isSwitchingChat = true;
+        
+        // Add exit animation to chat interface
+        chatInterface.classList.add('chat-exit');
+        
+        setTimeout(() => {
+          chatInterface.classList.add('hidden');
+          chatInterface.classList.remove('chat-exit');
+          
+          // Show welcome screen with enter animation
+          welcomeScreen.classList.remove('hidden');
+          welcomeScreen.classList.add('chat-enter');
+          
+          setTimeout(() => {
+            welcomeScreen.classList.remove('chat-enter');
+            isSwitchingChat = false;
+            
+            // Clear URL parameter
+            const url = new URL(window.location);
+            url.searchParams.delete('chat');
+            window.history.replaceState({}, '', url);
+            
+            // Focus input
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) chatInput.focus();
+          }, 400);
+        }, 300);
+      }
+
+      // Event Listeners
+      if (toggleSidebarBtn) {
+        toggleSidebarBtn.addEventListener('click', toggleSidebar);
+      }
+      
+      if (toggleSidebarChatBtn) {
+        toggleSidebarChatBtn.addEventListener('click', toggleSidebar);
+      }
+      
+      if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+      }
+      
+      if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', closeSidebar);
+      }
+
+      // Window resize handler
+      window.addEventListener('resize', () => {
+        if (window.innerWidth >= 1024 && !sidebarOpen) {
+          openSidebar();
+        } else if (window.innerWidth < 1024 && sidebarOpen) {
+          closeSidebar();
+        }
+      });
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', () => {
+        initUI();
+        
+        // Expose functions to window
+        window.uiManager = {
+          switchToChatInterface,
+          switchToWelcomeScreen,
+          openSidebar,
+          closeSidebar,
+          toggleSidebar,
+          isSidebarOpen: () => sidebarOpen
+        };
+      });
+    })();
+  </script>
+
+  <!-- LOGOUT AND PROFILE FUNCTIONALITY -->
+  <script>
+    // Enhanced logout and profile functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const logoutBtn = document.getElementById('logout-btn');
+      const profileBtn = document.getElementById('profile-btn');
+      
+      // Helper function to get CSRF token
+      function getCSRFToken() {
+        const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : '';
+      }
+      
+      // Helper function to show notifications
+      function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ${type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'}`;
+        notification.innerHTML = `
+          <div class="flex items-center">
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
+            <span>${message}</span>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }
+      
+      // Logout functionality
+      if (logoutBtn) {
+        logoutBtn.addEventListener('click', async function(e) {
+          e.preventDefault();
+          
+          // Show confirmation dialog
+          const confirmed = confirm('Are you sure you want to log out?');
+          if (!confirmed) return;
+          
+          // Show loading state
+          const originalHTML = logoutBtn.innerHTML;
+          logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          logoutBtn.disabled = true;
+          
+          try {
+            // Send logout request to your Django auth URL
+            const response = await fetch('/auth/logout/', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+              }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Show success message
+              showNotification('Successfully logged out', 'success');
+              
+              // Redirect to HOME PAGE after 1 second (changed from /auth/login/)
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 1000);
+            } else {
+              throw new Error(data.message || 'Logout failed');
+            }
+          } catch (error) {
+            console.error('Logout error:', error);
+            showNotification('Failed to logout: ' + error.message, 'error');
+            
+            // Restore button state
+            logoutBtn.innerHTML = originalHTML;
+            logoutBtn.disabled = false;
+          }
+        });
+      }
+      
+      // Profile button - redirect to dashboard
+      if (profileBtn) {
+        profileBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          // Redirect to the dashboard page based on your URLs
+          window.location.href = '/auth/dashboard/';
+        });
+      }
+      
+      // Add CSS for logout button states
+      const style = document.createElement('style');
+      style.textContent = `
+        #logout-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+        
+        #logout-btn:hover:disabled {
+          background-color: inherit;
+          color: inherit;
+        }
+      `;
+      document.head.appendChild(style);
+    });
+  </script>
+
+  <script>
+    // Back button handler - determines where to navigate based on current state
+    function handleBackButton() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const chatId = urlParams.get('chat');
+      
+      // Check if chat interface is visible (means we're in a chat, not welcome screen)
+      const chatInterface = document.getElementById('chatInterface');
+      const isInChatInterface = chatInterface && !chatInterface.classList.contains('hidden');
+      
+      if (chatId || isInChatInterface) {
+        // In a specific chat - go to main chat page (remove chat param and show welcome screen)
+        const url = new URL(window.location);
+        url.searchParams.delete('chat');
+        window.location.href = url.pathname;
+      } else {
+        // In main chat page (welcome screen) - go to homepage
+        window.location.href = '{% url "home" %}';
+      }
+    }
+    
+    // Make function globally available
+    window.handleBackButton = handleBackButton;
+  </script>
+</body>
+</html>

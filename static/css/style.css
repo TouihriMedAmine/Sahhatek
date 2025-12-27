@@ -1,0 +1,63 @@
+/* Medical Design System */
+.feature-card {
+    @apply p-6 rounded-2xl bg-white border border-gray-200 smooth-transition cursor-pointer;
+    box-shadow: 0 4px 20px rgba(14, 165, 233, 0.05);
+}
+
+.feature-card:hover {
+    @apply border-medical-primary/30;
+    box-shadow: 0 8px 32px rgba(14, 165, 233, 0.15);
+}
+
+.card-icon {
+    @apply w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-4 smooth-transition;
+}
+
+.feature-card:hover .card-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.emergency-action-btn {
+    @apply w-full p-3 rounded-lg border border-gray-200 hover:border-medical-emergency hover:bg-red-50 smooth-transition flex items-center justify-between text-left;
+}
+
+.emergency-action-btn:hover span {
+    @apply text-medical-emergency font-medium;
+}
+
+/* Emergency status indicators */
+.status-indicator {
+    @apply inline-block w-2 h-2 rounded-full mr-2;
+}
+
+.status-active {
+    @apply bg-medical-secondary animate-pulse;
+}
+
+.status-warning {
+    @apply bg-medical-emergency animate-pulse;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #emergencyPanel {
+        right: 1rem;
+        bottom: 5rem;
+        width: calc(100vw - 2rem);
+    }
+    
+    .feature-card {
+        @apply p-4;
+    }
+}
+
+/* Print styles for emergency instructions */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .emergency-instructions {
+        break-inside: avoid;
+    }
+}

@@ -1,0 +1,339 @@
+{
+  "Nutrition": [],
+  "Physical Activity": [],
+  "Mental Health": [],
+  "Chronic Diseases": [],
+  "Infectious Diseases": [
+    {
+      "claim": "is the coronavirus came from china",
+      "created_at": "2025-12-17T16:34:27.328616",
+      "last_updated": "2025-12-17T16:34:27.328616",
+      "verdict": "CREDIBLE",
+      "score": 48,
+      "credibility_percentage": 96.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-17T16:34:27.328616",
+          "score": 48,
+          "credibility_percentage": 96.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of COVID-19",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "The WHO Scientific Advisory Group for the Origins of Novel Pathogens (SAGO), a panel of 27 independent, international, multidisciplinary experts, today published its report on the origins of SARS-CoV-2, the virus responsible for the COVID-19 pandemic."
+            },
+            {
+              "title": "Virus origin / Origins of the SARS-CoV-2 virus",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/origins-of-the-virus",
+              "body": "28 February 2020 Report of the WHO- China Joint Mission on Coronavirus Disease 2019 (COVID-19)"
+            },
+            {
+              "title": "How did COVID-19 get it's name? - CDC Stacks",
+              "href": "https://stacks.cdc.gov/view/cdc/93060",
+              "body": "On February 11, 2020, the World Health Organization announced an official name for the disease that is causing the 2019 novel coronavirus outbreak, first identified in Wuhan, China ."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "is the coronavirus came from china",
+        "timestamp": "2025-12-17T16:34:27.328616",
+        "steps": []
+      }
+    },
+    {
+      "claim": "is the coronavirus came from china ?",
+      "created_at": "2025-12-17T16:45:34.176987",
+      "last_updated": "2025-12-17T16:45:34.176987",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-17T16:45:34.176987",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "Virus origin / Origins of the SARS-CoV-2 virus",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/origins-of-the-virus",
+              "body": "WHO-convened global study of origins of SARS-CoV-2: China Part.How WHO is working to track down the animal reservoir of the SARS-CoV-2 virus."
+            },
+            {
+              "title": "Coronavirus disease (COVID-19) pandemic",
+              "href": "https://www.who.int/europe/emergencies/situations/covid-19",
+              "body": "The coronavirus disease 2019 (COVID-19) pandemic is a global outbreak of coronavirus – an infectious disease caused by the severe acute respiratory syndrome coronavirus 2 (SARS-CoV-2). Cases of novel coronavirus (nCoV) were first detected in China in December 2019, with..."
+            },
+            {
+              "title": "CDC SARS Response Timeline | About | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/about/history/sars/timeline.htm",
+              "body": "March 28: The SARs outbreak is more widespread. CDC begins utilizing pandemic planning for SARS. March 29: CDC extended its travel advisory for SARS to include all of mainland China and added Singapore."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "is the coronavirus came from china ?",
+        "timestamp": "2025-12-17T16:45:34.176987",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i heard in tiktok that corona came from chine is that true ?",
+      "created_at": "2025-12-18T12:20:46.898020",
+      "last_updated": "2025-12-18T12:20:46.898020",
+      "verdict": "PARTIALLY_CREDIBLE",
+      "score": 31,
+      "credibility_percentage": 62.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-18T12:20:46.898020",
+          "score": 31,
+          "credibility_percentage": 62.0,
+          "verdict": "PARTIALLY_CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of ...",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "Jun 27, 2025 · WHO requested that China share hundreds of genetic sequences from individuals with COVID-19 early in the pandemic, more detailed information about the animals sold at markets in Wuhan, and information on work done and biosafety conditions at laboratories in Wuhan."
+            },
+            {
+              "title": "WHO-convened Global Study of Origins of SARS-CoV-2: China Part",
+              "href": "https://www.who.int/docs/default-source/coronaviruse/who-convened-global-study-of-origins-of-sars-cov-2-china-part-joint-report.pdf",
+              "body": "In July 2020, WHO and China began the groundwork for studies to better understand the origins of the virus. Terms of Reference (TORs) were agreed that defined a phased approach, and the scope of studies, the main guiding principles and expected deliverables."
+            },
+            {
+              "title": "Physical Activity and Health: A Report of the Surgeon General | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/nccdphp/sgr/index.htm",
+              "body": "It is a work of real significance, on par with the Surgeon General’s historic first report on smoking and health published in 1964. This report is a passport to good health for all Americans. Its key finding is that people of all ages can improve the quality of their lives through a lifelong practice of..."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heard in tiktok that corona came from chine is that true ?",
+        "timestamp": "2025-12-18T12:20:46.898020",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i heard in tiktok that corona came from china is that true ?",
+      "created_at": "2025-12-18T13:27:18.578636",
+      "last_updated": "2025-12-18T13:27:18.578636",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-18T13:27:18.578636",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "covid19.who.int",
+              "href": "https://covid19.who.int/",
+              "body": "Seite der Weltgesundheitsorganisation WHO zur Verbreitung des Corona -Virus."
+            },
+            {
+              "title": "WHO Model Lists of Essential Medicines",
+              "href": "https://www.who.int/groups/expert-committee-on-selection-and-use-of-essential-medicines/essential-medicines-lists",
+              "body": "The first Essential Medicines List was published in 1977, and the first Essential Medicines List for Children was published in 2007. The current versions, updated in September 2025, are the 24th Essential Medicines List (EML) and the 10th Essential M..."
+            },
+            {
+              "title": "About COVID-19 | COVID-19 | CDC",
+              "href": "https://www.cdc.gov/covid/about/index.html",
+              "body": "Learn about COVID-19 and how it spreads About COVID-19 COVID-19 most often causes respiratory symptoms that can feel much like a cold, the flu, or pneumonia. COVID-19 may attack more than your lungs and respiratory system. Other parts of your body may also be affected by the disease. Most people with COVID-19 have mild symptoms, but some people become severely ill."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heard in tiktok that corona came from china is that true ?",
+        "timestamp": "2025-12-18T13:27:18.578636",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i heard in tiktok that corona virus came from china is that true",
+      "created_at": "2025-12-18T15:49:33.722326",
+      "last_updated": "2025-12-18T15:49:33.722326",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-18T15:49:33.722326",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of COVID-19",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "The WHO Scientific Advisory Group for the Origins of Novel Pathogens (SAGO), a panel of 27 independent, international, multidisciplinary experts, today published its report on the origins of SARS-CoV-2, the virus responsible for the COVID-19 pandemic."
+            },
+            {
+              "title": "Virus origin / Origins of the SARS-CoV-2 virus",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/origins-of-the-virus",
+              "body": "28 February 2020 Report of the WHO- China Joint Mission on Coronavirus Disease 2019 (COVID-19)"
+            },
+            {
+              "title": "CDC SARS Response Timeline | About | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/about/history/sars/timeline.htm",
+              "body": "Identifying the genetic sequence of a new virus is important to treatment and prevention efforts. The results came just 12 days after a team of scientists and technicians began working around the clock to grow cells taken from the throat culture of a SARS patient."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heard in tiktok that corona virus came from china is that true",
+        "timestamp": "2025-12-18T15:49:33.722326",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i heard in tiktok that corona came from china ?",
+      "created_at": "2025-12-19T11:23:43.906213",
+      "last_updated": "2025-12-19T11:23:43.906213",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-19T11:23:43.906213",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of COVID-19",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "The WHO Scientific Advisory Group for the Origins of Novel Pathogens (SAGO), a panel of 27 independent, international, multidisciplinary experts, today published its report on the origins of SARS-CoV-2, the virus responsible for the COVID-19 pandemic."
+            },
+            {
+              "title": "PDF WHO-convened Global Study of Origins of SARS-CoV-2: China Part",
+              "href": "https://www.who.int/docs/default-source/coronaviruse/who-convened-global-study-of-origins-of-sars-cov-2-china-part-joint-report.pdf",
+              "body": "More than 80 000 wildlife, livestock and poultry samples were collected from 31 provinces in China and no positive result was identified for SARS-CoV-2 antibody or nucleic acid before and after the SARS-CoV-2 outbreak in China . Through extensive testing of animal products in the Huanan market, no evidence of animal infections was found."
+            },
+            {
+              "title": "CDC Museum COVID-19 Timeline | David J. Sencer CDC Museum | CDC",
+              "href": "https://www.cdc.gov/museum/timeline/covid19.html",
+              "body": "Jul 8, 2024 · January 28, 2020 CDC issues a Level 3 Travel Health Notice— advising travelers to avoid all non-essential travel to China due to the 2019 Novel Coronavirus outbreak. The U.S. government relocates U.S. citizens from Wuhan, China back to the U.S. due to the 2019 Novel Coronavirus (2019-nCoV)."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heard in tiktok that corona came from china ?",
+        "timestamp": "2025-12-19T11:23:43.906213",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i heard that corona came from china ?",
+      "created_at": "2025-12-19T13:40:40.084484",
+      "last_updated": "2025-12-19T13:40:40.084484",
+      "verdict": "CREDIBLE",
+      "score": 42,
+      "credibility_percentage": 84.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-19T13:40:40.084484",
+          "score": 42,
+          "credibility_percentage": 84.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of ...",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "Jun 27, 2025 · WHO requested that China share hundreds of genetic sequences from individuals with COVID-19 early in the pandemic, more detailed information about the animals sold at markets in Wuhan, and information on work done and biosafety conditions at laboratories in Wuhan."
+            },
+            {
+              "title": "WHO-convened Global Study of Origins of SARS-CoV-2: China Part",
+              "href": "https://www.who.int/docs/default-source/coronaviruse/who-convened-global-study-of-origins-of-sars-cov-2-china-part-joint-report.pdf",
+              "body": "In July 2020, WHO and China began the groundwork for studies to better understand the origins of the virus. Terms of Reference (TORs) were agreed that defined a phased approach, and the scope of studies, the main guiding principles and expected deliverables."
+            },
+            {
+              "title": "SARS | Frequently Asked Questions | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/sars/about/faq.html",
+              "body": "In April 2004, the Chinese Ministry of Health reported several new cases of possible SARS in Beijing and in Anhui Province, which is located in east-central China .Coronaviruses are a group of viruses that have a halo or crown-like ( corona ) appearance when viewed under a microscope."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heard that corona came from china ?",
+        "timestamp": "2025-12-19T13:40:40.084484",
+        "steps": []
+      }
+    }
+  ],
+  "Preventive Medicine": [],
+  "Alternative Medicine": [
+    {
+      "claim": "in facebooki saw a person recovering fromi llness with only cucumber?",
+      "created_at": "2025-12-18T15:56:40.461084",
+      "last_updated": "2025-12-18T15:56:40.461084",
+      "verdict": "NOT_CREDIBLE",
+      "score": 0,
+      "credibility_percentage": 0.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-18T15:56:40.461084",
+          "score": 0,
+          "credibility_percentage": 0.0,
+          "verdict": "NOT_CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "Rehabilitation - World Health Organization (WHO)",
+              "href": "https://www.who.int/health-topics/rehabilitation",
+              "body": "Anyone may need rehabilitation at some point in their lives, whether they have experienced an injury, disease, illness , or because their functioning has declined with age. Globally, 1 in 3 people today are estimated to be living with a health condition that would benefit from rehabilitation."
+            },
+            {
+              "title": "Rehabilitation needs of people recovering from COVID-19 ...",
+              "href": "https://www.who.int/publications/i/item/WHO-2019-nCoV-Sci-Brief-Rehabilitation-2021.1",
+              "body": "Nov 29, 2021 · People who are critically unwell with COVID-19 are likely to have rehabilitation needs during and after their acute illness . In many individuals recovering from COVID-19, health problems may extend far beyond acute infection, even among those who experience mild illness ."
+            },
+            {
+              "title": "About Hantavirus | Hantavirus | CDC",
+              "href": "https://www.cdc.gov/hantavirus/about/index.html",
+              "body": "Diagnosing hantavirus in a person who has been infected less than 72 hours is difficult. If the initial test is done before the virus can be found, repeat testing is often done 72 hours after symptom start."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "in facebooki saw a person recovering fromi llness with only cucumber?",
+        "timestamp": "2025-12-18T15:56:40.461084",
+        "steps": []
+      }
+    }
+  ]
+}

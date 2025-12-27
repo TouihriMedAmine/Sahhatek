@@ -1,0 +1,50 @@
+# Core Django Framework
+Django==5.2.0
+django-tailwind==3.8.0
+
+# HTTP Client and API
+httpx==0.27.0
+requests==2.31.0
+
+# OpenAI API Client
+openai==1.12.0
+
+# Geocoding and Location Services
+geopy==2.4.1
+
+# Natural Language Processing
+spacy==3.8.1
+# Machine Learning and Embeddings
+sentence-transformers==2.2.2
+transformers==4.36.2
+torch==2.4.0
+torchvision==0.18.1
+torchaudio==2.4.0
+
+# Vector Search and Similarity
+faiss-cpu==1.13.1
+numpy==1.26.3
+rapidfuzz==3.6.1
+
+
+# String Matching and Fuzzy Search
+rapidfuzz==3.6.1
+
+# Web Framework (for unified_healthcare_api.py)
+flask==3.0.0
+flask-cors==4.0.0
+
+# FastAPI (optional, for alternative API server)
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+pydantic==2.5.3
+
+# Speech Recognition and Audio Processing
+vosk==0.3.45
+sounddevice==0.4.6
+
+# Gradio (for UI, optional)
+gradio==4.8.0
+
+# Additional Utilities
+python-dotenv==1.0.0

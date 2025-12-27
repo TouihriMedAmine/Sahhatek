@@ -1,0 +1,20 @@
+{
+  "fever": ["fever", "feverish", "high temperature", "felt hot", "hot", "temperature"],
+  "cough": ["cough", "coughing", "dry cough", "productive cough"],
+  "sore throat": ["sore throat", "throat pain", "throat hurts", "throat burning", "throat burns"],
+  "headache": ["headache", "head hurts", "migraine"],
+  "nausea": ["nausea", "nauseous", "feeling sick"],
+  "dizziness": ["dizziness", "dizzy", "vertigo"],
+  "chest pain": ["chest pain", "chest hurts", "chest discomfort"],
+  "shortness of breath": ["shortness of breath", "difficulty breathing", "breathing difficulty", "trouble breathing", "feel suffocated", "suffocated", "suffocating"],
+  "fatigue": ["fatigue", "tired", "tiredness", "feeling tired", "weak", "weakness"],
+  "chills": ["chills", "shivering", "feeling cold"],
+  "abdominal pain": ["abdominal pain", "stomach pain", "stomach hurts", "belly ache", "stomach is killing", "stomach is killing me"],
+  "diarrhea": ["diarrhea", "loose stools"],
+  "joint pain": ["joint pain", "joints hurt", "arthralgia"],
+  "muscle aches": ["muscle aches", "body aches", "muscle pain", "myalgia"],
+  "runny nose": ["runny nose", "nasal discharge"],
+  "sweating": ["sweating", "sweaty", "perspiration"],
+  "loss of appetite": ["loss of appetite", "no appetite", "decreased appetite"]
+}
+

@@ -1,0 +1,154 @@
+*{box-sizing:border-box}
+:root {
+  --agent-rumor: #8b5cf6;
+  --agent-triage: #06b6d4;
+  --agent-mental: #ec4899;
+  --agent-qa: #f59e0b;
+  --success: #10b981;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --medical-primary: #d80027;
+  --medical-dark: #b30020;
+  --medical-neutral: #2d3748;
+}
+html{background:#f8f9fa !important;min-height:100%}
+body{font-family:'Open Sans',ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";background:#f8f9fa !important;color:#0f172a !important;min-height:100vh}
+main{background:transparent !important}
+body > *{background:transparent !important}
+
+/* Remove any gradient backgrounds */
+body[style*="gradient"]{background:#f8f9fa !important}
+body[style*="linear-gradient"]{background:#f8f9fa !important}
+body[style*="0f172a"]{background:#f8f9fa !important}
+body[style*="1e1b4b"]{background:#f8f9fa !important}
+
+/* Cards */
+.card{background:white;border:1px solid #e5e7eb;border-radius:16px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04);transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1);position:relative;overflow:hidden}
+.card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg, #d80027, transparent);transform:translateX(-100%);transition:transform 0.4s ease}
+.card:hover{border-color:#d80027;transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.1)}
+.card:hover::after{transform:translateX(0)}
+.card .label{color:#0f172a;font-size:.85rem;text-transform:uppercase;letter-spacing:0.05em;font-weight:700}
+.card .value{font-size:2rem;font-weight:800;margin-top:.5rem;color:#d80027}
+
+/* Panels */
+.panel{background:white;border:1px solid #e5e7eb;border-radius:16px;padding:1.5rem;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.panel-title{font-weight:700;margin-bottom:1rem;font-size:1.1rem;color:#0f172a !important;display:flex;align-items:center;gap:.5rem}
+.panel-title::before{content:'';display:inline-block;width:4px;height:1.2rem;background:#d80027;border-radius:2px}
+
+/* Form Elements */
+input,select{outline:none;background-color:white;border:2px solid #e5e7eb;color:#0f172a;padding:.6rem;border-radius:12px;transition:all 0.2s ease;font-size:.9rem;font-family:'Open Sans',sans-serif}
+input:focus,select:focus{border-color:#d80027;box-shadow:0 0 0 3px rgba(216,0,39,0.1)}
+input::placeholder{color:#9ca3af}
+
+/* Tables */
+table thead th{border-bottom:2px solid #e5e7eb;color:#0f172a !important;font-weight:700;padding:1rem;text-align:left;font-size:.85rem;text-transform:uppercase;letter-spacing:0.05em;background:#f8f9fa}
+table tbody tr{border-bottom:1px solid #e5e7eb;transition:background 0.2s}
+table tbody tr:hover{background-color:rgba(216,0,39,0.05)}
+table tbody td{padding:1rem;color:#0f172a !important;font-size:.9rem}
+
+/* Agent Badges */
+.agent-badge{display:inline-block;padding:.4rem .8rem;border-radius:8px;font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.03em}
+.agent-rumor{background-color:rgba(139,92,246,0.1);color:#7c3aed;border-left:3px solid #8b5cf6}
+.agent-triage{background-color:rgba(6,182,212,0.1);color:#0891b2;border-left:3px solid #06b6d4}
+.agent-mental{background-color:rgba(236,72,153,0.1);color:#db2777;border-left:3px solid #ec4899}
+.agent-qa{background-color:rgba(245,158,11,0.1);color:#d97706;border-left:3px solid #f59e0b}
+
+/* Status Indicators */
+.status-ok{color:#10b981;font-weight:600}
+.status-err{color:#ef4444;font-weight:600}
+.status-warning{color:#f59e0b;font-weight:600}
+
+.status-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .8rem;border-radius:8px;font-size:.75rem;font-weight:600}
+.status-badge.success{background-color:rgba(16,185,129,0.1);color:#059669;border:1px solid rgba(16,185,129,0.2)}
+.status-badge.error{background-color:rgba(239,68,68,0.1);color:#dc2626;border:1px solid rgba(239,68,68,0.2)}
+.status-badge.pending{background-color:rgba(245,158,11,0.1);color:#d97706;border:1px solid rgba(245,158,11,0.2)}
+
+.status-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.status-dot.success{background-color:#10b981}
+.status-dot.error{background-color:#ef4444}
+.status-dot.pending{background-color:#f59e0b}
+
+/* Run Detail Panel */
+.run-detail-header{background:white;border-left:4px solid #d80027;padding:1rem;margin-bottom:1rem;border-radius:12px;border:1px solid #e5e7eb;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.run-detail-section{margin-bottom:1.5rem}
+.run-detail-section-title{font-weight:700;color:#d80027 !important;font-size:.9rem;text-transform:uppercase;margin-bottom:.5rem;letter-spacing:0.05em}
+.run-detail-content{background-color:#f8f9fa;border-radius:12px;padding:1rem;font-family:monospace;font-size:.8rem;color:#0f172a !important;max-height:300px;overflow-y:auto;border:1px solid #e5e7eb}
+.run-detail-content::-webkit-scrollbar{width:6px}
+.run-detail-content::-webkit-scrollbar-track{background:#f1f1f1;border-radius:3px}
+.run-detail-content::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+.run-detail-content::-webkit-scrollbar-thumb:hover{background:#9ca3af}
+
+/* Trace/Flow Visualization */
+.trace-container{background-color:#f8f9fa;border:1px solid #e5e7eb;border-radius:12px;padding:1rem}
+.trace-item{background:white;border-left:3px solid #d80027;padding:1rem;margin-bottom:.75rem;border-radius:12px;cursor:pointer;transition:all 0.2s;border:1px solid #e5e7eb}
+.trace-item:hover{border-left-color:#b30020;transform:translateX(4px);box-shadow:0 4px 8px rgba(216,0,39,0.15)}
+.trace-item-name{font-weight:600;color:#0f172a !important;font-size:.9rem}
+.trace-item-time{font-size:.8rem;color:#1f2937 !important;margin-top:.3rem}
+.trace-item-status{display:inline-block;margin-top:.5rem;padding:.2rem .6rem;border-radius:8px;font-size:.75rem;font-weight:600}
+
+/* Buttons */
+button{background:#212121;border:none;color:white;padding:.6rem 1.2rem;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.2s ease;font-size:.9rem;box-shadow:0 2px 4px rgba(216,0,39,0.15);font-family:'Open Sans',sans-serif}
+button:hover{background:#323232;transform:translateY(-1px);box-shadow:0 4px 12px rgba(216,0,39,0.25)}
+button:active{transform:translateY(0)}
+a.btn{display:inline-block;text-decoration:none;background:#212121;color:white;padding:.6rem 1.2rem;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.2s ease;font-size:.9rem;box-shadow:0 2px 4px rgba(216,0,39,0.15)}
+a.btn:hover{background:#323232;transform:translateY(-1px);box-shadow:0 4px 12px rgba(216,0,39,0.25)}
+
+/* Pre code blocks */
+pre{max-height:420px;background-color:#f8f9fa;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;color:#0f172a;overflow-x:auto}
+pre code{font-family:monospace;font-size:.8rem}
+
+/* Utility */
+.hidden{display:none}
+.text-xs{font-size:.75rem}
+.text-sm{font-size:.875rem}
+.text-center{text-align:center}
+.mt-2{margin-top:.5rem}
+.mt-4{margin-top:1rem}
+.mb-2{margin-bottom:.5rem}
+.gap-2{gap:.5rem}
+
+/* Override Tailwind dark classes */
+.bg-gray-950{background-color:#f8f9fa !important}
+.bg-gray-900{background-color:#212121 !important;color:white !important}
+.bg-gray-800{background-color:#323232 !important;color:white !important}
+.text-white{color:#0f172a !important}
+.text-gray-300{color:#1f2937 !important}
+.text-gray-400{color:#1f2937 !important}
+.text-gray-500{color:#374151 !important}
+.text-gray-600{color:#1f2937 !important}
+.text-gray-700{color:#0f172a !important}
+.text-gray-900{color:#0f172a !important}
+
+.border-gray-800{border-color:#e5e7eb !important}
+.border-gray-700{border-color:#e5e7eb !important}
+
+/* Force light background on all containers */
+body.bg-gray-950{background:#f8f9fa !important}
+body[style*="background"]{background:#f8f9fa !important}
+
+/* Force dark text on all elements - highest priority */
+h1, h2, h3, h4, h5, h6, p, span, div, td, th, label {
+  color: #0f172a !important;
+}
+.panel-title, .panel-title * {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+.card .label {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+table thead th, table tbody td {
+  color: #0f172a !important;
+}
+.run-detail-section-title {
+  color: #d80027 !important;
+  font-weight: 700 !important;
+}
+.trace-item-name {
+  color: #0f172a !important;
+  font-weight: 600 !important;
+}
+.trace-item-time {
+  color: #1f2937 !important;
+}

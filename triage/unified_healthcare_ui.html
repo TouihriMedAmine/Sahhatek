@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏥 Healthcare Chatbot - AI Diagnosis Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .chat-container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .message.bot {
+            justify-content: flex-start;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message.bot .message-content.system {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .message.bot .message-content.diagnosis {
+            background: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .message.bot .message-content.question {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .diagnosis-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .diagnosis-card h4 {
+            color: #9c27b0;
+            margin-bottom: 8px;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9c27b0 0%, #e91e63 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .quick-btn {
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .quick-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .quick-btn.yes {
+            border-color: #4caf50;
+            color: #4caf50;
+        }
+
+        .quick-btn.yes:hover {
+            background: #4caf50;
+            color: white;
+        }
+
+        .quick-btn.no {
+            border-color: #f44336;
+            color: #f44336;
+        }
+
+        .quick-btn.no:hover {
+            background: #f44336;
+            color: white;
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #666;
+            font-style: italic;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #c62828;
+        }
+
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #2e7d32;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .location-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 12px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .location-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #2196f3;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .location-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .facility-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .facility-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .directions-btn {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .directions-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>🏥 Healthcare AI Assistant</h1>
+            <p>Describe your symptoms and I'll help diagnose your condition</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-content system">
+                    👋 Hello! I'm your AI healthcare assistant. Please describe your symptoms and I'll help analyze them.
+                    <br><br>
+                    <strong>Example:</strong> "I have a headache, fever, and I feel very tired"
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" 
+                       id="chatInput" 
+                       class="chat-input" 
+                       placeholder="Type your message here..."
+                       autocomplete="off">
+                <button id="sendBtn" class="send-btn" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:5000';
+        let sessionId = null;
+        let currentDiagnosis = null;
+        let currentQuestions = [];
+        let waitingForAge = false;
+        let waitingForAnswer = false;
+        let currentQuestionIndex = -1;
+        let extractedSymptoms = [];
+
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        // Allow Enter key to send
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !sendBtn.disabled) {
+                sendMessage();
+            }
+        });
+
+        function addMessage(text, type = 'bot', className = '') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = `message-content ${className}`;
+            contentDiv.innerHTML = text;
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return contentDiv;
+        }
+
+        function addTypingIndicator() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            messageDiv.id = 'typingIndicator';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || sendBtn.disabled) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            chatInput.value = '';
+            sendBtn.disabled = true;
+            addTypingIndicator();
+
+            try {
+                if (!sessionId) {
+                    // First message - extract symptoms
+                    await handleInitialSymptoms(message);
+                } else if (waitingForAge) {
+                    // Waiting for age input
+                    await handleAgeInput(message);
+                } else if (waitingForAnswer && currentQuestionIndex >= 0) {
+                    // Answering a question
+                    await handleQuestionAnswer(message);
+                } else {
+                    // General conversation or follow-up
+                    await handleGeneralMessage(message);
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        async function handleInitialSymptoms(message) {
+            try {
+                // Extract symptoms
+                const response = await fetch(`${API_URL}/api/extract-symptoms`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({text: message})
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (data.error) {
+                    addMessage(`<div class="error">${data.error}</div>`, 'bot', 'error');
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                extractedSymptoms = data.symptoms || [];
+                
+                if (extractedSymptoms.length === 0) {
+                    addMessage(
+                        '<div class="error">I couldn\'t identify any symptoms. Please try describing them more clearly.<br><br><strong>Example:</strong> "I have a headache and fever"</div>',
+                        'bot',
+                        'error'
+                    );
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                // Show extracted symptoms
+                let symptomsText = '✓ I\'ve identified these symptoms:\n';
+                symptomsText += extractedSymptoms.map(s => `• ${s.canonical} (${s.score}% confidence)`).join('\n');
+                addMessage(symptomsText, 'bot', 'system');
+
+                // Start diagnosis session
+                addTypingIndicator();
+                const startResponse = await fetch(`${API_URL}/api/start-diagnosis`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        symptoms: message,
+                        age: ''
+                    })
+                });
+
+                const startData = await startResponse.json();
+                sessionId = startData.session_id;
+                removeTypingIndicator();
+
+                // Ask for age
+                waitingForAge = true;
+                addMessage(
+                    'To provide a more accurate diagnosis, could you tell me your age or age group?<br><br><strong>Examples:</strong> "25", "adult", "young", "old"',
+                    'bot',
+                    'question'
+                );
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error processing symptoms: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        async function handleAgeInput(message) {
+            try {
+                removeTypingIndicator();
+                
+                // Update session with age
+                const startResponse = await fetch(`${API_URL}/api/start-diagnosis`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        symptoms: extractedSymptoms.map(s => s.canonical).join(', '),
+                        age: message,
+                        session_id: sessionId
+                    })
+                });
+
+                const startData = await startResponse.json();
+                waitingForAge = false;
+
+                // Perform initial diagnosis
+                addTypingIndicator();
+                await performDiagnosis();
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        async function handleQuestionAnswer(message) {
+            try {
+                removeTypingIndicator();
+
+                if (currentQuestionIndex < 0 || currentQuestionIndex >= currentQuestions.length) {
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                const question = currentQuestions[currentQuestionIndex];
+                
+                // Send answer to API
+                const response = await fetch(`${API_URL}/api/answer-question`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        question: question,
+                        answer: message
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    addMessage(`<div class="error">${data.error}</div>`, 'bot', 'error');
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                // Show extracted symptoms if any
+                if (data.extracted_symptoms && data.extracted_symptoms.length > 0) {
+                    addMessage(
+                        `✓ Extracted symptoms from your answer: ${data.extracted_symptoms.join(', ')}`,
+                        'bot',
+                        'system'
+                    );
+                }
+
+                // Move to next question or re-diagnose
+                currentQuestionIndex++;
+                if (currentQuestionIndex >= currentQuestions.length) {
+                    // All questions answered, re-diagnose
+                    waitingForAnswer = false;
+                    addTypingIndicator();
+                    await performDiagnosis();
+                } else {
+                    // Ask next question
+                    askQuestion(currentQuestionIndex);
+                }
+                
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        async function handleGeneralMessage(message) {
+            // Handle general messages or location requests
+            if (message.toLowerCase().includes('location') || message.toLowerCase().includes('find')) {
+                await handleLocationRequest(message);
+            } else {
+                addMessage('I\'m here to help with your diagnosis. Please answer the questions above, or ask about finding healthcare facilities.', 'bot');
+            }
+            sendBtn.disabled = false;
+        }
+
+        async function performDiagnosis() {
+            try {
+                const response = await fetch(`${API_URL}/api/diagnose`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({session_id: sessionId})
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (data.error) {
+                    addMessage(`<div class="error">${data.error}</div>`, 'bot', 'error');
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                currentDiagnosis = data;
+
+                // Show diagnoses
+                if (data.diagnoses && data.diagnoses.length > 0) {
+                    // If confidence threshold reached, show only the top diagnosis prominently
+                    if (data.confidence_reached && data.diagnoses.length === 1) {
+                        const topDiagnosis = data.diagnoses[0];
+                        const confPercent = Math.round((topDiagnosis.confidence || 0) * 100);
+                        let diagnosisHtml = '<div class="success"><strong>✅ FINAL DIAGNOSIS (Highest Accuracy)</strong></div><br>';
+                        diagnosisHtml += `
+                            <div class="diagnosis-card" style="border: 3px solid #4caf50; background: #f1f8f4;">
+                                <h3 style="color: #2e7d32; margin-bottom: 10px;">🎯 ${topDiagnosis.name || 'Unknown'}</h3>
+                                <div class="confidence-bar" style="margin: 15px 0;">
+                                    <div class="confidence-fill" style="width: ${confPercent}%; background: #4caf50; font-weight: bold;">${confPercent}% Confidence</div>
+                                </div>
+                                <p><strong>Explanation:</strong> ${topDiagnosis.explanation || 'No explanation available'}</p>
+                                ${topDiagnosis.age_relevance ? `<p><strong>Age Relevance:</strong> ${topDiagnosis.age_relevance}</p>` : ''}
+                                ${topDiagnosis.canonical_symptoms && topDiagnosis.canonical_symptoms.length > 0 ? 
+                                    `<p><strong>Matching Symptoms:</strong> ${topDiagnosis.canonical_symptoms.join(', ')}</p>` : ''}
+                            </div>
+                        `;
+                        addMessage(diagnosisHtml, 'bot', 'diagnosis');
+                        
+                        addMessage(
+                            '<div class="success">✓ Diagnosis confidence threshold reached!<br><br>I\'m now finding nearby healthcare facilities for you...</div>',
+                            'bot',
+                            'success'
+                        );
+                        // Automatically request location
+                        setTimeout(() => {
+                            requestLocationAutomatically();
+                        }, 1000);
+                    } else {
+                        // Show multiple possible diagnoses (still gathering information)
+                        let diagnosisHtml = '<strong>📋 Possible Diagnoses (Gathering more information...):</strong><br><br>';
+                        
+                        data.diagnoses.slice(0, 5).forEach((d, idx) => {
+                            const confPercent = Math.round((d.confidence || 0) * 100);
+                            diagnosisHtml += `
+                                <div class="diagnosis-card">
+                                    <h4>${idx + 1}. ${d.name || 'Unknown'}</h4>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" style="width: ${confPercent}%">${confPercent}%</div>
+                                    </div>
+                                    <p><strong>Explanation:</strong> ${d.explanation || 'No explanation available'}</p>
+                                    ${d.age_relevance ? `<p><strong>Age Relevance:</strong> ${d.age_relevance}</p>` : ''}
+                                </div>
+                            `;
+                        });
+
+                        addMessage(diagnosisHtml, 'bot', 'diagnosis');
+
+                        if (data.questions && data.questions.length > 0) {
+                            // Ask questions
+                            currentQuestions = data.questions;
+                            currentQuestionIndex = 0;
+                            waitingForAnswer = true;
+                            askQuestion(0);
+                        } else {
+                            addMessage(
+                                'I need more information. Please describe any additional symptoms you\'re experiencing.',
+                                'bot'
+                            );
+                        }
+                    }
+                } else {
+                    addMessage(
+                        'I couldn\'t determine a diagnosis with the current information. Please provide more details about your symptoms.',
+                        'bot'
+                    );
+                }
+
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        function askQuestion(index) {
+            if (index < 0 || index >= currentQuestions.length) return;
+
+            const question = currentQuestions[index];
+            const questionDiv = addMessage(
+                `<strong>❓ Question ${index + 1}:</strong> ${question}`,
+                'bot',
+                'question'
+            );
+
+            // Add quick action buttons
+            const quickActions = document.createElement('div');
+            quickActions.className = 'quick-actions';
+            quickActions.innerHTML = `
+                <button class="quick-btn yes" onclick="answerQuick('yes')">Yes</button>
+                <button class="quick-btn no" onclick="answerQuick('no')">No</button>
+                <button class="quick-btn" onclick="answerQuick('sometimes')">Sometimes</button>
+            `;
+            questionDiv.appendChild(quickActions);
+        }
+
+        function answerQuick(answer) {
+            chatInput.value = answer;
+            sendMessage();
+        }
+
+        async function handleLocationRequest(message) {
+            addTypingIndicator();
+            
+            // Extract location from message or ask for it
+            let location = message.replace(/find|location|nearby|facilities/gi, '').trim();
+            
+            if (!location || location.length < 3) {
+                removeTypingIndicator();
+                const locationDiv = addMessage(
+                    '<div class="location-section">' +
+                    '<strong>📍 Find Healthcare Facilities</strong><br>' +
+                    'Please provide your location (address or coordinates):<br>' +
+                    '<input type="text" id="locationInput" class="location-input" placeholder="e.g., New York, NY or 40.7128, -74.0060">' +
+                    '<button class="location-btn" onclick="useCurrentLocation()">Use Current Location</button>' +
+                    '<button class="location-btn" onclick="findHealthcare()" style="background: #4caf50;">Find Facilities</button>' +
+                    '</div>',
+                    'bot'
+                );
+                sendBtn.disabled = false;
+                return;
+            }
+
+            await findHealthcareWithLocation(location);
+        }
+
+        async function findHealthcareWithLocation(location) {
+            if (!currentDiagnosis || !currentDiagnosis.diagnoses || currentDiagnosis.diagnoses.length === 0) {
+                removeTypingIndicator();
+                addMessage('Please complete the diagnosis first.', 'bot');
+                sendBtn.disabled = false;
+                return;
+            }
+
+            try {
+                const topDiagnosis = currentDiagnosis.diagnoses[0];
+                
+                // Parse location
+                let lat = null, lon = null;
+                if (location.includes(',')) {
+                    const parts = location.split(',');
+                    lat = parseFloat(parts[0].trim());
+                    lon = parseFloat(parts[1].trim());
+                }
+
+                const response = await fetch(`${API_URL}/api/find-healthcare`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        illness: topDiagnosis.name,
+                        severity: topDiagnosis.confidence > 0.8 ? 'moderate' : 'mild',
+                        confidence: topDiagnosis.confidence,
+                        latitude: lat,
+                        longitude: lon,
+                        location: location
+                    })
+                });
+
+                const data = await response.json();
+                removeTypingIndicator();
+
+                if (data.error) {
+                    addMessage(`<div class="error">${data.error}</div>`, 'bot', 'error');
+                    sendBtn.disabled = false;
+                    return;
+                }
+
+                let html = `<div class="success"><strong>${data.message}</strong></div>`;
+                html += `<div class="diagnosis-card"><h4>Recommended Service: ${data.service_type}</h4>`;
+                html += `<p><strong>Immediate Care:</strong> ${data.immediate_care ? 'YES - Seek care immediately' : 'NO - Can schedule appointment'}</p></div>`;
+
+                if (data.places && data.places.length > 0) {
+                    html += '<strong>📍 Nearby Facilities:</strong><br><br>';
+                    data.places.forEach((place, index) => {
+                        const hasCoords = place.latitude && place.longitude;
+                        const placeId = `place-${index}`;
+                        html += `
+                            <div class="diagnosis-card facility-card" ${hasCoords ? `onclick="openGoogleMaps(${place.latitude}, ${place.longitude}, '${place.name.replace(/'/g, "\\'")}')" style="cursor: pointer;"` : ''}>
+                                <h4>${place.name}</h4>
+                                <p><strong>Type:</strong> ${place.type}</p>
+                                <p>📍 ${place.distance} km away</p>
+                                ${place.address ? `<p><strong>Address:</strong> ${place.address}</p>` : ''}
+                                ${hasCoords ? '<button class="directions-btn" onclick="event.stopPropagation(); openGoogleMaps(' + place.latitude + ', ' + place.longitude + ', \'' + place.name.replace(/'/g, "\\'") + '\')">🗺️ Get Directions</button>' : ''}
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<div class="error">No facilities found nearby. Please try a different location.</div>';
+                }
+
+                addMessage(html, 'bot', 'diagnosis');
+                sendBtn.disabled = false;
+
+            } catch (error) {
+                removeTypingIndicator();
+                addMessage(`<div class="error">Error: ${error.message}</div>`, 'bot', 'error');
+                sendBtn.disabled = false;
+            }
+        }
+
+        async function useCurrentLocation() {
+            if (navigator.geolocation) {
+                addTypingIndicator();
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        const locationInput = document.getElementById('locationInput');
+                        if (locationInput) {
+                            locationInput.value = `${lat}, ${lon}`;
+                        }
+                        await findHealthcareWithLocation(`${lat}, ${lon}`);
+                    },
+                    (error) => {
+                        removeTypingIndicator();
+                        alert('Could not get your location: ' + error.message);
+                        sendBtn.disabled = false;
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser');
+            }
+        }
+
+        function findHealthcare() {
+            const locationInput = document.getElementById('locationInput');
+            if (locationInput) {
+                const location = locationInput.value.trim();
+                if (location) {
+                    chatInput.value = `find location ${location}`;
+                    sendMessage();
+                } else {
+                    alert('Please enter a location');
+                }
+            }
+        }
+
+        async function requestLocationAutomatically() {
+            // Try to get current location automatically
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const lat = position.coords.latitude;
+                        const lon = position.coords.longitude;
+                        await findHealthcareWithLocation(`${lat}, ${lon}`);
+                    },
+                    async (error) => {
+                        // If geolocation fails, ask user for location
+                        removeTypingIndicator();
+                        const locationDiv = addMessage(
+                            '<div class="location-section">' +
+                            '<strong>📍 Find Healthcare Facilities</strong><br>' +
+                            'Please provide your location (address or coordinates):<br>' +
+                            '<input type="text" id="locationInput" class="location-input" placeholder="e.g., New York, NY or 40.7128, -74.0060">' +
+                            '<button class="location-btn" onclick="useCurrentLocation()">Use Current Location</button>' +
+                            '<button class="location-btn" onclick="findHealthcare()" style="background: #4caf50;">Find Facilities</button>' +
+                            '</div>',
+                            'bot'
+                        );
+                        sendBtn.disabled = false;
+                    }
+                );
+            } else {
+                // Geolocation not supported - ask for location
+                removeTypingIndicator();
+                const locationDiv = addMessage(
+                    '<div class="location-section">' +
+                    '<strong>📍 Find Healthcare Facilities</strong><br>' +
+                    'Please provide your location (address or coordinates):<br>' +
+                    '<input type="text" id="locationInput" class="location-input" placeholder="e.g., New York, NY or 40.7128, -74.0060">' +
+                    '<button class="location-btn" onclick="useCurrentLocation()">Use Current Location</button>' +
+                    '<button class="location-btn" onclick="findHealthcare()" style="background: #4caf50;">Find Facilities</button>' +
+                    '</div>',
+                    'bot'
+                );
+                sendBtn.disabled = false;
+            }
+        }
+
+        function openGoogleMaps(lat, lon, placeName) {
+            // Open Google Maps with directions to the facility
+            // Using the Google Maps URL format: https://www.google.com/maps/dir/?api=1&destination=lat,lon
+            const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}&destination_place_id=${encodeURIComponent(placeName)}`;
+            window.open(mapsUrl, '_blank');
+        }
+    </script>
+</body>
+</html>

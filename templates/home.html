@@ -1,0 +1,1260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sahatek – Your Personal Emergency & Health AI</title>
+  <link rel="icon" href="{% static 'favicon.ico' %}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- UPDATED: Montserrat & Open Sans - Most trusted by healthcare websites -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Medical Color Theme Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            medical: {
+              primary: '#0EA5E9',
+              secondary: '#10B981',
+              emergency: '#EF4444',
+              thirdary: '#acd3a8',
+              dark: '#1E40AF',
+              neutral: '#475569',
+              light: '#F0F9FF'
+            }
+          },
+          animation: {
+            'gradient': 'gradient 8s ease infinite',
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+            'count-up': 'countUp 2s ease-out forwards',
+            'shake': 'shake 0.5s ease-in-out'
+          },
+          keyframes: {
+            gradient: {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' }
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' }
+            },
+            countUp: {
+              '0%': { content: '"0"' },
+              '100%': { content: 'attr(data-count)' }
+            },
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-5px)' },
+              '20%, 40%, 60%, 80%': { transform: 'translateX(5px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Professional Medical Design System */
+    :root {
+      --medical-primary: #0EA5E9;
+      --medical-secondary: #10B981;
+      --medical-emergency: #dc2b2b;
+    }
+    
+    body {
+      /* UPDATED: Open Sans for body text - #1 most used by hospital websites */
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    /* Animated Bubble Background */
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+      opacity: 0.1;
+      filter: blur(20px);
+      z-index: 0;
+      animation: floatBubble 25s linear infinite, fadeBubble 10s ease-in-out infinite alternate;
+    }
+
+    @keyframes floatBubble {
+      0% { transform: translateY(0) translateX(0); }
+      25% { transform: translateY(-50px) translateX(20px); }
+      50% { transform: translateY(-100px) translateX(-20px); }
+      75% { transform: translateY(-150px) translateX(20px); }
+      100% { transform: translateY(-200px) translateX(0); }
+    }
+
+    @keyframes fadeBubble {
+      0%, 100% { opacity: 0.05; }
+      50% { opacity: 0.15; }
+    }
+    
+    /* Enhanced Card Design */
+    .medical-card {
+      position: relative;
+      z-index: 1;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(14, 165, 233, 0.1);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+    
+    .medical-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, 
+        rgba(14, 165, 233, 0.05), 
+        rgba(16, 185, 129, 0.03));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    .medical-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.15);
+      border-color: rgba(14, 165, 233, 0.2);
+    }
+    
+    .medical-card:hover::before {
+      opacity: 1;
+    }
+    
+    /* Professional Modal */
+    .medical-modal {
+      background: linear-gradient(135deg, #ffffff, #fafafa);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                  0 0 0 1px rgba(239, 68, 68, 0.1);
+    }
+    
+    /* Emergency Glow */
+    .emergency-glow {
+      box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    }
+    
+    /* Medical Badges */
+    .medical-badge {
+      background: linear-gradient(135deg, var(--medical-primary), var(--medical-secondary));
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    
+    /* UPDATED: Professional Typography - Healthcare optimized */
+    .heading-1 {
+      /* UPDATED: Montserrat for headings - modern & professional */
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    
+    .heading-2 {
+      /* UPDATED: Montserrat for headings */
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    
+    /* Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Glass Effect */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .emergency-pulse {
+      animation: emergencyPulse 2s infinite;
+    }
+    
+    @keyframes emergencyPulse {
+      0%, 100% { box-shadow: 0 0 15px 3px rgba(239, 68, 68, 0.2); }
+      50% { box-shadow: 0 0 25px 8px rgba(239, 68, 68, 0.35); }
+    }
+    
+    .smooth-transition {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .medical-icon {
+      filter: drop-shadow(0 4px 6px rgba(14, 165, 233, 0.2));
+    }
+    
+    .modal-open {
+      animation: modalFadeIn 0.3s ease-out forwards;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    /* Form Styles */
+    .form-input {
+      @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-medical-primary/30 focus:border-medical-primary transition-all duration-200 text-sm;
+    }
+    
+    .form-label {
+      @apply block text-sm font-medium text-gray-700 mb-1.5;
+    }
+    
+    .btn-primary {
+      @apply w-full py-2.5 bg-medical-primary text-white font-medium rounded-lg hover:bg-medical-primary/90 active:scale-[0.99] transition-all duration-200 text-sm;
+    }
+    
+    .btn-secondary {
+      @apply px-6 py-3 rounded-xl border border-medical-primary text-medical-primary hover:bg-medical-primary/5 transition-all duration-300 font-medium;
+    }
+    
+    .error-message {
+      @apply text-red-600 text-xs mt-1.5 flex items-center gap-1.5;
+    }
+    
+    .success-message {
+      @apply text-green-600 text-xs mt-1.5 flex items-center gap-1.5;
+    }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 2px solid rgba(14, 165, 233, 0.1);
+      border-radius: 50%;
+      border-top: 2px solid var(--medical-primary);
+      width: 16px;
+      height: 16px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Progress Bar */
+    .progress-bar {
+      height: 4px;
+      background: linear-gradient(to right, var(--medical-primary), var(--medical-secondary));
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen text-gray-700 overflow-x-hidden relative">
+  {% csrf_token %}
+
+  <!-- Animated Bubbles -->
+  <div id="bubble-container"></div>
+
+  <!-- ================= NAVBAR ================= -->
+  <nav id="navbar"
+       class="fixed top-0 left-0 w-full z-50 px-6 py-4 border-b border-gray-100 backdrop-blur-md transition-all duration-300"
+       style="background-color: rgba(255, 255, 255, 0.15);">
+    <div class="container mx-auto flex justify-between items-center">
+
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-11 w-11">
+        <h1 class="text-2xl font-bold">
+          <a href="{% url 'home' %}" class="hover:text-medical-primary transition-colors" style="color:#d80027;">
+            Sahatek
+          </a>
+      </h1>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-x-3 flex items-center">
+        {% if request.user.is_authenticated %}
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <span class="text-sm font-medium text-medical-dark block">
+              {{ request.user.username }}
+            </span>
+            <span class="text-xs text-medical-neutral flex items-center">
+              <span class="w-2 h-2 bg-medical-secondary rounded-full mr-1 animate-pulse"></span>
+              Emergency Ready
+            </span>
+          </div>
+
+        <button id="homeLogoutBtn"
+                  class="px-4 py-2 rounded-full border border-medical-neutral/20 text-medical-dark hover:bg-medical-emergency/5 hover:text-medical-emergency transition-all text-sm">
+          Logout
+        </button>
+        </div>
+        {% else %}
+        <button id="loginBtn"
+                class="px-4 py-2 rounded-full border border-medical-primary text-medical-primary hover:bg-medical-primary/5 transition-all text-sm">
+          Login
+        </button>
+
+        <button id="signupBtn"
+                class="px-4 py-2 rounded-full bg-gradient-to-r from-medical-primary to-medical-dark text-white hover:shadow-lg transition-all text-sm">
+          Sign Up
+        </button>
+        {% endif %}
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-grow pt-40 relative z-10">
+    <div class="container mx-auto px-4 pb-20">
+      <div class="max-w-6xl mx-auto">
+
+        <!-- ===== HERO SECTION ===== -->
+        <section class="text-center mb-20 animate-fade-in">
+          <div class="inline-flex items-center space-x-3 bg-medical-light px-4 py-2 rounded-full mb-8 border border-medical-primary/10">
+            <span class="w-2 h-2 bg-medical-emergency rounded-full animate-pulse"></span>
+            <span class="text-sm font-semibold text-medical-primary">
+              24/7 EMERGENCY SUPPORT AVAILABLE
+            </span>
+          </div>
+          <h1 class="text-5xl md:text-5xl mb-6 font-bold">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-medical-primary via-medical-secondary to-medical-thirdary animate-gradient">
+              Your Personal Emergency & Health Assistant
+            </span>
+    </h1>
+
+          <p class="text-xl text-medical-neutral mb-10 max-w-3xl mx-auto leading-relaxed">
+            Professional medical guidance powered by AI. Get instant emergency protocols,
+            symptom analysis, and personalized health support when you need it most.
+          </p>
+          
+
+          <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            {% if request.user.is_authenticated %}
+    <a href="/chat/"
+               class="px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-medical-primary to-medical-dark text-white hover:shadow-xl hover:scale-105 transition-all">
+              Start Emergency Chat
+            </a>
+            <a href="/chat/dashboard/langsmith/"
+               class="px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+              <span>📊</span>
+              LangSmith Dashboard
+            </a>
+            {% else %}
+            <button id="startChatBtn"
+                    class="px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-medical-primary to-medical-dark text-white hover:shadow-xl hover:scale-105 transition-all cursor-pointer">
+              Start Emergency Chat
+            </button>
+            <a href="/chat/dashboard/langsmith/"
+               class="px-8 py-4 text-lg font-semibold rounded-full bg-gradient-to-r from-gray-700 to-gray-900 text-white hover:shadow-xl hover:scale-105 transition-all flex items-center gap-2">
+              <span>📊</span>
+              LangSmith Dashboard
+            </a>
+            {% endif %}
+  </div>
+        </section>
+
+        <!-- Features Grid -->
+         <section>
+          <h2 class="text-3xl text-center mb-12 text-medical-dark font-semibold">
+            Medical AI Capabilities
+          </h2>
+      
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-primary/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">🚑</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">Emergency Response Protocol</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">Step-by-step guidance for critical situations with real-time updates and location-based emergency services.</p>
+            </div>
+            
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-secondary/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">🩺</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">AI Symptom Analysis</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">Advanced symptom correlation and urgency assessment with evidence-based medical guidance.</p>
+            </div>
+            
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-emergency/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">📚</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">Medical Knowledge Base</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">Curated emergency protocols, drug interactions, and medical procedures from trusted sources.</p>
+            </div>
+            
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-primary/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">💬</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">Intelligent Health Chat</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">Context-aware medical conversations with multi-language support and real-time translation.</p>
+      </div>
+
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-secondary/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">🔒</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">Secure & Private</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">End-to-end encrypted health data with military-grade security and zero-knowledge architecture.</p>
+      </div>
+
+            <div class="medical-card p-8">
+              <div class="w-14 h-14 rounded-xl bg-medical-emergency/10 flex items-center justify-center mb-6">
+                <span class="text-2xl">🏥</span>
+              </div>
+              <h3 class="heading-2 text-xl mb-4">Emergency Integration</h3>
+              <p class="text-medical-neutral mb-6 leading-relaxed">Direct connection to local emergency services with automatic medical history handoff.</p>
+            </div>
+          </div>
+         </section> 
+    </div>
+    </div>
+  </main>
+
+  <!-- Professional Authentication Modal -->
+  <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 overflow-hidden modal-open border border-gray-100">
+      
+      <!-- Modal Header -->
+      <div class="px-8 pt-8 pb-6">
+        <div class="flex justify-between items-center mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br y flex items-center justify-center">
+              <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-6 w-6">
+            </div>
+            <h3 class="text-xl font-semibold text-gray-900" id="modalTitle">Welcome</h3>
+          </div>
+          <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <p class="text-sm text-gray-500" id="modalSubtitle">Sign in to your account</p>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="px-8 pb-8">
+        <!-- Login Form -->
+        <div id="loginForm" class="space-y-5 hidden">
+          <form id="loginFormElement" class="space-y-5">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            
+            <div class="space-y-1.5">
+              <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Username</label>
+              <input type="text" name="username" placeholder="Enter your username" required
+                     class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+              <div id="loginUsernameError" class="error-message hidden"></div>
+      </div>
+
+            <div class="space-y-1.5">
+              <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Password</label>
+              <input type="password" name="password" placeholder="Enter your password" required
+                     class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+              <div id="loginPasswordError" class="error-message hidden"></div>
+      </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <input type="checkbox" id="rememberMe" name="remember_me" 
+                       class="h-4 w-4 text-medical-primary border-gray-300 rounded focus:ring-medical-primary/20">
+                <label for="rememberMe" class="ml-2 text-xs text-gray-600">
+                  Remember me
+                </label>
+      </div>
+
+    </div>
+            
+            <div id="loginMessage" class="text-xs py-2 hidden"></div>
+            
+            <button type="submit" id="loginSubmitBtn"
+                    class="w-full py-3.5 bg-medical-primary text-white font-medium rounded-xl hover:bg-medical-primary/90 active:scale-[0.99] transition-all duration-200 text-sm shadow-md shadow-medical-primary/20">
+              <span id="loginBtnText" class="flex items-center justify-center gap-2">
+                Sign In
+                <div id="loginSpinner" class="spinner hidden"></div>
+              </span>
+            </button>
+          </form>
+          
+          <div class="pt-4 border-t border-gray-100">
+            <p class="text-xs text-gray-600 text-center">
+              Don't have an account?
+              <button id="switchToSignup" class="text-medical-primary hover:text-medical-primary/80 font-medium ml-1">
+                Create account
+              </button>
+            </p>
+          </div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="space-y-5">
+          <!-- Progress Bar -->
+          <div class="flex items-center justify-center mb-1">
+            <div class="w-32 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div id="signupProgress" class="h-full bg-gradient-to-r from-medical-primary to-medical-secondary rounded-full transition-all duration-300" style="width: 50%"></div>
+            </div>
+          </div>
+          
+          <!-- Step 1: Basic Information -->
+          <div id="signupFormStep1" class="space-y-5">
+            <form id="signupStep1Form">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+              
+              <div class="space-y-1.5">
+                <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Username</label>
+                <input type="text" name="username" placeholder="Choose a username" required
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+                <div id="signupUsernameError" class="error-message hidden"></div>
+  </div>
+
+              <div class="space-y-1.5">
+                <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Email Address</label>
+                <input type="email" name="email" placeholder="your.email@example.com" required
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+                <div id="signupEmailError" class="error-message hidden"></div>
+              </div>
+              
+              <div class="space-y-1.5">
+                <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Phone Number <span class="text-gray-400 font-normal">(Optional)</span></label>
+                <input type="text" name="phone" placeholder="+123 456 7890"
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+                <div id="signupPhoneError" class="error-message hidden"></div>
+              </div>
+              
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Password</label>
+                  <input type="password" name="password1" placeholder="••••••••" required
+                         class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+      </div>
+
+                <div class="space-y-1.5">
+                  <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Confirm</label>
+                  <input type="password" name="password2" placeholder="••••••••" required
+                         class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400">
+                </div>
+              </div>
+              <div class="flex-grow pt-5 "> </div>
+              <div id="signupPasswordError" class="error-message hidden"></div>
+              
+              
+              
+              <div id="signupStep1Message" class="text-xs py-2 hidden"></div>
+              
+              <button type="submit" id="sendSignupCode"
+                      class="w-full py-3.5 bg-medical-primary text-white font-medium rounded-xl hover:bg-medical-primary/90 active:scale-[0.99] transition-all duration-200 text-sm shadow-md shadow-medical-primary/20">
+                <span id="signupBtnText" class="flex items-center justify-center gap-2">
+                  Continue
+                  <div id="signupSpinner" class="spinner hidden"></div>
+                </span>
+          </button>
+        </form>
+            
+            <div class="pt-4 border-t border-gray-100">
+              <p class="text-xs text-gray-600 text-center">
+                Already have an account?
+                <button id="switchToLogin" class="text-medical-primary hover:text-medical-primary/80 font-medium ml-1">
+                  Sign in
+                </button>
+              </p>
+            </div>
+          </div>
+
+          <!-- Step 2: Verification Code -->
+          <div id="signupFormStep2" class="space-y-5 hidden">
+            <div class="text-center mb-4">
+              <div class="w-14 h-14 rounded-full bg-gradient-to-br from-medical-primary/10 to-medical-secondary/10 flex items-center justify-center mx-auto mb-3">
+                <svg class="w-6 h-6 text-medical-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89-3.88a2 2 0 012.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h4 class="font-semibold text-gray-900 text-base">Verify your email</h4>
+              <p class="text-xs text-gray-500 mt-1 max-w-xs mx-auto leading-relaxed">
+                Enter the 6-digit verification code sent to your email address
+        </p>
+      </div>
+
+            <form id="signupStep2Form">
+              <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+              
+              <div class="space-y-1.5">
+                <label class="text-xs font-medium text-gray-700 uppercase tracking-wider">Verification Code</label>
+                <input id="verificationCode" type="text" name="code" placeholder="Enter 6-digit code" required
+                       class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm placeholder-gray-400 text-center tracking-widest font-mono text-lg" maxlength="6">
+                <div id="verificationError" class="error-message hidden"></div>
+              </div>
+              
+              <div id="signupStep2Message" class="text-xs py-2 hidden"></div>
+              
+              <button type="submit" id="verifySignupCode"
+                      class="w-full py-3.5 bg-gradient-to-r from-medical-primary to-medical-secondary text-white font-medium rounded-xl hover:opacity-90 active:scale-[0.99] transition-all duration-200 text-sm shadow-md shadow-medical-primary/20">
+                <span id="verifyBtnText" class="flex items-center justify-center gap-2">
+                  Verify & Create Account
+                  <div id="verifySpinner" class="spinner hidden"></div>
+                </span>
+          </button>
+        </form>
+
+            <div class="text-center">
+              <p class="text-xs text-gray-600">
+                Didn't receive a code?
+                <button id="resendCode" class="text-medical-primary hover:text-medical-primary/80 font-medium ml-1">
+                  Resend code
+          </button>
+        </p>
+      </div>
+
+            <div class="pt-4 border-t border-gray-100">
+              <button id="backToStep1" class="w-full text-xs text-gray-600 hover:text-gray-900 transition-colors flex items-center justify-center gap-2 py-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to account details
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class=" py-10 bg-gradient-to-b from-white to-medical-light border-t border-gray-100">
+    <div class="container mx-auto px-">
+      <div class="pt-8 border-t border-gray-200 text-center">
+        <p class="text-medical-neutral text-sm">
+          <span class="font-semibold text-medical-emergency">MEDICAL DISCLAIMER:</span> 
+          Sahatek provides AI-powered guidance and is not a substitute for professional medical diagnosis or treatment. 
+          In emergencies, always call 190 or your local emergency number immediately.
+        </p>
+        <p class="text-gray-500 text-sm mt-4">© 2025 Sahatek. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Emergency Guide Modal -->
+  <div id="emergencyGuideModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="medical-modal rounded-2xl w-full max-w-4xl p-8 relative max-h-[90vh] overflow-y-auto">
+
+    </div>
+  </div>
+
+  <!-- JavaScript - CORRECTED ENDPOINTS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // CSRF Token
+      const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+      
+      // Store signup data globally for resend functionality
+      let signupData = null;
+      
+      // Initialize variables
+      const navbar = document.getElementById('navbar');
+      const loginBtn = document.getElementById('loginBtn');
+      const signupBtn = document.getElementById('signupBtn');
+      const homeLogoutBtn = document.getElementById('homeLogoutBtn');
+      const startChatBtn = document.getElementById('startChatBtn');
+      
+      // Auth Modal Elements
+      const authModal = document.getElementById('authModal');
+      const closeModal = document.getElementById('closeModal');
+      const loginForm = document.getElementById('loginForm');
+      const signupForm = document.getElementById('signupForm');
+      const signupStep1 = document.getElementById('signupFormStep1');
+      const signupStep2 = document.getElementById('signupFormStep2');
+      const switchToSignup = document.getElementById('switchToSignup');
+      const switchToLogin = document.getElementById('switchToLogin');
+      const backToStep1 = document.getElementById('backToStep1');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalSubtitle = document.getElementById('modalSubtitle');
+      const signupProgress = document.getElementById('signupProgress');
+      
+      // Create floating bubbles
+      function createBubbles() {
+          const container = document.getElementById('bubble-container');
+          const bubbleCount = 40;
+          for (let i = 0; i < bubbleCount; i++) {
+              const bubble = document.createElement('div');
+              bubble.className = 'bubble';
+              const size = Math.random() * 150 + 50;
+              bubble.style.width = `${size}px`;
+              bubble.style.height = `${size}px`;
+              bubble.style.left = `${Math.random() * 100}%`;
+              bubble.style.top = `${Math.random() * 100}%`;
+              bubble.style.animationDelay = `${Math.random() * 20}s, ${Math.random() * 10}s`;
+              bubble.style.animationDuration = `${20 + Math.random() * 15}s, ${8 + Math.random() * 10}s`;
+              container.appendChild(bubble);
+          }
+      }
+
+      // Navbar scroll effect
+      function handleScroll() {
+        if (window.scrollY > 20) {
+              navbar.classList.add('shadow-lg');
+              navbar.style.backdropFilter = 'blur(10px)';
+              navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+          } else {
+              navbar.classList.remove('shadow-lg');
+              navbar.style.backdropFilter = 'blur(10px)';
+              navbar.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+          }
+      }
+      
+      // Modal Functions
+      function openModal(form) {
+          authModal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+          
+          if (form === 'login') {
+              loginForm.classList.remove('hidden');
+              signupForm.classList.add('hidden');
+              modalTitle.textContent = 'Welcome Back';
+              modalSubtitle.textContent = 'Sign in to your account';
+              resetFormErrors('login');
+          } else {
+              signupForm.classList.remove('hidden');
+              loginForm.classList.add('hidden');
+              signupStep1.classList.remove('hidden');
+              signupStep2.classList.add('hidden');
+              signupProgress.style.width = '50%';
+              modalTitle.textContent = 'Create Account';
+              modalSubtitle.textContent = 'Join our health community';
+              resetFormErrors('signup');
+              signupData = null; // Reset signup data when opening modal
+          }
+      }
+      
+      function closeAuthModal() {
+          authModal.classList.add('hidden');
+          document.body.style.overflow = 'auto';
+          resetFormErrors('all');
+          signupData = null; // Clear signup data when closing modal
+      }
+      
+      // Reset form errors
+      function resetFormErrors(formType) {
+          const errorElements = document.querySelectorAll('.error-message, .success-message');
+          errorElements.forEach(el => {
+              el.classList.add('hidden');
+              el.textContent = '';
+          });
+          
+          const messageElements = document.querySelectorAll('[id$="Message"]');
+          messageElements.forEach(el => {
+              el.classList.add('hidden');
+              el.textContent = '';
+              el.className = el.className.replace(/success-message|error-message/g, '') + ' hidden';
+          });
+          
+          if (formType === 'login' || formType === 'all') {
+              document.getElementById('loginUsernameError')?.classList.add('hidden');
+              document.getElementById('loginPasswordError')?.classList.add('hidden');
+              document.getElementById('loginMessage')?.classList.add('hidden');
+          }
+          
+          if (formType === 'signup' || formType === 'all') {
+              document.getElementById('signupUsernameError')?.classList.add('hidden');
+              document.getElementById('signupEmailError')?.classList.add('hidden');
+              document.getElementById('signupPhoneError')?.classList.add('hidden');
+              document.getElementById('signupPasswordError')?.classList.add('hidden');
+              document.getElementById('verificationError')?.classList.add('hidden');
+              document.getElementById('signupStep1Message')?.classList.add('hidden');
+              document.getElementById('signupStep2Message')?.classList.add('hidden');
+          }
+      }
+      
+      // Show error message
+      function showError(elementId, message) {
+          const element = document.getElementById(elementId);
+          if (element) {
+              element.textContent = message;
+              element.classList.remove('hidden', 'success-message');
+              element.classList.add('error-message');
+          }
+      }
+      
+      // Show success message
+      function showSuccess(elementId, message) {
+          const element = document.getElementById(elementId);
+          if (element) {
+              element.textContent = message;
+              element.classList.remove('hidden', 'error-message');
+              element.classList.add('success-message');
+          }
+      }
+      
+      // Toggle loading state
+      function toggleLoading(buttonId, spinnerId, buttonTextId, isLoading) {
+          const button = document.getElementById(buttonId);
+          const spinner = document.getElementById(spinnerId);
+          const buttonText = document.getElementById(buttonTextId);
+          
+          if (button && spinner) {
+              if (isLoading) {
+                  button.disabled = true;
+                  spinner.classList.remove('hidden');
+                  if (buttonText) {
+                      buttonText.textContent = buttonText.textContent.replace('ing', 'ing...').replace('Continue', 'Sending...').replace('Verify', 'Verifying...');
+                  }
+              } else {
+                  button.disabled = false;
+                  spinner.classList.add('hidden');
+                  if (buttonText) {
+                      buttonText.textContent = buttonText.textContent.replace('ing...', 'ing').replace('Sending...', 'Continue').replace('Verifying...', 'Verify');
+                  }
+              }
+          }
+      }
+      
+      // Validate email format
+      function isValidEmail(email) {
+          const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          return re.test(email);
+      }
+      
+      // Login Form Submission
+      document.getElementById('loginFormElement').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(e.target);
+          const data = {
+              username: formData.get('username').trim(),
+              password: formData.get('password'),
+              remember_me: formData.get('remember_me') === 'on'
+          };
+          
+          resetFormErrors('login');
+          
+          // Validate inputs
+          if (!data.username) {
+              showError('loginMessage', 'Please enter your username.');
+              return;
+          }
+          
+          if (!data.password) {
+              showError('loginMessage', 'Please enter your password.');
+              return;
+          }
+          
+          toggleLoading('loginSubmitBtn', 'loginSpinner', 'loginBtnText', true);
+          
+          try {
+              console.log('Sending login data:', data);
+              
+              const response = await fetch('/auth/login/', {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': csrftoken,
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify(data)
+              });
+              
+              const result = await response.json();
+              console.log('Login response:', result);
+              
+              if (result.success) {
+                  showSuccess('loginMessage', 'Login successful! Redirecting...');
+                  setTimeout(() => {
+                      window.location.reload();
+                  }, 1500);
+              } else {
+                  showError('loginMessage', result.message || 'Invalid username or password.');
+              }
+          } catch (error) {
+              console.error('Login error:', error);
+              showError('loginMessage', 'Network error. Please try again.');
+          } finally {
+              toggleLoading('loginSubmitBtn', 'loginSpinner', 'loginBtnText', false);
+          }
+      });
+      
+      // Signup Step 1 Submission
+      document.getElementById('signupStep1Form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(e.target);
+          const data = {
+              username: formData.get('username').trim(),
+              email: formData.get('email').trim(),
+              phone: formData.get('phone')?.trim() || '',
+              password1: formData.get('password1'),
+              password2: formData.get('password2')
+          };
+          
+          console.log('Sending signup data:', data);
+          
+          resetFormErrors('signup');
+          
+          // Validate inputs
+          let hasError = false;
+          
+          if (!data.username) {
+              showError('signupUsernameError', 'Username is required.');
+              hasError = true;
+          } else if (data.username.length < 3) {
+              showError('signupUsernameError', 'Username must be at least 3 characters.');
+              hasError = true;
+          }
+          
+          if (!data.email) {
+              showError('signupEmailError', 'Email is required.');
+              hasError = true;
+          } else if (!isValidEmail(data.email)) {
+              showError('signupEmailError', 'Please enter a valid email address.');
+              hasError = true;
+          }
+          
+          if (!data.password1) {
+              showError('signupPasswordError', 'Password is required.');
+              hasError = true;
+          } else if (data.password1.length < 8) {
+              showError('signupPasswordError', 'Password must be at least 8 characters.');
+              hasError = true;
+          } else if (data.password1 !== data.password2) {
+              showError('signupPasswordError', 'Passwords do not match.');
+              hasError = true;
+          }
+          
+          if (hasError) return;
+          
+          // Store data for resend functionality
+          signupData = data;
+          
+          toggleLoading('sendSignupCode', 'signupSpinner', 'signupBtnText', true);
+          
+          try {
+              const response = await fetch('/auth/signup/', {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': csrftoken,
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify(data)
+              });
+              
+              const result = await response.json();
+              console.log('Signup step 1 response:', result);
+              
+              if (result.success) {
+                  // Show success message immediately
+                  showSuccess('signupStep1Message', result.message || 'Verification code sent!');
+                  
+                  // Transition to step 2 after short delay
+                  setTimeout(() => {
+                      signupStep1.classList.add('hidden');
+                      signupStep2.classList.remove('hidden');
+                      signupProgress.style.width = '100%';
+                      modalTitle.textContent = 'Verify Your Email';
+                      modalSubtitle.textContent = 'Enter the 6-digit code';
+                      
+                      // Focus on verification code input
+                      const codeInput = document.getElementById('verificationCode');
+                      if (codeInput) {
+                          codeInput.focus();
+                      }
+                      
+                      // Clear step 1 message
+                      document.getElementById('signupStep1Message').classList.add('hidden');
+                  }, 1000);
+              } else {
+                  showError('signupStep1Message', result.message || 'Failed to send verification code.');
+              }
+          } catch (error) {
+              console.error('Signup error:', error);
+              showError('signupStep1Message', 'Network error. Please check your connection.');
+          } finally {
+              toggleLoading('sendSignupCode', 'signupSpinner', 'signupBtnText', false);
+          }
+      });
+      
+      // Signup Step 2 Submission
+      document.getElementById('signupStep2Form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          
+          const formData = new FormData(e.target);
+          const code = formData.get('code')?.trim();
+          
+          // Clear previous errors
+          document.getElementById('verificationError')?.classList.add('hidden');
+          document.getElementById('signupStep2Message')?.classList.add('hidden');
+          
+          // Validate code
+          if (!code || code.length !== 6 || !/^\d{6}$/.test(code)) {
+              showError('verificationError', 'Please enter a valid 6-digit code.');
+              return;
+          }
+          
+          const data = { code: code };
+          
+          console.log('Verifying code:', data);
+          
+          toggleLoading('verifySignupCode', 'verifySpinner', 'verifyBtnText', true);
+          
+          try {
+              const response = await fetch('/auth/verify/', {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': csrftoken,
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify(data)
+              });
+              
+              const result = await response.json();
+              console.log('Verification response:', result);
+              
+              if (result.success) {
+                  showSuccess('signupStep2Message', 'Account created successfully! Redirecting...');
+                  setTimeout(() => {
+                      window.location.reload();
+                  }, 1500);
+              } else {
+                  if (result.message && result.message.includes('expired')) {
+                      showError('verificationError', 'Code expired. Please request a new one.');
+                  } else if (result.message && result.message.includes('Invalid')) {
+                      showError('verificationError', 'Invalid code. Please try again.');
+                  } else if (result.message && result.message.includes('No signup')) {
+                      showError('verificationError', 'Session expired. Please start over.');
+                  } else {
+                      showError('verificationError', result.message || 'Verification failed.');
+                  }
+              }
+          } catch (error) {
+              console.error('Verification error:', error);
+              showError('signupStep2Message', 'Network error. Please try again.');
+          } finally {
+              toggleLoading('verifySignupCode', 'verifySpinner', 'verifyBtnText', false);
+          }
+      });
+      
+      // Resend verification code
+      document.getElementById('resendCode').addEventListener('click', async () => {
+          // Use the stored signup data
+          if (!signupData || !signupData.username) {
+              showError('signupStep2Message', 'Please start the signup process again.');
+              return;
+          }
+          
+          console.log('Resending code for:', signupData.username);
+          
+          const step2Message = document.getElementById('signupStep2Message');
+          step2Message.classList.add('hidden');
+          
+          // Show loading on resend button
+          const resendBtn = document.getElementById('resendCode');
+          const originalText = resendBtn.textContent;
+          resendBtn.textContent = 'Sending...';
+          resendBtn.disabled = true;
+          
+          try {
+              const response = await fetch('/auth/resend-code/', {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': csrftoken,
+                      'Content-Type': 'application/json',
+                      'X-Requested-With': 'XMLHttpRequest'
+                  },
+                  body: JSON.stringify({ username: signupData.username })
+              });
+              
+              const result = await response.json();
+              console.log('Resend response:', result);
+              
+              if (result.success) {
+                  showSuccess('signupStep2Message', result.message || 'New code sent!');
+              } else {
+                  showError('signupStep2Message', result.message || 'Failed to resend code.');
+              }
+          } catch (error) {
+              console.error('Resend error:', error);
+              showError('signupStep2Message', 'Network error. Please try again.');
+          } finally {
+              // Restore button state
+              resendBtn.textContent = originalText;
+              resendBtn.disabled = false;
+          }
+      });
+      
+      // Auto-advance verification code input
+      document.getElementById('verificationCode')?.addEventListener('input', function(e) {
+          // Remove non-numeric characters
+          this.value = this.value.replace(/\D/g, '');
+          
+          // Limit to 6 characters
+          if (this.value.length > 6) {
+              this.value = this.value.slice(0, 6);
+          }
+          
+          // Auto-submit when 6 digits are entered
+          if (this.value.length === 6) {
+              // Small delay to let user see the final digit
+              setTimeout(() => {
+                  document.getElementById('verifySignupCode').click();
+              }, 300);
+          }
+      });
+      
+      // Add input validation for phone number
+      document.querySelector('input[name="phone"]')?.addEventListener('input', function(e) {
+          // Allow only numbers, plus, parentheses, and dashes
+          this.value = this.value.replace(/[^\d\+\-\(\)\s]/g, '');
+      });
+      
+      // Password strength indicator (optional enhancement)
+      document.querySelector('input[name="password1"]')?.addEventListener('input', function(e) {
+          const password = this.value;
+          const passwordError = document.getElementById('signupPasswordError');
+          
+          if (password.length > 0 && password.length < 8) {
+              passwordError.textContent = 'Password must be at least 8 characters.';
+              passwordError.classList.remove('hidden', 'success-message');
+              passwordError.classList.add('error-message');
+          } else if (password.length >= 8) {
+              passwordError.classList.add('hidden');
+          }
+      });
+      
+      // Logout functionality
+      if (homeLogoutBtn) {
+          homeLogoutBtn.addEventListener('click', async () => {
+              try {
+                  const response = await fetch('/auth/logout/', {
+                      method: 'POST',
+                      headers: {
+                          'X-CSRFToken': csrftoken,
+                          'X-Requested-With': 'XMLHttpRequest'
+                      }
+                  });
+                  
+                  const data = await response.json();
+                  console.log('Logout response:', data);
+                  
+                  if (data.success) {
+                      window.location.reload();
+                  } else {
+                      alert('Logout failed. Please try again.');
+                  }
+              } catch (error) {
+                  alert('Network error. Please try again.');
+              }
+          });
+      }
+      
+      // Start Chat Button functionality
+      if (startChatBtn) {
+          startChatBtn.addEventListener('click', () => {
+              // Show login modal if user is not authenticated
+              openModal('login');
+          });
+      }
+      
+      // Event Listeners
+      window.addEventListener('scroll', handleScroll);
+      handleScroll();
+      
+      if (loginBtn) loginBtn.addEventListener('click', () => openModal('login'));
+      if (signupBtn) signupBtn.addEventListener('click', () => openModal('signup'));
+      if (closeModal) closeModal.addEventListener('click', closeAuthModal);
+      
+      authModal.addEventListener('click', (e) => {
+          if (e.target === authModal) closeAuthModal();
+      });
+      
+      if (switchToSignup) switchToSignup.addEventListener('click', () => openModal('signup'));
+      if (switchToLogin) switchToLogin.addEventListener('click', () => openModal('login'));
+      if (backToStep1) backToStep1.addEventListener('click', () => {
+          signupStep1.classList.remove('hidden');
+          signupStep2.classList.add('hidden');
+          signupProgress.style.width = '50%';
+          modalTitle.textContent = 'Create Account';
+          modalSubtitle.textContent = 'Join our health community';
+          resetFormErrors('signup');
+      });
+      
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+              if (!authModal.classList.contains('hidden')) closeAuthModal();
+          }
+      });
+      
+      // Initialize
+      createBubbles();
+      
+      // Debug function to test endpoints
+      window.testEndpoints = async function() {
+          console.log('Testing authentication endpoints...');
+          const endpoints = [
+              { url: '/auth/signup/', method: 'POST', data: { 
+                  username: 'testuser' + Date.now(), 
+                  email: 'test' + Date.now() + '@test.com', 
+                  password1: 'test1234', 
+                  password2: 'test1234' 
+              }},
+              { url: '/auth/verify/', method: 'POST', data: { code: '123456' }},
+              { url: '/auth/login/', method: 'POST', data: { username: 'test', password: 'test123' }},
+              { url: '/auth/resend-code/', method: 'POST', data: { username: 'testuser' }}
+          ];
+          
+          for (const endpoint of endpoints) {
+              try {
+                  console.log(`Testing ${endpoint.url}...`);
+                  const response = await fetch(endpoint.url, {
+                      method: endpoint.method,
+                      headers: {
+                          'Content-Type': 'application/json',
+                          'X-CSRFToken': csrftoken
+                      },
+                      body: JSON.stringify(endpoint.data)
+                  });
+                  const result = await response.json();
+                  console.log(`${endpoint.url}:`, result);
+              } catch (error) {
+                  console.log(`${endpoint.url}: ERROR - ${error.message}`);
+              }
+          }
+      };
+      
+      // Enable console logging for debugging
+      console.log('Sahatek authentication system loaded');
+      console.log('CSRF Token available:', !!csrftoken);
+    });
+  </script>
+</body>
+</html>

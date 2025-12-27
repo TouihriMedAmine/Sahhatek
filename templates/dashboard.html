@@ -1,0 +1,1336 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sahatek • Health Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Chart.js for visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- UPDATED: Montserrat & Open Sans Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Medical Color Theme Configuration -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            medical: {
+              primary: '#0EA5E9',
+              secondary: '#10B981',
+              emergency: '#EF4444',
+              thirdary: '#acd3a8',
+              dark: '#1E40AF',
+              neutral: '#475569',
+              light: '#F0F9FF'
+            }
+          },
+          animation: {
+            'gradient': 'gradient 8s ease infinite',
+            'fade-in': 'fadeIn 0.5s ease-out',
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+          },
+          keyframes: {
+            gradient: {
+              '0%, 100%': { backgroundPosition: '0% 50%' },
+              '50%': { backgroundPosition: '100% 50%' }
+            },
+            fadeIn: {
+              '0%': { opacity: '0', transform: 'translateY(10px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-20px)' }
+            },
+            pulseGlow: {
+              '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+              '50%': { opacity: '0.8', transform: 'scale(1.05)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Professional Medical Design System */
+    :root {
+      --medical-primary: #0EA5E9;
+      --medical-secondary: #10B981;
+      --medical-emergency: #dc2b2b;
+    }
+    
+    body {
+      font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    }
+    
+    /* Professional Typography */
+    .heading-1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+    
+    .heading-2 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.015em;
+    }
+    
+    /* Medical Card Design */
+    .medical-card {
+      position: relative;
+      transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(14, 165, 233, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    
+    .medical-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(14, 165, 233, 0.12);
+      border-color: rgba(14, 165, 233, 0.2);
+    }
+    
+    /* Medical Modal */
+    .medical-modal {
+      background: linear-gradient(135deg, #ffffff, #fafafa);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+                  0 0 0 1px rgba(239, 68, 68, 0.1);
+      border-radius: 20px;
+      border: 1px solid rgba(14, 165, 233, 0.1);
+    }
+    
+    /* Smooth Scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    /* Glass Effect */
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .smooth-transition {
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .modal-open {
+      animation: modalFadeIn 0.3s ease-out forwards;
+    }
+    
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    
+    /* Form Styles */
+    .form-input {
+      @apply w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-medical-primary/30 focus:border-medical-primary transition-all duration-200 text-sm;
+    }
+    
+    .form-label {
+      @apply block text-sm font-medium text-gray-700 mb-1.5;
+    }
+    
+    .btn-primary {
+      @apply w-full py-2.5 bg-medical-primary text-white font-medium rounded-lg hover:bg-medical-primary/90 active:scale-[0.99] transition-all duration-200 text-sm;
+    }
+    
+    .error-message {
+      @apply text-red-600 text-xs mt-1.5 flex items-center gap-1.5;
+    }
+    
+    .success-message {
+      @apply text-green-600 text-xs mt-1.5 flex items-center gap-1.5;
+    }
+    
+    /* Fixed chart container */
+    .chart-container {
+      position: relative;
+      height: 220px !important;
+      width: 100% !important;
+      min-height: 220px !important;
+      max-height: 220px !important;
+    }
+    
+    /* Prevent scrolling in charts */
+    canvas {
+      display: block !important;
+      max-height: 220px !important;
+      min-height: 220px !important;
+      height: 220px !important;
+    }
+    
+    /* Scrollbar styling */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    /* Agent badges */
+    .agent-badge {
+      @apply px-2 py-1 rounded-full text-xs font-medium;
+    }
+    
+    .agent-general-info { background-color: #dbeafe; color: #1e40af; }
+    .agent-symptoms-checker { background-color: #fef3c7; color: #92400e; }
+    .agent-mental-health { background-color: #f3e8ff; color: #5b21b6; }
+    .agent-orientation { background-color: #dcfce7; color: #166534; }
+    .agent-rumor-check { background-color: #fee2e2; color: #991b1b; }
+    .agent-computer-vision { background-color: #e0e7ff; color: #3730a3; }
+    
+    /* Emergency level badges */
+    .emergency-critical { background-color: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
+    .emergency-high { background-color: #fef3c7; color: #d97706; border: 1px solid #fde68a; }
+    .emergency-medium { background-color: #dbeafe; color: #2563eb; border: 1px solid #bfdbfe; }
+    .emergency-low { background-color: #dcfce7; color: #16a34a; border: 1px solid #bbf7d0; }
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-700">
+  {% csrf_token %}
+  
+  <!-- Navigation Bar -->
+  <nav class="sticky top-0 z-50 w-full px-6 py-4 border-b border-gray-100 backdrop-blur-md bg-white/95">
+    <div class="container mx-auto flex justify-between items-center">
+      <!-- Logo -->
+      <div class="flex items-center space-x-3">
+        <a href="{% url 'home' %}" class="text-medical-primary hover:text-medical-dark font-semibold mr-2 flex items-center gap-1 px-3 py-1 rounded-lg hover:bg-medical-light transition-all">
+          <span>←</span>
+          <span>Back</span>
+        </a>
+        <img src="{% static 'img/logo.png' %}" alt="Sahatek Logo" class="h-11 w-11">
+        <h1 class="text-2xl font-bold">
+          <a href="{% url 'home' %}" class="hover:text-medical-primary transition-colors" style="color:#d80027;">
+            Sahatek
+          </a>
+        </h1>
+      </div>
+
+      <!-- Actions -->
+      <div class="space-x-3 flex items-center">
+        {% if request.user.is_authenticated %}
+        <div class="flex items-center space-x-3">
+          <div class="text-right">
+            <span class="text-sm font-medium text-medical-dark block" id="navUsername">
+              {{ request.user.username }}
+            </span>
+            <span class="text-xs text-medical-neutral flex items-center">
+              <span class="w-2 h-2 bg-medical-secondary rounded-full mr-1 animate-pulse"></span>
+              <span id="navStatus">Loading...</span>
+            </span>
+          </div>
+          <a href="/chat/" class="px-4 py-2 rounded-full border border-medical-neutral/20 text-medical-dark hover:bg-medical-emergency/5 hover:text-medical-emergency transition-all text-sm">
+            <i class="fas fa-comments mr-2"></i>Chat
+          </a>
+          <a href="{% url 'home' %}" class="px-4 py-2 rounded-full border border-medical-neutral/20 text-medical-dark hover:bg-medical-emergency/5 hover:text-medical-emergency transition-all text-sm">
+            <i class="fas fa-home mr-2"></i>Home
+          </a>
+          <button id="logoutBtn" class="px-4 py-2 rounded-full bg-medical-emergency/10 text-medical-emergency hover:bg-medical-emergency/20 transition-all text-sm">
+            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Main Dashboard Container -->
+  <div class="min-h-screen flex">
+    
+    <!-- ================= SIDEBAR ================= -->
+    <aside class="w-80 glass-effect border-r border-gray-100 p-6 sticky top-0 h-screen overflow-y-auto custom-scrollbar">
+      <div class="mb-8">
+        <div class="flex items-center space-x-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-medical-primary/20 to-medical-secondary/20 flex items-center justify-center">
+          <i class="fas fa-user text-xl text-medical-primary"></i>
+        </div>
+        <div>
+          <h2 class="heading-2 text-lg">Health Profile</h2>
+          <p class="text-xs text-medical-neutral" id="sbEmail">—</p>
+        </div>
+      </div>
+
+        
+        <div class="mb-2">
+          <h1 class="text-2xl font-bold text-medical-dark" id="sbUsername">—</h1>
+          <div class="flex items-center space-x-2 mt-1">
+            <span class="text-xs px-2 py-1 rounded-full bg-medical-light border border-medical-primary/20 text-medical-primary">
+              <span id="profileStatus">Profile Incomplete</span>
+            </span>
+            <span class="w-2 h-2 rounded-full bg-medical-secondary animate-pulse"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Stats Grid -->
+      <div class="space-y-4 mb-8">
+        <div class="grid grid-cols-3 gap-3">
+          <div class="text-center p-3 rounded-xl bg-medical-light border border-medical-primary/10">
+            <div class="text-sm font-semibold text-medical-dark" id="statsAge">—</div>
+            <div class="text-xs text-medical-neutral">Age</div>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-medical-light border border-medical-primary/10">
+            <div class="text-sm font-semibold text-medical-dark" id="statsGender">—</div>
+            <div class="text-xs text-medical-neutral">Gender</div>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-medical-light border border-medical-primary/10">
+            <div class="text-sm font-semibold text-medical-dark" id="statsBlood">—</div>
+            <div class="text-xs text-medical-neutral">Blood</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Health Sections -->
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-sm font-semibold text-medical-dark mb-3 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-medical-primary mr-2"></span>
+            Chronic Diseases
+          </h3>
+          <div class="flex flex-wrap gap-2" id="sbChronic"></div>
+          <div class="text-xs text-medical-neutral mt-2" id="sbChronicCount">None recorded</div>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-medical-dark mb-3 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-medical-secondary mr-2"></span>
+            Allergies
+          </h3>
+          <div class="flex flex-wrap gap-2" id="sbAllergies"></div>
+          <div class="text-xs text-medical-neutral mt-2" id="sbAllergiesCount">None recorded</div>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-semibold text-medical-dark mb-3 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-medical-emergency mr-2"></span>
+            Medications
+          </h3>
+          <div class="flex flex-wrap gap-2" id="sbMeds"></div>
+          <div class="text-xs text-medical-neutral mt-2" id="sbMedsCount">None recorded</div>
+        </div>
+      </div>
+      
+      <!-- Last Updated -->
+      <div class="mt-8 pt-6 border-t border-gray-200">
+        <p class="text-xs text-gray-500" id="lastUpdated">Last updated: —</p>
+      </div>
+    </aside>
+
+    <!-- ================= MAIN DASHBOARD ================= -->
+    <main class="flex-1 p-8 overflow-y-auto custom-scrollbar">
+      <!-- Header -->
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="heading-1 text-3xl mb-2 bg-gradient-to-r from-medical-primary via-medical-secondary to-medical-thirdary bg-clip-text text-transparent">
+            Health Dashboard
+          </h1>
+          <p class="text-medical-neutral" id="welcomeLine">Loading your health data...</p>
+        </div>
+
+        <div class="flex gap-3">
+          <button id="refreshDashboard" class="px-4 py-2.5 rounded-xl border border-medical-primary text-medical-primary hover:bg-medical-primary/5 transition-all duration-300 font-medium">
+            <i class="fas fa-sync-alt mr-2"></i>Refresh
+          </button>
+          <button id="openProfileModal" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-medical-primary to-medical-dark text-white hover:shadow-lg transition-all duration-300 font-medium">
+            <i class="fas fa-edit mr-2"></i>Edit Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- Health Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="medical-card p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm text-medical-neutral mb-1">Chronic Diseases</div>
+              <div class="text-2xl font-bold text-medical-dark" id="cardChronic">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-medical-primary/10 flex items-center justify-center">
+              <i class="fas fa-heart-pulse text-medical-primary"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-medical-neutral" id="chronicStatus">Status: None recorded</div>
+        </div>
+
+        <div class="medical-card p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm text-medical-neutral mb-1">Allergies</div>
+              <div class="text-2xl font-bold text-medical-dark" id="cardAllergies">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-medical-secondary/10 flex items-center justify-center">
+              <i class="fas fa-allergies text-medical-secondary"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-medical-neutral" id="allergiesStatus">Status: None recorded</div>
+        </div>
+
+        <div class="medical-card p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm text-medical-neutral mb-1">Medications</div>
+              <div class="text-2xl font-bold text-medical-dark" id="cardMeds">0</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-medical-emergency/10 flex items-center justify-center">
+              <i class="fas fa-pills text-medical-emergency"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-medical-neutral" id="medsStatus">Status: None recorded</div>
+        </div>
+
+        <div class="medical-card p-5">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="text-sm text-medical-neutral mb-1">Profile Complete</div>
+              <div class="text-2xl font-bold" id="cardComplete">
+                <span class="text-red-500">No</span>
+              </div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-medical-primary/10 to-medical-secondary/10 flex items-center justify-center">
+              <i class="fas fa-clipboard-check text-medical-primary"></i>
+            </div>
+          </div>
+          <div class="mt-3 text-xs text-medical-neutral">Complete your health profile</div>
+        </div>
+      </div>
+
+      <!-- Chat Analytics Section -->
+      <div class="mb-8">
+        <h2 class="heading-2 text-xl mb-4 text-medical-dark">Chat Analytics</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          <div class="medical-card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-medical-neutral mb-1">Total Conversations</div>
+                <div class="text-2xl font-bold text-medical-dark" id="totalConversations">0</div>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-comments text-blue-600"></i>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-medical-neutral">Active chats with AI</div>
+          </div>
+
+          <div class="medical-card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-medical-neutral mb-1">Total Messages</div>
+                <div class="text-2xl font-bold text-medical-dark" id="totalMessages">0</div>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
+                <i class="fas fa-envelope text-green-600"></i>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-medical-neutral">All messages exchanged</div>
+          </div>
+
+          <div class="medical-card p-5">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="text-sm text-medical-neutral mb-1">AI Agents Used</div>
+                <div class="text-2xl font-bold text-medical-dark" id="totalAgents">0</div>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center">
+                <i class="fas fa-robot text-purple-600"></i>
+              </div>
+            </div>
+            <div class="mt-3 text-xs text-medical-neutral">Different AI agents accessed</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visualizations -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Agents Usage Chart -->
+        <div class="medical-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="heading-2 text-lg text-medical-dark">AI Agents Usage</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-medical-light text-medical-primary">Top 5</span>
+          </div>
+          <div class="chart-container flex-1">
+            <canvas id="chartAgents"></canvas>
+          </div>
+          <div class="mt-4 space-y-2" id="agentsList"></div>
+        </div>
+
+        <!-- Profile Completion -->
+        <div class="medical-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="heading-2 text-lg text-medical-dark">Profile Completion</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-medical-light text-medical-primary">Status</span>
+          </div>
+          <div class="chart-container flex-1">
+            <canvas id="chartCompletion"></canvas>
+          </div>
+          <div class="mt-4 text-center" id="completionStatus"></div>
+        </div>
+
+        <!-- Emergency Levels -->
+        <div class="medical-card p-5 flex flex-col">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="heading-2 text-lg text-medical-dark">Emergency Levels</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-medical-light text-medical-primary">Chat Analysis</span>
+          </div>
+          <div class="chart-container flex-1">
+            <canvas id="chartEmergency"></canvas>
+          </div>
+          <div class="mt-4 space-y-2" id="emergencyList"></div>
+        </div>
+      </div>
+
+      <!-- Top Topics & Health Recommendations -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Top Topics -->
+        <div class="medical-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="heading-2 text-lg text-medical-dark">Top Chat Topics</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-medical-primary to-medical-secondary text-white">AI Analysis</span>
+          </div>
+          <div class="space-y-3" id="topTopics">
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <span class="text-sm font-medium text-gray-700">Loading topics...</span>
+              <span class="text-xs text-gray-500">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health Recommendations -->
+        <div class="medical-card p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="heading-2 text-lg text-medical-dark">Health Recommendations</h3>
+            <span class="text-xs px-2 py-1 rounded-full bg-gradient-to-r from-medical-primary to-medical-secondary text-white">AI Powered</span>
+          </div>
+          <div class="space-y-3" id="healthRecommendations">
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 rounded-full bg-medical-primary/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-medical-primary text-xs">1</span>
+              </div>
+              <p class="text-sm text-medical-neutral">Complete your health profile for personalized emergency guidance.</p>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 rounded-full bg-medical-primary/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-medical-primary text-xs">2</span>
+              </div>
+              <p class="text-sm text-medical-neutral">Regularly update your medications and allergies for accurate AI analysis.</p>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 rounded-full bg-medical-primary/10 flex items-center justify-center flex-shrink-0">
+                <span class="text-medical-primary text-xs">3</span>
+              </div>
+              <p class="text-sm text-medical-neutral">Review emergency protocols in the chat for critical situations.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Profile Update Modal -->
+  <div id="profileModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="medical-modal w-full max-w-2xl p-0 max-h-[90vh] overflow-hidden">
+      <!-- Modal Header -->
+      <div class="px-8 py-6 border-b border-gray-100">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-medical-primary/10 to-medical-secondary/10 flex items-center justify-center">
+              <i class="fas fa-user-md text-medical-primary"></i>
+            </div>
+            <div>
+              <h3 class="heading-2 text-xl text-gray-900">Edit Health Profile</h3>
+              <p class="text-sm text-gray-500">Update your medical information for accurate emergency assistance</p>
+            </div>
+          </div>
+          <button id="closeProfileModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Content -->
+      <div class="px-8 py-6 overflow-y-auto max-h-[60vh]">
+        <form id="profileForm" class="space-y-6">
+          <!-- Hidden CSRF Token -->
+          <input type="hidden" name="csrfmiddlewaretoken" id="csrfToken">
+
+          <!-- Gender and Age -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="form-label">Gender</label>
+              <select name="gender" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="form-label">Age</label>
+              <input type="number" name="age" min="0" max="120" placeholder="Enter your age"
+                     class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+            </div>
+          </div>
+
+          <!-- Blood Type -->
+          <div>
+            <label class="form-label">Blood Type</label>
+            <select name="blood_type" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+              <option value="">Select Blood Type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+
+          <!-- Chronic Diseases -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="form-label">Chronic Diseases</label>
+              <span class="text-xs text-gray-500">Comma-separated</span>
+            </div>
+            <input type="text" name="chronic_diseases" placeholder="e.g. diabetes, asthma, hypertension"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+          </div>
+
+          <!-- Allergies -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="form-label">Allergies</label>
+              <span class="text-xs text-gray-500">Comma-separated</span>
+            </div>
+            <input type="text" name="allergies" placeholder="e.g. peanuts, penicillin, pollen"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+          </div>
+
+          <!-- Medications -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="form-label">Medications</label>
+              <span class="text-xs text-gray-500">Comma-separated</span>
+            </div>
+            <input type="text" name="medications" placeholder="e.g. metformin, ibuprofen, aspirin"
+                   class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-medical-primary/20 focus:border-medical-primary transition-all duration-200 text-sm">
+          </div>
+
+          <!-- Form Messages -->
+          <div id="formMessage" class="hidden text-sm p-3 rounded-lg"></div>
+        </form>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-8 py-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button id="cancelProfileUpdate" class="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all duration-200 font-medium">
+          Cancel
+        </button>
+        <button id="submitProfileUpdate" class="px-5 py-2.5 bg-gradient-to-r from-medical-primary to-medical-dark text-white rounded-xl hover:shadow-lg transition-all duration-200 font-medium">
+          <span id="submitBtnText" class="flex items-center gap-2">
+            <i class="fas fa-save"></i>
+            Save Changes
+            <div id="submitSpinner" class="spinner hidden ml-2">
+              <i class="fas fa-spinner fa-spin"></i>
+            </div>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="globalSpinner" class="fixed inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div class="text-center">
+      <div class="w-16 h-16 border-4 border-medical-primary/20 border-t-medical-primary rounded-full animate-spin mx-auto"></div>
+      <p class="mt-4 text-medical-neutral font-medium">Loading your health dashboard...</p>
+    </div>
+  </div>
+
+<script>
+// CSRF Token
+const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+// Chart instances
+let chartAgents = null;
+let chartCompletion = null;
+let chartEmergency = null;
+
+// Utility functions
+function createTag(text, type = 'default') {
+  const el = document.createElement('span');
+  const colors = {
+    default: 'bg-medical-light text-medical-primary border-medical-primary/20',
+    chronic: 'bg-red-50 text-red-600 border-red-200',
+    allergy: 'bg-amber-50 text-amber-600 border-amber-200',
+    medication: 'bg-emerald-50 text-emerald-600 border-emerald-200'
+  };
+  
+  el.className = `px-3 py-1.5 text-xs rounded-full border ${colors[type]}`;
+  el.textContent = text;
+  return el;
+}
+
+function fillTags(containerId, items, type = 'default') {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  
+  if (!items || items.length === 0) {
+    const empty = createTag("None", type);
+    container.appendChild(empty);
+    return;
+  }
+  
+  items.forEach(item => {
+    container.appendChild(createTag(item, type));
+  });
+}
+
+function formatStatusText(count, type) {
+  if (count === 0) return `No ${type} recorded`;
+  if (count === 1) return `1 ${type.slice(0, -1)} recorded`;
+  return `${count} ${type} recorded`;
+}
+
+function showNotification(message, type = 'success') {
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300 ${type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'}`;
+  notification.innerHTML = `
+    <div class="flex items-center">
+      <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'} mr-2"></i>
+      <span>${message}</span>
+    </div>
+  `;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => notification.style.transform = 'translateX(0)', 10);
+  setTimeout(() => {
+    notification.style.transform = 'translateX(100%)';
+    setTimeout(() => notification.remove(), 300);
+  }, 3000);
+}
+
+function destroyChart(chart) {
+  if (chart) chart.destroy();
+  return null;
+}
+
+function renderAgentsChart(agentsUsage) {
+  chartAgents = destroyChart(chartAgents);
+  const canvas = document.getElementById('chartAgents');
+  if (!canvas) return;
+  
+  // Fix canvas dimensions
+  canvas.style.height = '220px';
+  canvas.style.width = '100%';
+  canvas.height = 220;
+  canvas.width = canvas.offsetWidth;
+  
+  // Sort agents by count (desc)
+  const sortedAgents = agentsUsage.slice().sort((a, b) => b.count - a.count);
+  const top5 = sortedAgents.slice(0, 5);
+  
+  const ctx = canvas.getContext('2d');
+  chartAgents = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: top5.map(a => a.name || 'Unknown'),
+      datasets: [{
+        label: "Usage Count",
+        data: top5.map(a => a.count),
+        backgroundColor: [
+          'rgba(14, 165, 233, 0.6)',
+          'rgba(16, 185, 129, 0.6)',
+          'rgba(245, 158, 11, 0.6)',
+          'rgba(139, 92, 246, 0.6)',
+          'rgba(239, 68, 68, 0.6)'
+        ],
+        borderColor: [
+          'rgb(14, 165, 233)',
+          'rgb(16, 185, 129)',
+          'rgb(245, 158, 11)',
+          'rgb(139, 92, 246)',
+          'rgb(239, 68, 68)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: { precision: 0 }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  });
+  
+  // Update agents list
+  const agentsList = document.getElementById('agentsList');
+  if (agentsList) {
+    agentsList.innerHTML = sortedAgents.slice(0, 3).map(agent => `
+      <div class="flex items-center justify-between">
+        <span class="text-sm text-gray-700">${agent.name || 'Unknown'}</span>
+        <span class="text-sm font-semibold text-medical-primary">${agent.count}</span>
+      </div>
+    `).join('');
+  }
+}
+
+function renderCompletionChart(isComplete) {
+  chartCompletion = destroyChart(chartCompletion);
+  const canvas = document.getElementById('chartCompletion');
+  if (!canvas) return;
+  
+  canvas.style.height = '220px';
+  canvas.style.width = '100%';
+  canvas.height = 220;
+  canvas.width = canvas.offsetWidth;
+  
+  const ctx = canvas.getContext('2d');
+  const complete = isComplete ? 1 : 0;
+  const missing = isComplete ? 0 : 1;
+  
+  chartCompletion = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Complete", "Incomplete"],
+      datasets: [{
+        data: [complete, missing],
+        backgroundColor: [
+          'rgba(16, 185, 129, 0.8)',
+          'rgba(239, 68, 68, 0.8)'
+        ],
+        borderColor: [
+          'rgb(16, 185, 129)',
+          'rgb(239, 68, 68)'
+        ],
+        borderWidth: 1,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '70%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            padding: 15,
+            usePointStyle: true,
+            font: { size: 11 }
+          }
+        }
+      }
+    }
+  });
+  
+  // Update completion status text
+  const completionStatus = document.getElementById('completionStatus');
+  if (completionStatus) {
+    if (isComplete) {
+      completionStatus.innerHTML = `
+        <div class="flex items-center justify-center text-green-600">
+          <i class="fas fa-check-circle mr-2"></i>
+          <span class="text-sm font-medium">Profile Complete</span>
+        </div>
+      `;
+    } else {
+      completionStatus.innerHTML = `
+        <div class="flex items-center justify-center text-red-600">
+          <i class="fas fa-exclamation-circle mr-2"></i>
+          <span class="text-sm font-medium">Profile Incomplete</span>
+        </div>
+      `;
+    }
+  }
+}
+
+function renderEmergencyChart(urgencyCounts) {
+  chartEmergency = destroyChart(chartEmergency);
+  const canvas = document.getElementById('chartEmergency');
+  if (!canvas) return;
+  
+  canvas.style.height = '220px';
+  canvas.style.width = '100%';
+  canvas.height = 220;
+  canvas.width = canvas.offsetWidth;
+  
+  const ctx = canvas.getContext('2d');
+  
+  // Group emergency levels
+  const levels = {
+    'critical': 0,
+    'high': 0,
+    'medium': 0,
+    'low': 0
+  };
+  
+  urgencyCounts.forEach(item => {
+    const level = item.level?.toLowerCase();
+    if (level in levels) {
+      levels[level] += item.count;
+    }
+  });
+  
+  chartEmergency = new Chart(ctx, {
+    type: "polarArea",
+    data: {
+      labels: ["Critical", "High", "Medium", "Low"],
+      datasets: [{
+        data: [levels.critical, levels.high, levels.medium, levels.low],
+        backgroundColor: [
+          'rgba(239, 68, 68, 0.7)',
+          'rgba(245, 158, 11, 0.7)',
+          'rgba(59, 130, 246, 0.7)',
+          'rgba(16, 185, 129, 0.7)'
+        ],
+        borderColor: [
+          'rgb(239, 68, 68)',
+          'rgb(245, 158, 11)',
+          'rgb(59, 130, 246)',
+          'rgb(16, 185, 129)'
+        ],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 11 }
+          }
+        }
+      }
+    }
+  });
+  
+  // Update emergency list
+  const emergencyList = document.getElementById('emergencyList');
+  if (emergencyList) {
+    emergencyList.innerHTML = Object.entries(levels)
+      .filter(([_, count]) => count > 0)
+      .map(([level, count]) => {
+        const levelMap = {
+          'critical': { label: 'Critical', class: 'emergency-critical' },
+          'high': { label: 'High', class: 'emergency-high' },
+          'medium': { label: 'Medium', class: 'emergency-medium' },
+          'low': { label: 'Low', class: 'emergency-low' }
+        };
+        const info = levelMap[level] || { label: level, class: '' };
+        return `
+          <div class="flex items-center justify-between">
+            <span class="text-sm ${info.class} px-2 py-1 rounded">${info.label}</span>
+            <span class="text-sm font-semibold text-gray-700">${count}</span>
+          </div>
+        `;
+      }).join('');
+  }
+}
+
+function updateTopTopics(topics) {
+  const container = document.getElementById('topTopics');
+  if (!container) return;
+  
+  if (!topics || topics.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-4 text-gray-500">
+        <i class="fas fa-comment-slash text-2xl mb-2"></i>
+        <p class="text-sm">No topic data available yet</p>
+      </div>
+    `;
+    return;
+  }
+  
+  container.innerHTML = topics.slice(0, 5).map(topic => `
+    <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors">
+      <div class="flex items-center">
+        <i class="fas fa-hashtag text-gray-400 mr-2"></i>
+        <span class="text-sm font-medium text-gray-700 truncate" title="${topic.topic}">
+          ${topic.topic.length > 30 ? topic.topic.substring(0, 30) + '...' : topic.topic}
+        </span>
+      </div>
+      <span class="text-xs font-semibold px-2 py-1 rounded-full bg-medical-primary/10 text-medical-primary">
+        ${topic.count}
+      </span>
+    </div>
+  `).join('');
+}
+
+// Modal Management
+function openProfileModal(profileData = null) {
+  const modal = document.getElementById('profileModal');
+  modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+  
+  if (profileData) {
+    document.querySelector('select[name="gender"]').value = profileData.gender || '';
+    document.querySelector('input[name="age"]').value = profileData.age || '';
+    document.querySelector('select[name="blood_type"]').value = profileData.blood_type || '';
+    document.querySelector('input[name="chronic_diseases"]').value = profileData.chronic_diseases?.join(', ') || '';
+    document.querySelector('input[name="allergies"]').value = profileData.allergies?.join(', ') || '';
+    document.querySelector('input[name="medications"]').value = profileData.medications?.join(', ') || '';
+  }
+}
+
+function closeProfileModal() {
+  const modal = document.getElementById('profileModal');
+  modal.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+  const messageDiv = document.getElementById('formMessage');
+  messageDiv.classList.add('hidden');
+  messageDiv.textContent = '';
+}
+
+async function updateProfile(event) {
+  event.preventDefault();
+  
+  const submitBtn = document.getElementById('submitProfileUpdate');
+  const spinner = document.getElementById('submitSpinner');
+  const btnText = document.getElementById('submitBtnText');
+  const messageDiv = document.getElementById('formMessage');
+  
+  // Show loading state
+  submitBtn.disabled = true;
+  spinner.classList.remove('hidden');
+  
+  // Collect form data
+  const formData = new FormData(document.getElementById('profileForm'));
+  const data = {
+    gender: formData.get('gender'),
+    age: formData.get('age'),
+    blood_type: formData.get('blood_type'),
+    chronic_diseases: formData.get('chronic_diseases').split(',').map(item => item.trim()).filter(item => item),
+    allergies: formData.get('allergies').split(',').map(item => item.trim()).filter(item => item),
+    medications: formData.get('medications').split(',').map(item => item.trim()).filter(item => item)
+  };
+  
+  try {
+    const response = await fetch('/auth/update-profile/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      },
+      body: JSON.stringify(data)
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      messageDiv.textContent = 'Profile updated successfully!';
+      messageDiv.className = 'success-message p-3 rounded-lg';
+      messageDiv.classList.remove('hidden');
+      
+      setTimeout(async () => {
+        await loadDashboard();
+        closeProfileModal();
+        showNotification('Profile updated successfully!');
+      }, 1500);
+    } else {
+      messageDiv.textContent = result.message || 'Failed to update profile';
+      messageDiv.className = 'error-message p-3 rounded-lg';
+      messageDiv.classList.remove('hidden');
+    }
+  } catch (error) {
+    messageDiv.textContent = 'Network error. Please try again.';
+    messageDiv.className = 'error-message p-3 rounded-lg';
+    messageDiv.classList.remove('hidden');
+  } finally {
+    submitBtn.disabled = false;
+    spinner.classList.add('hidden');
+  }
+}
+
+async function loadDashboard() {
+  const spinner = document.getElementById('globalSpinner');
+  spinner.classList.remove('hidden');
+  
+  try {
+    // Load dashboard data from your endpoint
+    const res = await fetch("/auth/dashboard/data/");
+    const data = await res.json();
+    
+    if (!data.success) {
+      console.error('Failed to load dashboard data');
+      showNotification('Failed to load dashboard data', 'error');
+      return;
+    }
+    
+    const d = data.dashboard;
+    const p = d.profile;
+    const chat = d.chat;
+    
+    // Update user info
+    document.getElementById("sbUsername").textContent = d.account.username;
+    document.getElementById("sbEmail").textContent = d.account.email;
+    document.getElementById("navUsername").textContent = d.account.username;
+    document.getElementById("welcomeLine").textContent = `Welcome back, ${d.account.username}`;
+    
+    // Update profile stats
+    document.getElementById("statsGender").textContent = p.gender ? p.gender.charAt(0).toUpperCase() + p.gender.slice(1) : "—";
+    document.getElementById("statsAge").textContent = p.age || "—";
+    document.getElementById("statsBlood").textContent = p.blood_type || "—";
+    
+    // Update profile status
+    const statusElement = document.getElementById('profileStatus');
+    const navStatus = document.getElementById('navStatus');
+    if (p.is_complete) {
+      statusElement.textContent = 'Profile Complete';
+      statusElement.parentElement.className = 'text-xs px-2 py-1 rounded-full bg-green-100 border border-green-200 text-green-800';
+      navStatus.textContent = 'Profile Complete';
+    } else {
+      statusElement.textContent = 'Profile Incomplete';
+      statusElement.parentElement.className = 'text-xs px-2 py-1 rounded-full bg-yellow-100 border border-yellow-200 text-yellow-800';
+      navStatus.textContent = 'Profile Incomplete';
+    }
+    
+    // Update tags
+    fillTags("sbChronic", p.chronic_diseases, 'chronic');
+    fillTags("sbAllergies", p.allergies, 'allergy');
+    fillTags("sbMeds", p.medications, 'medication');
+    
+    // Update counts
+    document.getElementById("sbChronicCount").textContent = formatStatusText(p.chronic_diseases_count, 'diseases');
+    document.getElementById("sbAllergiesCount").textContent = formatStatusText(p.allergies_count, 'allergies');
+    document.getElementById("sbMedsCount").textContent = formatStatusText(p.medications_count, 'medications');
+    
+    // Update cards
+    document.getElementById("cardChronic").textContent = p.chronic_diseases_count;
+    document.getElementById("cardAllergies").textContent = p.allergies_count;
+    document.getElementById("cardMeds").textContent = p.medications_count;
+    
+    const completeElement = document.getElementById("cardComplete");
+    if (p.is_complete) {
+      completeElement.innerHTML = '<span class="text-green-500">Yes</span>';
+    } else {
+      completeElement.innerHTML = '<span class="text-red-500">No</span>';
+    }
+    
+    // Update status texts
+    document.getElementById("chronicStatus").textContent = formatStatusText(p.chronic_diseases_count, 'chronic diseases');
+    document.getElementById("allergiesStatus").textContent = formatStatusText(p.allergies_count, 'allergies');
+    document.getElementById("medsStatus").textContent = formatStatusText(p.medications_count, 'medications');
+    
+    // Update last updated
+    if (p.updated_at) {
+      const date = new Date(p.updated_at);
+      document.getElementById("lastUpdated").textContent = `Last updated: ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    }
+    
+    // Update chat analytics
+    document.getElementById("totalConversations").textContent = chat.total_conversations || 0;
+    document.getElementById("totalMessages").textContent = chat.total_messages || 0;
+    document.getElementById("totalAgents").textContent = chat.agents_usage?.length || 0;
+    
+    // Render charts
+    renderAgentsChart(chat.agents_usage || []);
+    renderCompletionChart(p.is_complete);
+    renderEmergencyChart(chat.urgency_counts || []);
+    updateTopTopics(chat.top_topics || []);
+    
+  } catch (error) {
+    console.error('Error loading dashboard:', error);
+    document.getElementById("welcomeLine").textContent = "Error loading dashboard data";
+    showNotification('Error loading dashboard data', 'error');
+  } finally {
+    spinner.classList.add('hidden');
+  }
+}
+
+// Load user profile for chat context (optional)
+async function loadUserProfileForChat() {
+  try {
+    const res = await fetch("/chat/api/user-profile/");
+    const data = await res.json();
+    if (data.success) {
+      console.log('User profile loaded for chat context:', data.profile);
+      // Store in global variable for use in chat if needed
+      window.userProfile = data.profile;
+    }
+  } catch (error) {
+    console.error('Error loading user profile:', error);
+  }
+}
+
+// Enhanced logout functionality (matching chat interface)
+async function logoutUser() {
+  // Show confirmation dialog
+  const confirmed = confirm('Are you sure you want to log out?');
+  if (!confirmed) return;
+  
+  // Show loading state
+  const logoutBtn = document.getElementById('logoutBtn');
+  const originalHTML = logoutBtn.innerHTML;
+  logoutBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Logging out...';
+  logoutBtn.disabled = true;
+  
+  try {
+    const response = await fetch('/auth/logout/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      // Show success message
+      showNotification('Successfully logged out', 'success');
+      
+      // Redirect to HOME PAGE after 1 second (matching chat interface behavior)
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    } else {
+      throw new Error(data.message || 'Logout failed');
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+    showNotification('Failed to logout: ' + error.message, 'error');
+    
+    // Restore button state
+    logoutBtn.innerHTML = originalHTML;
+    logoutBtn.disabled = false;
+  }
+}
+
+// Event Listeners
+document.addEventListener('DOMContentLoaded', () => {
+  // Load dashboard data
+  loadDashboard();
+  
+  // Also load user profile for chat context
+  loadUserProfileForChat();
+  
+  // Refresh button
+  document.getElementById('refreshDashboard').addEventListener('click', () => {
+    loadDashboard();
+    showNotification('Dashboard refreshed', 'success');
+  });
+  
+  // Modal event listeners
+  document.getElementById('openProfileModal').addEventListener('click', () => {
+    // Get current profile data to pre-fill form
+    const gender = document.getElementById('statsGender').textContent;
+    const age = document.getElementById('statsAge').textContent;
+    const blood = document.getElementById('statsBlood').textContent;
+    
+    openProfileModal({
+      gender: gender !== '—' ? gender.toLowerCase() : '',
+      age: age !== '—' ? age : '',
+      blood_type: blood !== '—' ? blood : '',
+      chronic_diseases: [],
+      allergies: [],
+      medications: []
+    });
+  });
+  
+  document.getElementById('closeProfileModal').addEventListener('click', closeProfileModal);
+  document.getElementById('cancelProfileUpdate').addEventListener('click', closeProfileModal);
+  
+  // Close modal when clicking outside
+  document.getElementById('profileModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('profileModal')) {
+      closeProfileModal();
+    }
+  });
+  
+  // Profile form submission
+  document.getElementById('submitProfileUpdate').addEventListener('click', updateProfile);
+  
+  // Allow form submission with Enter key
+  document.getElementById('profileForm').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      document.getElementById('submitProfileUpdate').click();
+    }
+  });
+  
+  // Logout button - using enhanced logout function
+  document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+  
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeProfileModal();
+    }
+    if (e.key === 'r' && e.ctrlKey) {
+      e.preventDefault();
+      loadDashboard();
+      showNotification('Dashboard refreshed', 'success');
+    }
+  });
+  
+  // Handle window resize for charts
+  let resizeTimeout;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      loadDashboard(); // Reload to re-render charts
+    }, 250);
+  });
+  
+  // Auto-refresh every 5 minutes (optional)
+  setInterval(() => {
+    if (!document.hidden) {
+      loadDashboard();
+    }
+  }, 5 * 60 * 1000);
+});
+</script>
+</body>
+</html>
