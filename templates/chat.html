@@ -1294,9 +1294,9 @@
         
         scrollToBottom();
         
-        // Attach translate handlers to loaded messages
+        // Attach message handlers (speak + translate) to loaded messages
         setTimeout(() => {
-          attachTranslateHandlers();
+          attachMessageHandlers();
         }, 100);
       }
 
@@ -1693,11 +1693,18 @@
                 <div class="flex-1">
                   ${messageContent}
                 </div>
-                <button class="translate-response-btn p-1.5 text-gray-400 hover:text-medical-primary rounded transition-colors" 
-                        data-message-id="${messageId}"
-                        title="Translate to Arabic">
-                  <i class="fas fa-language text-xs"></i>
-                </button>
+                <div class="flex items-center gap-1">
+                  <button class="speak-response-btn p-1.5 text-gray-400 hover:text-medical-primary rounded transition-colors" 
+                          data-message-id="${messageId}"
+                          title="Read message">
+                    <i class="fas fa-volume-up text-xs"></i>
+                  </button>
+                  <button class="translate-response-btn p-1.5 text-gray-400 hover:text-medical-primary rounded transition-colors" 
+                          data-message-id="${messageId}"
+                          title="Translate to Arabic">
+                    <i class="fas fa-language text-xs"></i>
+                  </button>
+                </div>
               </div>
               <div class="text-xs text-gray-400 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
@@ -1762,6 +1769,147 @@
         }
       }
       
+      // --- SPEAK RESPONSE HANDLERS ---
+      function attachSpeakHandlers() {
+        const speakButtons = document.querySelectorAll('.speak-response-btn:not([data-handler-attached])');
+        speakButtons.forEach(btn => {
+          btn.dataset.handlerAttached = 'true';
+          
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const messageId = btn.dataset.messageId;
+            const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            
+            if (!messageDiv) return;
+            
+            // Get current text (translated or original)
+            const isTranslated = messageDiv.dataset.isTranslated === 'true';
+            const originalContent = messageDiv.dataset.originalContent;
+            
+            // Extract text from the entire message bubble to get the FULL message
+            // This ensures we capture all text, not just the first part
+            let textToSpeak = '';
+            
+            // Get the entire message bubble content
+            const messageBubble = messageDiv.querySelector('.message-bubble');
+            if (messageBubble) {
+              // Clone the bubble to avoid modifying the original
+              const bubbleClone = messageBubble.cloneNode(true);
+              
+              // Remove UI elements that shouldn't be read
+              bubbleClone.querySelectorAll('button').forEach(btn => btn.remove());
+              bubbleClone.querySelectorAll('.text-xs.text-gray-400').forEach(ts => ts.remove()); // Timestamp
+              bubbleClone.querySelectorAll('.recommendation-card').forEach(card => card.remove()); // Recommendation cards
+              bubbleClone.querySelectorAll('.places-list').forEach(list => list.remove()); // Places list
+              bubbleClone.querySelectorAll('iframe').forEach(iframe => iframe.remove()); // Maps
+              
+              // Get the main content area (flex-1 div)
+              const flexDiv = bubbleClone.querySelector('.flex-1');
+              if (flexDiv) {
+                // Get ALL text content from the main message area
+                textToSpeak = flexDiv.textContent || flexDiv.innerText || '';
+              } else {
+                // Fallback: get all text from the bubble
+                textToSpeak = bubbleClone.textContent || bubbleClone.innerText || '';
+              }
+            }
+            
+            // Always prefer originalContent if it's longer (it's the source of truth)
+            // But if we extracted more text, use that (for translated messages)
+            if (originalContent && originalContent.length > textToSpeak.length) {
+              console.log('📝 Using originalContent (longer than extracted)');
+              textToSpeak = originalContent;
+            } else if (!textToSpeak || textToSpeak.trim().length < 10) {
+              console.log('⚠️ Extracted text seems incomplete, using originalContent');
+              textToSpeak = originalContent || '';
+            }
+            
+            // Clean up the text (remove extra whitespace, but preserve line breaks)
+            textToSpeak = textToSpeak.trim()
+              .replace(/\n\s*\n+/g, '\n')  // Multiple newlines to single
+              .replace(/[ \t]+/g, ' ')      // Multiple spaces to single
+              .replace(/\s*\n\s*/g, ' ');   // Single newlines to spaces (for better TTS flow)
+            
+            if (!textToSpeak || !textToSpeak.trim()) {
+              showNotification('No text to read', 'warning');
+              return;
+            }
+            
+            console.log(`🔊 Extracted text for TTS: ${textToSpeak.length} chars`);
+            console.log(`🔊 Original content length: ${originalContent ? originalContent.length : 0} chars`);
+            console.log(`🔊 Text preview: "${textToSpeak.substring(0, 200)}${textToSpeak.length > 200 ? '...' : ''}"`);
+            
+            // Show loading state
+            const icon = btn.querySelector('i');
+            const originalIcon = icon.className;
+            icon.className = 'fas fa-spinner fa-spin text-xs';
+            btn.disabled = true;
+            
+            try {
+              // Determine language (Arabic if translated, English otherwise)
+              const language = isTranslated ? 'ar' : 'en';
+              
+              // Call TTS API (don't specify speaker, let backend choose default)
+              const response = await fetch('/chat/api/text-to-speech/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({
+                  text: textToSpeak.trim(),
+                  language: language
+                  // Don't specify speaker - backend will choose appropriate default
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (data.success && data.audio) {
+                // Decode base64 audio
+                const audioData = atob(data.audio);
+                const audioBytes = new Uint8Array(audioData.length);
+                for (let i = 0; i < audioData.length; i++) {
+                  audioBytes[i] = audioData.charCodeAt(i);
+                }
+                
+                // Create audio blob and play (Edge TTS returns MP3)
+                const audioBlob = new Blob([audioBytes], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                // Update button to show playing state
+                icon.className = 'fas fa-volume-up text-xs text-medical-primary';
+                
+                // Play audio
+                audio.play();
+                
+                // Clean up when done
+                audio.onended = () => {
+                  icon.className = originalIcon;
+                  URL.revokeObjectURL(audioUrl);
+                  btn.disabled = false;
+                };
+                
+                audio.onerror = () => {
+                  icon.className = originalIcon;
+                  URL.revokeObjectURL(audioUrl);
+                  btn.disabled = false;
+                  showNotification('Failed to play audio', 'error');
+                };
+              } else {
+                throw new Error(data.message || 'Failed to synthesize speech');
+              }
+            } catch (error) {
+              console.error('TTS error:', error);
+              showNotification('Failed to read message: ' + (error.message || 'Unknown error'), 'error');
+              icon.className = originalIcon;
+              btn.disabled = false;
+            }
+          });
+        });
+      }
+      
       // --- TRANSLATE RESPONSE HANDLERS ---
       function attachTranslateHandlers() {
         const translateButtons = document.querySelectorAll('.translate-response-btn:not([data-handler-attached])');
@@ -1812,6 +1960,12 @@
             }
           });
         });
+      }
+      
+      // --- ATTACH ALL MESSAGE HANDLERS ---
+      function attachMessageHandlers() {
+        attachSpeakHandlers();
+        attachTranslateHandlers();
       }
       
       // --- MESSAGE SENDING ---
@@ -1873,9 +2027,9 @@
           }, 1000);
         }
         
-        // Attach translate handlers after messages are added
+        // Attach message handlers (speak + translate) after messages are added
         setTimeout(() => {
-          attachTranslateHandlers();
+          attachMessageHandlers();
         }, 600);
         
         // Refresh sidebar preview

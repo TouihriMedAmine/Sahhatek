@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/langsmith/runs/', views.langsmith_runs, name='langsmith_runs'),
     path('api/langsmith/runs/<str:run_id>/', views.langsmith_run_detail, name='langsmith_run_detail'),
     path('api/translate/', views.translate_text, name='translate_text'),
+    path('api/text-to-speech/', views.text_to_speech, name='text_to_speech'),
 ]

@@ -1,6 +1,12 @@
-# agents/speech/__init__.py
-from .transcription import RealTimeTranscription, TranscriptionService
-from .streaming import StreamingTranscriber, convert_audio_chunk_to_pcm
+# Speech processing modules
+from .transcription import TranscriptionService, RealTimeTranscription
+from .streaming import StreamingTranscriber
+from .tts_service import TTSService, synthesize_speech
 
-__all__ = ['RealTimeTranscription', 'TranscriptionService', 'StreamingTranscriber', 'convert_audio_chunk_to_pcm']
-
+__all__ = [
+    'TranscriptionService',
+    'RealTimeTranscription',
+    'StreamingTranscriber',
+    'TTSService',
+    'synthesize_speech'
+]

@@ -1213,21 +1213,87 @@ def langsmith_run_detail(request, run_id: str):
 @csrf_exempt
 @login_required
 def text_to_speech(request):
-    """Convert text to speech (placeholder)"""
+    """
+    Convert text to speech using Arabic TTS with multiple speakers.
+    
+    POST /chat/api/text-to-speech/
+    Body: {
+        "text": "مرحبا بك",
+        "speaker": "female_arabic_1",  # Optional
+        "language": "ar"  # Optional, default: "ar"
+    }
+    """
     if request.method == "POST":
         try:
             data = json.loads(request.body)
             text = data.get("text", "")
+            speaker = data.get("speaker", None)  # Optional speaker selection
+            language = data.get("language", "ar")  # Default to Arabic
             
-            # In production, integrate with TTS service
-            # For now, return placeholder
+            if not text or not text.strip():
+                return JsonResponse({
+                    "success": False,
+                    "message": "Text is required"
+                }, status=400)
+            
+            # Import TTS service
+            from agents.speech.tts_service import TTSService
+            
+            # Get TTS service instance
+            tts_service = TTSService.get_instance()
+            
+            # Synthesize speech
+            audio_data = tts_service.synthesize(text, speaker=speaker, language=language)
+            
+            if audio_data:
+                # Convert to base64 for JSON response
+                import base64
+                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
+                
+                # Get available speakers for response
+                available_speakers = tts_service.get_speakers()
+                
+                return JsonResponse({
+                    "success": True,
+                    "audio": audio_base64,
+                    "format": "mp3",  # Edge TTS returns MP3
+                    "speakers": available_speakers,
+                    "current_speaker": speaker or tts_service.current_speaker,
+                    "message": "Speech synthesized successfully"
+                })
+            else:
+                return JsonResponse({
+                    "success": False,
+                    "message": "Failed to synthesize speech. Check server logs."
+                }, status=500)
+                
+        except Exception as e:
+            print(f"❌ TTS endpoint error: {e}")
+            import traceback
+            traceback.print_exc()
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+    
+    elif request.method == "GET":
+        # Return available speakers
+        try:
+            from agents.speech.tts_service import TTSService
+            tts_service = TTSService.get_instance()
+            speakers = tts_service.get_speakers()
+            
             return JsonResponse({
                 "success": True,
-                "audio": None,
-                "message": "TTS service not configured"
+                "speakers": speakers,
+                "available": tts_service.is_available()
             })
-        except:
-            return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
+        except Exception as e:
+            return JsonResponse({
+                "success": False,
+                "message": str(e)
+            }, status=500)
+    
     return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
 
 # ============================================================
