@@ -20,6 +20,8 @@ transformers==4.36.2
 torch==2.4.0
 torchvision==0.18.1
 torchaudio==2.4.0
+# Translation models (MarianMT for English-Arabic)
+sentencepiece==0.1.99
 
 # Vector Search and Similarity
 faiss-cpu==1.13.1

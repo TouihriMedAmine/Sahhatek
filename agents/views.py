@@ -1229,3 +1229,51 @@ def text_to_speech(request):
         except:
             return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
     return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+# ============================================================
+# Translation Service
+# ============================================================
+@csrf_exempt
+@login_required
+def translate_text(request):
+    """
+    Translate text from English to Arabic using transformer models.
+    
+    POST /chat/api/translate/
+    Body: {"text": "Hello world", "source_lang": "en", "target_lang": "ar"}
+    """
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request method"}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        text = data.get("text", "").strip()
+        source_lang = data.get("source_lang", "en")
+        target_lang = data.get("target_lang", "ar")
+        
+        if not text:
+            return JsonResponse({"success": False, "message": "No text provided"}, status=400)
+        
+        # Import translation service
+        from agents.translation.translation_service import TranslationService
+        
+        # Get translation service instance
+        translation_service = TranslationService.get_instance()
+        
+        # Translate text
+        print(f"🌐 Translating: '{text[:50]}...' from {source_lang} to {target_lang}")
+        translated_text = translation_service.translate(text, source_lang=source_lang, target_lang=target_lang)
+        
+        return JsonResponse({
+            "success": True,
+            "original_text": text,
+            "translated_text": translated_text,
+            "source_lang": source_lang,
+            "target_lang": target_lang
+        })
+        
+    except Exception as e:
+        print(f"❌ Translation error: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "message": str(e)}, status=500)

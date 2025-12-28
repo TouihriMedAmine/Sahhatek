@@ -1293,6 +1293,11 @@
         });
         
         scrollToBottom();
+        
+        // Attach translate handlers to loaded messages
+        setTimeout(() => {
+          attachTranslateHandlers();
+        }, 100);
       }
 
       // Helper function to escape HTML
@@ -1673,12 +1678,27 @@
             messageContent = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
           }
           
+          // Generate unique ID for this message
+          const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          messageDiv.dataset.messageId = messageId;
+          messageDiv.dataset.originalContent = content; // Store original English content
+          messageDiv.dataset.isTranslated = 'false';
+          
           messageDiv.innerHTML = `
             <div class="message-avatar bot-avatar flex-shrink-0">
               <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
             </div>
             <div class="message-bubble bot-bubble">
-              ${messageContent}
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1">
+                  ${messageContent}
+                </div>
+                <button class="translate-response-btn p-1.5 text-gray-400 hover:text-medical-primary rounded transition-colors" 
+                        data-message-id="${messageId}"
+                        title="Translate to Arabic">
+                  <i class="fas fa-language text-xs"></i>
+                </button>
+              </div>
               <div class="text-xs text-gray-400 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
             </div>
           `;
@@ -1708,13 +1728,113 @@
         }
       }
 
+      // --- LANGUAGE DETECTION ---
+      function detectLanguage(text) {
+        // Simple Arabic detection: check for Arabic characters
+        const arabicPattern = /[\u0600-\u06FF]/;
+        return arabicPattern.test(text) ? 'ar' : 'en';
+      }
+      
+      // --- TRANSLATION HELPERS ---
+      async function translateText(text, sourceLang, targetLang) {
+        try {
+          const response = await fetch('/chat/api/translate/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+              text: text,
+              source_lang: sourceLang,
+              target_lang: targetLang
+            })
+          });
+          
+          const data = await response.json();
+          if (data.success && data.translated_text) {
+            return data.translated_text;
+          }
+          return text; // Return original if translation fails
+        } catch (error) {
+          console.error('Translation error:', error);
+          return text; // Return original on error
+        }
+      }
+      
+      // --- TRANSLATE RESPONSE HANDLERS ---
+      function attachTranslateHandlers() {
+        const translateButtons = document.querySelectorAll('.translate-response-btn:not([data-handler-attached])');
+        translateButtons.forEach(btn => {
+          btn.dataset.handlerAttached = 'true';
+          
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const messageId = btn.dataset.messageId;
+            const messageDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+            
+            if (!messageDiv) return;
+            
+            const isTranslated = messageDiv.dataset.isTranslated === 'true';
+            const originalContent = messageDiv.dataset.originalContent;
+            
+            // Toggle translation
+            if (isTranslated) {
+              // Show original English
+              const contentDiv = messageDiv.querySelector('.text-sm');
+              if (contentDiv) {
+                contentDiv.innerHTML = escapeHtml(originalContent);
+              }
+              messageDiv.dataset.isTranslated = 'false';
+              btn.title = 'Translate to Arabic';
+              btn.querySelector('i').classList.remove('text-medical-primary');
+            } else {
+              // Translate to Arabic
+              btn.disabled = true;
+              btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
+              
+              try {
+                const translated = await translateText(originalContent, 'en', 'ar');
+                const contentDiv = messageDiv.querySelector('.text-sm');
+                if (contentDiv) {
+                  contentDiv.innerHTML = escapeHtml(translated);
+                }
+                messageDiv.dataset.isTranslated = 'true';
+                btn.innerHTML = '<i class="fas fa-language text-xs text-medical-primary"></i>';
+                btn.title = 'Show original English';
+              } catch (error) {
+                console.error('Translation error:', error);
+                showNotification('Failed to translate response', 'error');
+                btn.innerHTML = '<i class="fas fa-language text-xs"></i>';
+              } finally {
+                btn.disabled = false;
+              }
+            }
+          });
+        });
+      }
+      
       // --- MESSAGE SENDING ---
       async function sendMessage(content) {
         if (!content.trim() || isProcessing) return;
         
+        // Detect input language
+        const inputLang = detectLanguage(content);
+        let contentToSend = content;
+        let originalContent = content;
+        
+        // If input is Arabic, translate to English before sending
+        if (inputLang === 'ar') {
+          console.log('🌐 Detected Arabic input, translating to English...');
+          contentToSend = await translateText(content, 'ar', 'en');
+          console.log('✅ Translated:', content.substring(0, 50), '->', contentToSend.substring(0, 50));
+          // Store original for display
+          originalContent = content;
+        }
+        
         if (!currentChatId) {
           // Create new conversation
-          const conv = await createConversation(content.substring(0, 30));
+          const conv = await createConversation(contentToSend.substring(0, 30));
           if (!conv) return;
           
           currentChatId = conv.id;
@@ -1727,18 +1847,18 @@
           }
         }
         
-        // Add user message
-        appendMessage('user', content);
+        // Add user message (show original if it was Arabic, otherwise show as-is)
+        appendMessage('user', originalContent);
         
         // Show typing indicator
         showTypingIndicator();
         
-        // Send to server with location if available
+        // Send to server with location if available (send English version)
         const locationData = window.userLocation || null;
         if (locationData) {
           console.log("📍 Sending message with location:", locationData);
         }
-        const result = await addMessage(currentChatId, content, 'user', locationData);
+        const result = await addMessage(currentChatId, contentToSend, 'user', locationData);
         
         // Remove typing indicator and add bot response
         removeTypingIndicator();
@@ -1752,6 +1872,11 @@
             appendMessage('assistant', "I've received your message. How can I assist you further?");
           }, 1000);
         }
+        
+        // Attach translate handlers after messages are added
+        setTimeout(() => {
+          attachTranslateHandlers();
+        }, 600);
         
         // Refresh sidebar preview
         setTimeout(() => loadAndRenderSidebar(), 1000);
@@ -1914,6 +2039,11 @@
         const chatInput = document.getElementById('chat-input');
         const chatInputChat = document.getElementById('chatInput');
         
+        // Translate button
+        const translateBtn = document.getElementById('translate-btn');
+        const translateIcon = document.getElementById('translate-icon');
+        const translateLoading = document.getElementById('translate-loading');
+        
         function handleSend() {
           // STRICT CHECK: Don't send if we're currently updating from transcription
           if (isUpdatingFromTranscription) {
@@ -1945,6 +2075,67 @@
         
         if (sendBtn) sendBtn.addEventListener('click', handleSend);
         if (sendChatBtn) sendChatBtn.addEventListener('click', handleSend);
+        
+        // Translate button handler
+        if (translateBtn) {
+          translateBtn.addEventListener('click', async () => {
+            const input = document.getElementById('chatInterface').classList.contains('hidden') ? chatInput : chatInputChat;
+            const text = input?.value.trim();
+            
+            if (!text) {
+              showNotification('Please enter text to translate', 'warning');
+              return;
+            }
+            
+            // Show loading state
+            translateIcon.classList.add('hidden');
+            translateLoading.classList.remove('hidden');
+            translateBtn.disabled = true;
+            
+            try {
+              // Get CSRF token
+              const csrfToken = getCSRFToken();
+              
+              // Call translation API
+              const response = await fetch('/chat/api/translate/', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'X-CSRFToken': csrfToken || ''
+                },
+                body: JSON.stringify({
+                  text: text,
+                  source_lang: 'en',
+                  target_lang: 'ar'
+                })
+              });
+              
+              const data = await response.json();
+              
+              if (data.success && data.translated_text) {
+                // Replace input text with translated text
+                input.value = data.translated_text;
+                showNotification('Text translated to Arabic', 'success');
+                
+                // Auto-resize textarea
+                if (input.style.height !== 'auto') {
+                  input.style.height = 'auto';
+                }
+                input.style.height = input.scrollHeight + 'px';
+              } else {
+                showNotification(data.message || 'Translation failed', 'error');
+              }
+            } catch (error) {
+              console.error('Translation error:', error);
+              showNotification('Failed to translate text. Please try again.', 'error');
+            } finally {
+              // Hide loading state
+              translateIcon.classList.remove('hidden');
+              translateLoading.classList.add('hidden');
+              translateBtn.disabled = false;
+            }
+          });
+        }
         
         // Enter key
         if (chatInput) {
