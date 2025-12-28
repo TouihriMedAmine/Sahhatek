@@ -42,6 +42,8 @@ pydantic==2.5.3
 # Speech Recognition and Audio Processing
 vosk==0.3.45
 sounddevice==0.4.6
+arabic-reshaper==3.0.0
+pydub==0.25.1
 
 # Gradio (for UI, optional)
 gradio==4.8.0

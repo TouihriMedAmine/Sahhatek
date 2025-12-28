@@ -373,7 +373,7 @@
       border-radius: 4px;
       margin-top: 5px;
     }
-    }
+    
     
     /* Avatar styles - UPDATED */
     .message-avatar {
@@ -1915,14 +1915,31 @@
         const chatInputChat = document.getElementById('chatInput');
         
         function handleSend() {
+          // STRICT CHECK: Don't send if we're currently updating from transcription
+          if (isUpdatingFromTranscription) {
+            console.log('⏸️ BLOCKED: Transcription is still updating. Waiting...');
+            setTimeout(() => {
+              if (!isUpdatingFromTranscription) {
+                console.log('✅ Transcription update complete. Retrying send...');
+                handleSend();
+              }
+            }, 500);
+            return;
+          }
+          
           const input = document.getElementById('chatInterface').classList.contains('hidden') ? chatInput : chatInputChat;
           const content = input?.value.trim();
-          if (content) {
+          
+          // Double-check flag before sending
+          if (content && !isUpdatingFromTranscription) {
+            console.log('📤 Sending message (user clicked Send):', content.substring(0, 50));
             sendMessage(content);
             input.value = '';
             if (input.style.height !== 'auto') {
               input.style.height = 'auto';
             }
+          } else {
+            console.log('⏸️ Send blocked - transcription flag is set');
           }
         }
         
@@ -1965,6 +1982,557 @@
           const agent = card.dataset.agent;
           card.addEventListener('click', handleCardClick(agent));
         });
+        
+        // --- MICROPHONE RECORDING (REAL-TIME STREAMING) ---
+        const micBtn = document.getElementById('mic-btn');
+        const micPulse = document.getElementById('mic-pulse');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let isStartingRecording = false; // Guard to prevent concurrent starts
+        let stream = null;
+        let sessionId = null;
+        let chunkIndex = 0;
+        let transcriptionBuffer = "";
+        let chunkInterval = null;
+        let isUpdatingFromTranscription = false; // Flag to prevent auto-send during transcription updates
+        
+        async function startRecording() {
+          // Prevent multiple simultaneous starts
+          if (isRecording || isStartingRecording) {
+            console.log('⚠️ Already recording or starting, please wait...');
+            return;
+          }
+          
+          // Set guard flag
+          isStartingRecording = true;
+          
+          try {
+          // Clean up any existing MediaRecorder instance COMPLETELY
+          if (mediaRecorder) {
+            console.log('🧹 Cleaning up existing MediaRecorder, state:', mediaRecorder.state);
+            try {
+              if (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused') {
+                console.log('🛑 Stopping existing MediaRecorder...');
+                mediaRecorder.stop();
+                // Wait for it to stop (with timeout)
+                await new Promise((resolve) => {
+                  let attempts = 0;
+                  const maxAttempts = 40; // 2 seconds max wait
+                  const checkState = () => {
+                    attempts++;
+                    if (!mediaRecorder || mediaRecorder.state === 'inactive' || attempts >= maxAttempts) {
+                      resolve();
+                    } else {
+                      setTimeout(checkState, 50);
+                    }
+                  };
+                  checkState();
+                });
+              }
+              // Remove all event handlers
+              mediaRecorder.ondataavailable = null;
+              mediaRecorder.onstop = null;
+              mediaRecorder.onerror = null;
+            } catch (e) {
+              console.warn('Error stopping existing MediaRecorder:', e);
+            }
+            mediaRecorder = null;
+          }
+          
+          // Stop all tracks if stream exists (to ensure clean state)
+          if (stream) {
+            console.log('🛑 Stopping existing stream tracks...');
+            stream.getTracks().forEach(track => {
+              track.stop();
+              console.log('✅ Stopped track:', track.kind, track.id);
+            });
+            stream = null;
+          }
+            
+            // Reset recording state
+            isRecording = false;
+            
+            // Check if getUserMedia is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            const errorMsg = 'Microphone access is not supported in this browser. Please use Chrome, Firefox, or Edge.';
+              console.error('❌', errorMsg);
+              showNotification(errorMsg, 'error');
+              return;
+            }
+            
+            try {
+              // Request microphone access
+              console.log('🎤 Requesting microphone permission...');
+              stream = await navigator.mediaDevices.getUserMedia({ 
+                audio: {
+                  sampleRate: 16000,
+                  channelCount: 1,
+                  echoCancellation: true,
+                  noiseSuppression: true
+                } 
+              });
+              console.log('✅ Microphone access granted!');
+            } catch (error) {
+              console.error('❌ Error accessing microphone:', error);
+            isRecording = false;
+            
+            // Handle specific error types
+            let errorMessage = 'Microphone access error';
+            let errorDetails = '';
+            
+            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+              errorMessage = 'Microphone access denied';
+              errorDetails = `
+                <div style="text-align: left; margin-top: 10px;">
+                  <strong>How to enable microphone access:</strong><br>
+                  1. Click the lock icon (🔒) or camera icon in your browser's address bar<br>
+                  2. Find "Microphone" in the permissions list<br>
+                  3. Change it from "Block" to "Allow"<br>
+                  4. Refresh this page and try again<br><br>
+                  <strong>Or:</strong><br>
+                  - Check your browser settings → Privacy → Site permissions → Microphone<br>
+                  - Make sure this site is allowed to use your microphone
+                </div>
+              `;
+            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+              errorMessage = 'No microphone found';
+              errorDetails = 'Please connect a microphone and try again.';
+            } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+              errorMessage = 'Microphone is being used by another application';
+              errorDetails = 'Please close other applications using your microphone and try again.';
+            } else if (error.name === 'OverconstrainedError' || error.name === 'ConstraintNotSatisfiedError') {
+              // Try again with default settings (less restrictive)
+              console.log('🔄 Retrying with default microphone settings...');
+              try {
+                stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                console.log('✅ Microphone access granted with default settings!');
+              } catch (retryError) {
+                errorMessage = 'Microphone settings not supported';
+                errorDetails = 'Your microphone does not support the required settings. Please try a different microphone or browser.';
+                showNotification(`${errorMessage}. ${errorDetails}`, 'error');
+                return; // Exit if retry also fails
+              }
+            } else {
+              errorMessage = 'Microphone access error';
+              errorDetails = error.message || 'Unknown error occurred. Please check your browser settings.';
+            }
+            
+            // Only show error if retry didn't succeed (if stream is null, retry failed)
+            if (!stream) {
+              // Show detailed error notification
+              const fullMessage = `${errorMessage}. ${errorDetails}`;
+              showNotification(fullMessage, 'error');
+              
+              // Also log detailed instructions
+              console.error('💡 Troubleshooting steps:');
+              console.error('   1. Check browser address bar for microphone permission icon');
+              console.error('   2. Click the icon and allow microphone access');
+              console.error('   3. Check browser settings → Privacy → Microphone permissions');
+              console.error('   4. Make sure no other app is using the microphone');
+              console.error('   5. Try refreshing the page');
+              return; // Exit if we don't have a stream
+            }
+            }
+            
+            // Continue with recording setup (runs if we have a stream from either initial request or retry)
+            if (!stream) {
+              return; // Safety check
+            }
+            
+            try {
+              // Create MediaRecorder with timeslice for chunked recording
+              const options = { mimeType: 'audio/webm;codecs=opus' };
+              if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/webm';
+              }
+              if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                options.mimeType = 'audio/mp4';
+              }
+              
+              // Ensure we don't have an existing MediaRecorder
+              if (mediaRecorder) {
+                console.warn('⚠️ Existing MediaRecorder found, cleaning up...');
+                try {
+                  if (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused') {
+                    mediaRecorder.stop();
+                  }
+                } catch (e) {
+                  console.warn('Error stopping existing MediaRecorder:', e);
+                }
+                mediaRecorder = null;
+              }
+              
+              // Create new MediaRecorder
+              mediaRecorder = new MediaRecorder(stream, options);
+              
+              // Verify the new MediaRecorder is in inactive state IMMEDIATELY after creation
+              if (mediaRecorder.state !== 'inactive') {
+                console.error('❌ New MediaRecorder is not in inactive state immediately after creation:', mediaRecorder.state);
+                mediaRecorder = null;
+                throw new Error('MediaRecorder was not properly initialized - state: ' + mediaRecorder.state);
+              }
+              
+              console.log('✅ MediaRecorder created successfully, state:', mediaRecorder.state);
+              
+              audioChunks = [];
+              chunkIndex = 0;
+              transcriptionBuffer = "";
+              sessionId = null; // Will be set by first response
+              
+              // Clear input field when starting new recording
+              const chatInputEl = document.getElementById('chatInterface').classList.contains('hidden') 
+                ? chatInput 
+                : chatInputChat;
+              if (chatInputEl) {
+                chatInputEl.value = "";
+                chatInputEl.disabled = false;
+                transcriptionBuffer = ""; // Clear buffer
+                console.log('🎤 Recording started - input field cleared');
+              }
+              
+              // Detect audio format
+              let audioFormat = 'webm';
+              if (mediaRecorder.mimeType.includes('webm')) {
+                audioFormat = 'webm';
+              } else if (mediaRecorder.mimeType.includes('opus')) {
+                audioFormat = 'opus';
+              } else if (mediaRecorder.mimeType.includes('mp4') || mediaRecorder.mimeType.includes('m4a')) {
+                audioFormat = 'mp4';
+              } else if (mediaRecorder.mimeType.includes('wav')) {
+                audioFormat = 'wav';
+              }
+              
+              // Process chunks in real-time (every 250ms)
+              // Based on reference code: continuous processing while speaking
+              mediaRecorder.ondataavailable = (event) => {
+                // Don't await here - process immediately without blocking
+                if (event.data.size > 0 && isRecording) {
+                  audioChunks.push(event.data);
+                  
+                  // Convert chunk to base64 and send immediately (non-blocking)
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    const base64Chunk = reader.result;
+                    
+                    // Process asynchronously without blocking the next chunk
+                    (async () => {
+                      try {
+                        const conversationId = currentChatId || 'new';
+                        const payload = {
+                          audio_chunk: base64Chunk,
+                          audio_format: audioFormat,
+                          chunk_index: chunkIndex++,
+                          is_final: false,
+                          session_id: sessionId
+                        };
+                        
+                        console.log(`📤 Sending chunk ${payload.chunk_index} (session: ${sessionId || 'new'})`);
+                        
+                        const response = await fetch(`/chat/api/conversations/${conversationId}/stream-audio-chunk/`, {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrftoken
+                          },
+                          body: JSON.stringify(payload)
+                        });
+                        
+                        const data = await response.json();
+                        console.log(`📥 Received transcription chunk ${payload.chunk_index}:`, {
+                          partial: data.partial,
+                          full_text: data.full_text,
+                          text: data.text
+                        });
+                        
+                        if (data.success) {
+                          // Store session ID for subsequent chunks
+                          if (!sessionId && data.session_id) {
+                            sessionId = data.session_id;
+                            console.log('✅ Session ID set:', sessionId);
+                          }
+                          
+                          // Update transcription buffer with latest result
+                          // Use full_text (which combines buffer + partial) for real-time display
+                          // This matches the reference code pattern: buffer_total + " " + partial
+                          let newText = data.full_text || data.partial || '';
+                          
+                          // Always update if we have any text (partial or final)
+                          // This ensures real-time updates while speaking (matching reference code yield pattern)
+                          if (newText) {
+                            // Use full_text if available (combines finalized + partial), otherwise use partial
+                            transcriptionBuffer = newText;
+                            
+                            console.log('🔄 Updating input field with:', transcriptionBuffer.substring(0, 50) + '...');
+                            
+                            // Update input field in real-time IMMEDIATELY while speaking
+                            // This matches the reference code's immediate yield/display pattern
+                            const currentInputEl = document.getElementById('chatInterface').classList.contains('hidden') 
+                              ? chatInput 
+                              : chatInputChat;
+                            
+                            if (currentInputEl) {
+                              // Set flag to prevent any auto-send during transcription update
+                              isUpdatingFromTranscription = true;
+                              
+                              // Update value immediately - this shows text while speaking (like reference code line 99-100, 111-113)
+                              currentInputEl.value = transcriptionBuffer;
+                              currentInputEl.style.height = 'auto';
+                              currentInputEl.style.height = (currentInputEl.scrollHeight) + 'px';
+                              // Ensure input is enabled and ready for user to edit/send
+                              currentInputEl.disabled = false;
+                              
+                              // Keep flag set during real-time updates to prevent auto-send
+                              // Only clear when user explicitly interacts or after recording stops
+                              // Don't clear here - let onstop handler manage it
+                            } else {
+                              console.warn('⚠️ Input element not found for real-time update');
+                            }
+                          } else {
+                            console.log('⏸️ No text in response yet');
+                          }
+                        } else {
+                          console.warn('⚠️ Transcription failed:', data.message);
+                        }
+                      } catch (error) {
+                        console.error('❌ Error sending audio chunk:', error);
+                      }
+                    })();
+                  };
+                  
+                  reader.readAsDataURL(event.data);
+                } else {
+                  console.log('⏸️ Skipping empty chunk or not recording');
+                }
+              };
+              
+              // Set up onstop handler (DO NOT start recording here - that happens later)
+              mediaRecorder.onstop = async () => {
+              // Send final chunk if there's any remaining audio
+              if (audioChunks.length > 0) {
+                const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                const reader = new FileReader();
+                
+                reader.onloadend = async () => {
+                  const base64Chunk = reader.result;
+                  
+                  try {
+                    const conversationId = currentChatId || 'new';
+                    const locationData = window.userLocation || null;
+                    
+                    // Detect audio format
+                    let audioFormat = 'webm';
+                    if (mediaRecorder.mimeType.includes('webm')) {
+                      audioFormat = 'webm';
+                    } else if (mediaRecorder.mimeType.includes('opus')) {
+                      audioFormat = 'opus';
+                    } else if (mediaRecorder.mimeType.includes('mp4') || mediaRecorder.mimeType.includes('m4a')) {
+                      audioFormat = 'mp4';
+                    } else if (mediaRecorder.mimeType.includes('wav')) {
+                      audioFormat = 'wav';
+                    }
+                    
+                    // Send final chunk
+                    const finalPayload = {
+                      audio_chunk: base64Chunk,
+                      audio_format: audioFormat,
+                      chunk_index: chunkIndex++,
+                      is_final: true,
+                      session_id: sessionId
+                    };
+                    
+                    const finalResponse = await fetch(`/chat/api/conversations/${conversationId}/stream-audio-chunk/`, {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                      },
+                      body: JSON.stringify(finalPayload)
+                    });
+                    
+                    const finalData = await finalResponse.json();
+                    
+                    if (finalData.success && finalData.full_text) {
+                      transcriptionBuffer = finalData.full_text;
+                    }
+                    
+                    // Just update the input field with final transcription - DON'T send automatically
+                    // User will click Send button to actually send the message
+                    const chatInputEl = document.getElementById('chatInterface').classList.contains('hidden') 
+                      ? chatInput 
+                      : chatInputChat;
+                    
+                    if (chatInputEl) {
+                      // Set flag to prevent auto-send
+                      isUpdatingFromTranscription = true;
+                      
+                      // Set the transcription value - DO NOT send automatically
+                      chatInputEl.value = transcriptionBuffer;
+                      chatInputEl.disabled = false;
+                      
+                      // Remove any "Processing..." text if it exists
+                      if (chatInputEl.value.includes('Processing') || chatInputEl.value.includes('processing')) {
+                        chatInputEl.value = transcriptionBuffer;
+                      }
+                      
+                      // DO NOT auto-focus - this can trigger events that cause auto-send
+                      // User will manually focus when ready
+                      // Keep flag set to prevent any automatic sending
+                      // Only clear flag after a longer delay to ensure no race conditions
+                      setTimeout(() => {
+                        isUpdatingFromTranscription = false;
+                        console.log('✅ Transcription update complete. Flag cleared. User can now send manually.');
+                      }, 1500); // Longer delay to prevent any auto-send triggers
+                    }
+                    
+                    // Show notification that transcription is ready - user must click Send
+                    if (typeof showNotification === 'function' && transcriptionBuffer.trim()) {
+                      showNotification('Transcription complete. Click Send to send the message.', 'success');
+                    }
+                    
+                    // IMPORTANT: Do NOT call sendMessage() or handleSend() here
+                    // The message will only be sent when user clicks the Send button
+                    console.log('✅ Transcription complete. Waiting for user to click Send button.');
+                  } catch (error) {
+                    console.error('Error processing final chunk:', error);
+                    showNotification('Error processing final audio: ' + error.message, 'error');
+                  }
+                };
+                
+                reader.readAsDataURL(audioBlob);
+              }
+              
+              // Stop all tracks
+              if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+              }
+              
+              // Reset state
+              sessionId = null;
+              chunkIndex = 0;
+              audioChunks = [];
+              };
+              
+              // Double-check MediaRecorder is still in inactive state before starting
+              // This should never happen, but check just in case
+              if (!mediaRecorder || mediaRecorder.state !== 'inactive') {
+                const state = mediaRecorder ? mediaRecorder.state : 'null';
+                console.error('❌ MediaRecorder state changed to:', state, 'before start()');
+                if (mediaRecorder) {
+                  try {
+                    if (mediaRecorder.state === 'recording') {
+                      mediaRecorder.stop();
+                    }
+                  } catch (e) {
+                    console.warn('Error stopping MediaRecorder:', e);
+                  }
+                  mediaRecorder = null;
+                }
+                throw new Error('MediaRecorder state is ' + state + ' instead of inactive');
+              }
+              
+              console.log('✅ MediaRecorder ready to start, state:', mediaRecorder.state);
+              
+              // Start recording
+              mediaRecorder.start(250); // Start with 250ms chunks for real-time transcription
+              
+              // Verify it started successfully
+              if (mediaRecorder.state !== 'recording') {
+                console.error('❌ MediaRecorder failed to start. State:', mediaRecorder.state);
+                throw new Error('Failed to start MediaRecorder - state: ' + mediaRecorder.state);
+              }
+              
+              console.log('✅ MediaRecorder started successfully, state:', mediaRecorder.state);
+              isRecording = true;
+              
+              // Update UI
+              if (micBtn) {
+                micBtn.classList.add('recording');
+                micBtn.style.color = '#ef4444';
+              }
+              if (micPulse) {
+                micPulse.style.opacity = '1';
+                micPulse.style.animation = 'pulse 1.5s ease-in-out infinite';
+              }
+              
+              // Show recording started notification
+              if (typeof showNotification === 'function') {
+                showNotification('Recording... Click again to stop', 'info');
+              }
+            } catch (setupError) {
+              // Handle any errors during MediaRecorder setup
+              console.error('❌ Error setting up MediaRecorder:', setupError);
+              isRecording = false;
+              showNotification('Error setting up recording: ' + setupError.message, 'error');
+              
+              // Clean up stream if we have one
+              if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+              }
+            }
+          } finally {
+            // Always clear the guard flag
+            isStartingRecording = false;
+          }
+        }
+        
+        function stopRecording() {
+          if (mediaRecorder && (isRecording || mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
+            try {
+              if (mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+              }
+            } catch (e) {
+              console.warn('Error stopping MediaRecorder:', e);
+            }
+            isRecording = false;
+            
+            // Update UI
+            if (micBtn) {
+              micBtn.classList.remove('recording');
+              micBtn.style.color = '';
+            }
+            if (micPulse) {
+              micPulse.style.opacity = '0';
+              micPulse.style.animation = '';
+            }
+          }
+          
+          // Clean up stream
+          if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+          }
+        }
+        
+        // Mic button click handler
+        if (micBtn) {
+          micBtn.addEventListener('click', () => {
+            if (!isRecording) {
+              startRecording();
+            } else {
+              stopRecording();
+            }
+          });
+        }
+        
+        // Add CSS animation for pulse
+        if (!document.getElementById('mic-pulse-style')) {
+          const style = document.createElement('style');
+          style.id = 'mic-pulse-style';
+          style.textContent = `
+            @keyframes pulse {
+              0%, 100% { opacity: 0.5; transform: scale(1); }
+              50% { opacity: 1; transform: scale(1.1); }
+            }
+            #mic-btn.recording {
+              background-color: rgba(239, 68, 68, 0.1);
+            }
+          `;
+          document.head.appendChild(style);
+        }
       }
 
       // --- INITIALIZATION ---

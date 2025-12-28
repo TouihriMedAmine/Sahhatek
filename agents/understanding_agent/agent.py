@@ -16,9 +16,11 @@ try:
     from vosk import Model, KaldiRecognizer
     import sounddevice as sd
     import queue
+    from agents.speech.transcription import TranscriptionService
     SPEECH_ENABLED = True
 except ImportError:
     SPEECH_ENABLED = False
+    TranscriptionService = None
 
 # ============================================================
 # SIMPLE CONFIGURATION
@@ -61,42 +63,65 @@ class SpeechHandler:
     """Only handles speech-to-text, nothing else"""
     
     def __init__(self):
-        self.model = None
+        self.transcription_service = None
         self.model_paths = [
             "E:/9raya_4eme_Sem1/Projet_Ia/Modele_Text_to_Speech_Derja/Modele_huhugging/vosk-model/vosk-model",
             os.path.join(os.path.dirname(__file__), "..", "..", "maaaheeeerrr", "Modele_huhugging", "vosk-model", "vosk-model"),
         ]
     
-    def load_model(self):
-        """Load VOSK model if available"""
-        if self.model:
-            return self.model
-        
+    def _get_model_path(self):
+        """Find available model path"""
         for path in self.model_paths:
             if os.path.exists(path):
-                try:
-                    self.model = Model(path)
-                    return self.model
-                except:
-                    continue
+                return path
         return None
     
+    def _get_transcription_service(self):
+        """Get or create transcription service instance"""
+        if self.transcription_service is None and TranscriptionService:
+            model_path = self._get_model_path()
+            try:
+                self.transcription_service = TranscriptionService.get_instance(model_path)
+            except Exception as e:
+                print(f"⚠️ Could not initialize transcription service: {e}")
+                return None
+        return self.transcription_service
+    
     def transcribe(self, audio_data: bytes) -> str:
-        """Simple transcription"""
-        if not SPEECH_ENABLED:
+        """Simple transcription using the new transcription service"""
+        if not SPEECH_ENABLED or not TranscriptionService:
             return ""
         
-        model = self.load_model()
-        if not model:
-            return ""
+        service = self._get_transcription_service()
+        if not service:
+            # Fallback to old method if service unavailable
+            return self._transcribe_fallback(audio_data)
         
         try:
+            # Use the new transcription service
+            result = service.transcribe_audio_data(audio_data)
+            return result.strip()
+        except Exception as e:
+            print(f"⚠️ Transcription error: {e}")
+            # Fallback to old method
+            return self._transcribe_fallback(audio_data)
+    
+    def _transcribe_fallback(self, audio_data: bytes) -> str:
+        """Fallback transcription method (old implementation)"""
+        try:
+            from vosk import Model, KaldiRecognizer
+            model_path = self._get_model_path()
+            if not model_path:
+                return ""
+            
+            model = Model(model_path)
             recognizer = KaldiRecognizer(model, 16000)
             if recognizer.AcceptWaveform(audio_data):
                 result = json.loads(recognizer.Result())
                 return result.get("text", "").strip()
             return ""
-        except:
+        except Exception as e:
+            print(f"⚠️ Fallback transcription error: {e}")
             return ""
 
 # ============================================================

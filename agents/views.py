@@ -488,16 +488,122 @@ def delete_message(request, message_id):
     return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
 
 # ============================================================
-# Audio Processing
+# Streaming Audio Processing (Real-time)
+# ============================================================
+# Module-level dictionary to store transcriber sessions
+# Key: session_id, Value: StreamingTranscriber instance
+_transcriber_sessions = {}
+import threading
+import time
+
+def _cleanup_old_sessions():
+    """Clean up transcriber sessions older than 5 minutes (background task)"""
+    # This is a simple cleanup - in production, use a proper task queue
+    pass
+
+# Start cleanup thread (optional, for production)
+# threading.Thread(target=_cleanup_old_sessions, daemon=True).start()
+
+@csrf_exempt
+@login_required
+def stream_audio_chunk(request, conversation_id):
+    """
+    Process a single audio chunk in real-time and return partial transcription.
+    This endpoint is called repeatedly during recording for real-time transcription.
+    """
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        audio_chunk_base64 = data.get("audio_chunk")
+        audio_format = data.get("audio_format", "webm")
+        chunk_index = data.get("chunk_index", 0)
+        is_final = data.get("is_final", False)
+        session_id = data.get("session_id")  # For maintaining transcriber state
+        
+        if not audio_chunk_base64:
+            return JsonResponse({"success": False, "message": "No audio chunk provided"}, status=400)
+        
+        # Decode base64
+        import base64
+        try:
+            if ',' in audio_chunk_base64:
+                audio_chunk_base64 = audio_chunk_base64.split(',')[1]
+            audio_chunk = base64.b64decode(audio_chunk_base64)
+        except Exception as e:
+            return JsonResponse({"success": False, "message": f"Invalid audio data: {str(e)}"}, status=400)
+        
+        # Get or create transcriber session
+        global _transcriber_sessions
+        
+        transcriber = None
+        if session_id and session_id in _transcriber_sessions:
+            transcriber = _transcriber_sessions[session_id]
+        else:
+            # Create new transcriber
+            from agents.speech.transcription import TranscriptionService
+            model = TranscriptionService.get_instance().model
+            if not model:
+                return JsonResponse({"success": False, "message": "Model not loaded"}, status=500)
+            
+            from agents.speech.streaming import StreamingTranscriber
+            transcriber = StreamingTranscriber(model)
+            
+            # Generate session ID if not provided
+            if not session_id:
+                import uuid
+                session_id = str(uuid.uuid4())
+            
+            _transcriber_sessions[session_id] = transcriber
+        
+        # Process WebM chunk directly (buffering happens inside StreamingTranscriber)
+        print(f"📦 Receiving chunk {chunk_index}: {len(audio_chunk)} bytes, format: {audio_format}, is_final: {is_final}")
+        result = transcriber.process_webm_chunk(audio_chunk, audio_format=audio_format, is_final=is_final)
+        print(f"📝 Transcription result: partial='{result.get('partial', '')}', full_text='{result.get('full_text', '')}', text='{result.get('text', '')}'")
+        
+        # Clean up if final
+        if is_final and session_id in _transcriber_sessions:
+            del _transcriber_sessions[session_id]
+        
+        return JsonResponse({
+            "success": True,
+            "session_id": session_id,
+            "text": result["text"],
+            "partial": result["partial"],
+            "full_text": result["full_text"],
+            "is_final": result["is_final"],
+            "chunk_index": chunk_index
+        })
+        
+    except Exception as e:
+        print(f"❌ Stream audio chunk error: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({"success": False, "message": str(e)}, status=500)
+
+# ============================================================
+# Audio Processing (Batch - kept for compatibility)
 # ============================================================
 @csrf_exempt
 @login_required
 def process_audio_input(request, conversation_id):
     """
-    Process audio input and return LangGraph response
+    Process audio input using Vosk transcription and return LangGraph response.
+    
+    WARNING: This endpoint processes audio and automatically sends through LangGraph.
+    For real-time transcription without auto-sending, use stream_audio_chunk instead.
+    This endpoint should only be used for batch processing when you want immediate response.
+    
+    For the chat interface, transcription should use stream_audio_chunk, then the user
+    clicks Send which calls add_message (not this endpoint).
     """
     if request.method != "POST":
         return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
+    
+    # Log warning if this is being called (should use stream_audio_chunk for real-time)
+    print("⚠️ WARNING: process_audio_input called - this auto-processes through LangGraph!")
+    print("   For real-time transcription, use stream_audio_chunk instead.")
     
     try:
         # Handle new conversation
@@ -515,73 +621,267 @@ def process_audio_input(request, conversation_id):
         except:
             return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
         
-        audio_data = data.get("audio_data")
+        audio_data_base64 = data.get("audio_data")
+        audio_format = data.get("audio_format", "webm")  # Get format from client
+        latitude = data.get("latitude")
+        longitude = data.get("longitude")
         
-        # In a real implementation, you would:
-        # 1. Decode base64 audio
-        # 2. Send to speech-to-text service (Google, Whisper, etc.)
-        # 3. Get transcription
-        # 4. Process through LangGraph
+        if not audio_data_base64:
+            return JsonResponse({"success": False, "message": "No audio data provided"}, status=400)
         
-        # For now, simulate with placeholder
-        transcription = "Audio message received"
+        # Decode base64 audio data
+        import base64
+        try:
+            # Remove data URL prefix if present (e.g., "data:audio/wav;base64,")
+            if ',' in audio_data_base64:
+                audio_data_base64 = audio_data_base64.split(',')[1]
+            
+            audio_bytes = base64.b64decode(audio_data_base64)
+            print(f"📦 Received audio: {len(audio_bytes)} bytes, format: {audio_format}")
+        except Exception as e:
+            print(f"❌ Error decoding audio: {e}")
+            return JsonResponse({"success": False, "message": f"Invalid audio data: {str(e)}"}, status=400)
         
-        # Save as user message
-        user_message = Message.objects.create(
-            conversation=conversation,
-            role='user',
-            content=transcription,
-            is_audio=True  # Add this field if you want to track audio messages
-        )
+        # Transcribe audio using Vosk
+        transcription = ""
+        try:
+            from agents.speech.transcription import TranscriptionService
+            transcription = TranscriptionService.transcribe_audio(audio_bytes, audio_format=audio_format)
+            
+            if not transcription or not transcription.strip():
+                transcription = "[Could not transcribe audio - please try again]"
+            
+            print(f"🎤 Transcribed audio: {transcription[:100]}...")
+        except Exception as e:
+            print(f"❌ Transcription error: {e}")
+            import traceback
+            traceback.print_exc()
+            transcription = "[Transcription error - please try typing your message]"
         
-        # Get user profile
+        # Now process the transcription through the same LangGraph flow as add_message
+        # We'll reuse the same logic by calling add_message internally or duplicating the flow
+        
+        # Get user profile for medical context
         try:
             profile = UserProfile.objects.get(user=request.user)
             user_context = {
                 "gender": profile.gender,
                 "age": profile.age,
                 "chronic_diseases": profile.chronic_diseases,
+                "blood_type": profile.blood_type,
+                "allergies": profile.allergies,
+                "medications": profile.medications,
                 "profile_complete": profile.is_complete
             }
         except UserProfile.DoesNotExist:
             user_context = {}
         
-        # Process through LangGraph (simplified)
-        # You would call the same LangGraph logic as in add_message
+        # Save user message with transcription
+        message_metadata = {}
+        if latitude is not None and longitude is not None:
+            message_metadata = {"latitude": latitude, "longitude": longitude}
+        message_metadata["was_audio"] = True
         
-        bot_content = f"I received your voice message. Profile context available: {bool(user_context)}"
-        if user_context.get('profile_complete'):
-            bot_content += " (Profile is complete)"
+        user_message = Message.objects.create(
+            conversation=conversation,
+            role='user',
+            content=transcription,
+            metadata=message_metadata if message_metadata else None
+        )
+        
+        # Process through LangGraph (reuse same logic as add_message)
+        bot_content = ""
+        metadata = {}
+        
+        try:
+            # Import LangGraph app
+            try:
+                from agents.graph.build_graph import app
+                print("✅ Imported LangGraph from agents.graph.build_graph")
+            except ImportError:
+                try:
+                    from graph.build_graph import app
+                    print("✅ Imported LangGraph from graph.build_graph")
+                except ImportError:
+                    print("⚠️ LangGraph not found, using fallback")
+                    from langgraph.graph import StateGraph, END
+                    from typing import TypedDict, List
+                    
+                    class AgentState(TypedDict):
+                        user_input: str
+                        messages: List[dict]
+                        current_agent: str
+                        next_agent: str
+                        agent_output: str
+                        metadata: dict
+                    
+                    workflow = StateGraph(AgentState)
+                    workflow.add_node("gatekeeper", lambda state: {
+                        **state,
+                        "current_agent": "gatekeeper",
+                        "agent_output": f"I received your voice message: {state['user_input']}",
+                        "metadata": {"processed_by": "fallback_gatekeeper"}
+                    })
+                    workflow.set_entry_point("gatekeeper")
+                    workflow.add_edge("gatekeeper", END)
+                    app = workflow.compile()
+            
+            # Get conversation history (same as add_message)
+            recent_messages = conversation.messages.filter(
+                is_deleted=False
+            ).order_by('-created_at')[:10]
+            
+            messages_history = []
+            session_id = None
+            diagnosis_session_id = None
+            pending_questions_from_history = []
+            last_symptoms_from_history = []
+            last_negative_symptoms_from_history = []
+            
+            for msg in recent_messages:
+                msg_dict = {
+                    "role": msg.role,
+                    "content": msg.content
+                }
+                if msg.metadata:
+                    try:
+                        if isinstance(msg.metadata, dict):
+                            msg_dict["metadata"] = msg.metadata
+                        elif isinstance(msg.metadata, str):
+                            msg_dict["metadata"] = json.loads(msg.metadata)
+                    except:
+                        pass
+                messages_history.append(msg_dict)
+                
+                if msg.role == 'assistant':
+                    try:
+                        if isinstance(msg.metadata, dict):
+                            msg_metadata = msg.metadata
+                        elif isinstance(msg.metadata, str) and msg.metadata:
+                            msg_metadata = json.loads(msg.metadata)
+                        else:
+                            msg_metadata = {}
+                        
+                        found_session_id = msg_metadata.get("session_id")
+                        if found_session_id:
+                            session_id = found_session_id
+                        
+                        found_diagnosis_session_id = msg_metadata.get("diagnosis_session_id")
+                        if found_diagnosis_session_id and not diagnosis_session_id:
+                            diagnosis_session_id = found_diagnosis_session_id
+                        
+                        if not last_symptoms_from_history:
+                            last_symptoms_from_history = msg_metadata.get("symptoms", []) or []
+                        if not last_negative_symptoms_from_history:
+                            last_negative_symptoms_from_history = msg_metadata.get("negative_symptoms", []) or []
+                        
+                        msg_pending = msg_metadata.get("pending_questions", [])
+                        if msg_pending and not pending_questions_from_history:
+                            pending_questions_from_history = msg_pending
+                        
+                        if diagnosis_session_id and pending_questions_from_history:
+                            break
+                    except Exception as e:
+                        print(f"⚠️ Error parsing message metadata: {e}")
+                        pass
+            
+            # Extract location
+            user_location = None
+            if latitude is not None and longitude is not None:
+                user_location = (float(latitude), float(longitude))
+            else:
+                for msg in reversed(recent_messages):
+                    if msg.role == 'user' and msg.metadata:
+                        try:
+                            msg_meta = msg.metadata if isinstance(msg.metadata, dict) else json.loads(msg.metadata)
+                            if 'latitude' in msg_meta and 'longitude' in msg_meta:
+                                user_location = (float(msg_meta['latitude']), float(msg_meta['longitude']))
+                                break
+                        except:
+                            pass
+            
+            # Prepare LangGraph state
+            langgraph_state = {
+                "user_input": transcription,
+                "messages": messages_history,
+                "current_agent": None,
+                "next_agent": None,
+                "agent_output": None,
+                "user_location": user_location,
+                "user_input_location": None,
+                "pending_questions": pending_questions_from_history,
+                "diagnosis_session_id": diagnosis_session_id,
+                "symptoms": last_symptoms_from_history,
+                "negative_symptoms": last_negative_symptoms_from_history,
+                "metadata": {
+                    "conversation_id": conversation_id,
+                    "user_id": request.user.id,
+                    "user_context": user_context,
+                    "was_audio": True,
+                },
+                "session_id": session_id,
+                "diagnosis_complete": False,
+            }
+            
+            # NOTE: This should only be called when user explicitly sends a message
+            # NOT automatically during transcription
+            print(f"🚀 Invoking LangGraph for audio message in conversation {conversation_id}...")
+            print(f"   Transcription: {transcription[:100]}...")
+            result = app.invoke(langgraph_state)
+            
+            # Extract response
+            bot_content = result.get("agent_output", "I apologize, but I couldn't generate a response.")
+            current_agent = result.get("current_agent", "unknown")
+            
+            pending_questions = result.get("pending_questions", [])
+            session_id = result.get("session_id")
+            diagnosis_session_id = result.get("diagnosis_session_id")
+            
+            # Build metadata
+            metadata = {
+                "was_audio": True,
+                "agent_used": current_agent,
+                "user_context_present": bool(user_context),
+                "profile_complete": user_context.get("profile_complete", False),
+                "session_id": session_id,
+                "diagnosis_session_id": diagnosis_session_id,
+                "pending_questions": pending_questions,
+                "symptoms": result.get("symptoms", []),
+                "negative_symptoms": result.get("negative_symptoms", []),
+                "transcription": transcription[:200]  # Store first 200 chars of transcription
+            }
+            
+        except Exception as e:
+            print(f"❌ LangGraph error: {e}")
+            import traceback
+            traceback.print_exc()
+            bot_content = "I received your voice message, but encountered an error processing it. Please try again."
+            metadata = {"was_audio": True, "error": str(e)}
         
         # Save bot response
         bot_message = Message.objects.create(
             conversation=conversation,
             role='assistant',
-            content=bot_content
+            content=bot_content,
+            metadata=metadata
         )
-        
-        # Prepare response metadata
-        metadata = {
-            "was_audio": True,
-            "agent_used": "gatekeeper",
-            "user_context_present": bool(user_context),
-            "profile_complete": user_context.get("profile_complete", False)
-        }
         
         return JsonResponse({
             "success": True,
             "conversation_id": conversation.id,
+            "transcription": transcription,
             "bot_message": {
                 "id": bot_message.id,
                 "role": bot_message.role,
                 "content": bot_message.content,
                 "metadata": metadata
-            },
-            "audio_response": None  # You can add TTS response here
+            }
         })
         
     except Exception as e:
         print(f"❌ Audio processing error: {e}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({"success": False, "message": str(e)}, status=500)
 
 @csrf_exempt
