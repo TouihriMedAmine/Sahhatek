@@ -20,4 +20,8 @@ urlpatterns = [
     path('api/langsmith/agent/<str:agent_name>/stats/', views.langsmith_agent_stats, name='langsmith_agent_stats'),
     path('api/langsmith/runs/', views.langsmith_runs, name='langsmith_runs'),
     path('api/langsmith/runs/<str:run_id>/', views.langsmith_run_detail, name='langsmith_run_detail'),
+#mentalhealth
+    path("mental/", views.mental_health_chat, name="mental_health_chat"),
+    path("mental/api/send/", views.mental_health_send, name="mental_health_send"),
+
 ]

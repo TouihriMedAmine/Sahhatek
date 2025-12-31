@@ -18,4 +18,6 @@ urlpatterns = [
     path("dashboard/data/", dashboard_data, name="dashboard_data"),
     #Profile
     path("profile/edit/", profile_edit_page, name="profile_edit"),
+        path('vision/', views.vision_page, name='vision_page'),
+
 ]

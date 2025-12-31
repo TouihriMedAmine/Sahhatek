@@ -10,6 +10,10 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .models import User, UserProfile
 
+def vision_page(request):
+    """Render the vision analysis page"""
+    return render(request, 'vision.html')
+
 # -------------------------------------------------------
 # Utility: Generate 6-digit verification code
 # -------------------------------------------------------

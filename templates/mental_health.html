@@ -1,0 +1,718 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mental Health Support - Sahatek AI</title>
+  
+  <!-- Design matching chat.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Medical theme colors matching chat.html */
+    .medical-primary { color: #d80027; }
+    .bg-medical-primary { background-color: #d80027; }
+    .bg-medical-primary\/10 { background-color: rgba(216, 0, 39, 0.1); }
+    
+    /* Chat interface styling */
+    .chat-interface-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+    
+    .chat-messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      min-height: 0;
+    }
+    
+    .chat-input-area {
+      flex-shrink: 0;
+      border-top: 1px solid #e5e7eb;
+      background: white;
+      padding: 1rem;
+    }
+    
+    /* Message bubbles matching chat.html */
+    .message-bubble {
+      max-width: 85%;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      position: relative;
+      word-wrap: break-word;
+    }
+    
+    .user-bubble {
+      background: linear-gradient(135deg, #910a0a, #b30020);
+      color: rgb(255, 255, 255);
+      border-bottom-right-radius: 0.5rem;
+      margin-left: auto;
+      margin-right: 0;
+    }
+    
+    .bot-bubble {
+      background: white;
+      color: #2b2b2b;
+      border: 1px solid #e5e7eb;
+      border-bottom-left-radius: 0.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+      margin-right: auto;
+      margin-left: 0;
+    }
+    
+    .message-container {
+      display: flex;
+      width: 100%;
+      margin-bottom: 1.5rem;
+      align-items: flex-end;
+    }
+    
+    .bot-message-container {
+      justify-content: flex-start;
+    }
+    
+    .user-message-container {
+      justify-content: flex-end;
+    }
+    
+    /* Camera specific styles */
+    .camera-controls {
+      background: rgba(248, 250, 252, 0.95);
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .mood-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .mood-happy { background: rgba(34, 197, 94, 0.1); color: #16a34a; }
+    .mood-sad { background: rgba(59, 130, 246, 0.1); color: #2563eb; }
+    .mood-angry { background: rgba(239, 68, 68, 0.1); color: #dc2626; }
+    .mood-calm { background: rgba(168, 85, 247, 0.1); color: #9333ea; }
+    .mood-neutral { background: rgba(107, 114, 128, 0.1); color: #6b7280; }
+    
+    /* Top button styles matching chat.html */
+    .top-button {
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      border: 1px solid #e2e8f0;
+      color: #2d3748;
+      padding: 0.625rem 1.25rem;
+      border-radius: 10px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .top-button:hover {
+      transform: translateY(-2px);
+      border-color: #d80027;
+      box-shadow: 0 10px 25px rgba(216, 0, 39, 0.15);
+      color: #d80027;
+    }
+    
+    .top-button-primary {
+      background: linear-gradient(135deg, #d80027 0%, #b30020 100%);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 15px rgba(216, 0, 39, 0.3);
+    }
+    
+    .top-button-primary:hover {
+      background: linear-gradient(135deg, #b30020 0%, #910a0a 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(216, 0, 39, 0.4);
+    }
+    
+    /* Input styles matching chat.html */
+    .medical-input {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      resize: none;
+      font-family: 'Open Sans', sans-serif;
+    }
+    
+    .medical-input:focus {
+      outline: none;
+      border-color: #d80027;
+      box-shadow: 0 0 0 3px rgba(216, 0, 39, 0.1);
+    }
+    
+    /* Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #d1d5db;
+      border-radius: 3px;
+    }
+    
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+    
+    /* Welcome message styling */
+    .welcome-card {
+      background: linear-gradient(135deg, rgba(216, 0, 39, 0.05) 0%, rgba(179, 0, 32, 0.05) 100%);
+      border: 1px solid rgba(216, 0, 39, 0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Avatar */
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin: 0 0.75rem;
+    }
+    
+    .bot-avatar {
+      background: linear-gradient(135deg, #f8e4e4, #f0d9d9);
+      color: white;
+    }
+    
+    .user-avatar-small {
+      background: linear-gradient(135deg, #d80027, #b30020);
+      color: white;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-white to-gray-50/50">
+  {% csrf_token %}
+  
+  <!-- Chat Interface Container -->
+  <div class="chat-interface-container">
+    <!-- Header matching chat.html design -->
+    <div class="border-b border-gray-100 bg-white/95 backdrop-blur-sm px-4 lg:px-6 py-4 sticky top-0 z-10">
+      <div class="flex items-center justify-between max-w-5xl mx-auto">
+        <div class="flex items-center space-x-4">
+          <button onclick="window.history.back()" class="top-button">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Back
+          </button>
+          <a href="{% url 'home' %}" class="flex items-center space-x-3 hover:opacity-80 transition-opacity cursor-pointer">
+            <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-10 w-10">
+            <div>
+              <h3 class="font-semibold text-gray-900">Mental Health Support</h3>
+              <p class="text-xs text-gray-500">Private • Supportive • 24/7</p>
+            </div>
+          </a>
+        </div>
+        
+        <div class="flex items-center space-x-3">
+          <button onclick="handleEmergency()" class="top-button top-button-primary">
+            <i class="fas fa-ambulance mr-2"></i>
+            Emergency Help
+          </button>
+          <a href="{% url 'home' %}" class="top-button">
+            <i class="fas fa-home mr-2"></i>
+            Home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages Area -->
+    <div class="chat-messages-area custom-scrollbar">
+      <div class="messages-wrapper max-w-5xl mx-auto px-4 lg:px-6 py-8">
+        <div id="chat-messages">
+          <!-- Welcome message -->
+          <div class="message-container bot-message-container">
+            <div class="message-avatar bot-avatar flex-shrink-0">
+              <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+            </div>
+            <div class="message-bubble bot-bubble">
+              <div class="welcome-card">
+                <h3 class="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <i class="fas fa-brain text-medical-primary"></i>
+                  Welcome to Mental Health Support
+                </h3>
+                <p class="text-sm text-gray-700 mb-3">
+                  I'm here to provide emotional support and coping strategies. You can talk about:
+                </p>
+                <ul class="text-sm text-gray-600 space-y-1 mb-3">
+                  <li class="flex items-start gap-2">
+                    <i class="fas fa-circle text-xs text-medical-primary mt-1"></i>
+                    Stress, anxiety, or depression
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i class="fas fa-circle text-xs text-medical-primary mt-1"></i>
+                    Relationship or work issues
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i class="fas fa-circle text-xs text-medical-primary mt-1"></i>
+                    Sleep problems or burnout
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <i class="fas fa-circle text-xs text-medical-primary mt-1"></i>
+                    General emotional wellbeing
+                  </li>
+                </ul>
+                <div class="flex items-center gap-2 text-xs text-gray-500">
+                  <i class="fas fa-lock"></i>
+                  <span>Your conversations are private and confidential</span>
+                </div>
+              </div>
+              <div class="text-xs text-gray-400 mt-2 text-right">
+                {{ current_time|default:"Now" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Camera Controls -->
+    <div class="px-4 lg:px-6 max-w-5xl mx-auto">
+      <div class="camera-controls">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <button id="toggleCamBtn" class="top-button">
+              <i class="fas fa-camera mr-2"></i>
+              <span id="camBtnText">Enable Camera</span>
+            </button>
+            <span id="camStatus" class="text-sm text-gray-500">Camera disabled</span>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-500">Detected mood:</span>
+            <span id="moodBadge" class="mood-badge mood-neutral">
+              <i class="fas fa-user mr-1"></i>
+              unknown
+            </span>
+          </div>
+        </div>
+        
+        <!-- Camera preview -->
+        <div id="cameraPreview" class="mt-3 hidden">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <video id="camVideo" class="rounded-xl border border-gray-200 w-[200px] h-auto" autoplay playsinline></video>
+              <div class="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                Live preview
+              </div>
+            </div>
+            <div class="flex-1">
+              <p class="text-xs text-gray-600">
+                <i class="fas fa-info-circle text-medical-primary mr-1"></i>
+                A snapshot will be sent with your message to help assess emotional state.
+                You can disable the camera anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Area - Fixed at bottom -->
+    <div class="chat-input-area">
+      <div class="max-w-5xl mx-auto">
+        <div class="relative">
+          <textarea id="chatInput" 
+                    rows="1"
+                    placeholder="How are you feeling today? Type your message..."
+                    class="medical-input w-full bg-white text-gray-900 placeholder-gray-500"
+                    style="max-height: 150px;"></textarea>
+          
+          <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+            <button id="toggleMoodBtn" class="p-2 text-gray-500 hover:text-medical-primary rounded-lg hover:bg-gray-100 transition-colors">
+              <i class="fas fa-smile"></i>
+            </button>
+            <button id="sendBtn" class="top-button top-button-primary px-4">
+              <i class="fas fa-paper-plane"></i>
+              <span class="hidden sm:inline ml-2">Send</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <p class="text-xs text-gray-500 mt-4 text-center">
+          <i class="fas fa-shield-alt mr-1"></i>
+          This chat provides supportive guidance, not a replacement for licensed mental health professionals.
+          In crisis, contact emergency services.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden canvas for snapshot -->
+  <canvas id="camCanvas" class="hidden"></canvas>
+
+  <script>
+    // -----------------------------
+    // CSRF Token Helper
+    // -----------------------------
+    function getCSRFToken() {
+      const match = document.cookie.match(/csrftoken=([^;]+)/);
+      return match ? decodeURIComponent(match[1]) : "";
+    }
+
+    // -----------------------------
+    // UI Helpers
+    // -----------------------------
+    function scrollToBottom() {
+      const chatMessagesArea = document.querySelector('.chat-messages-area');
+      if (chatMessagesArea) {
+        chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;
+      }
+    }
+
+    function escapeHtml(str) {
+      return (str || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function setMoodBadge(mood) {
+      const badge = document.getElementById("moodBadge");
+      const moodLower = (mood || "unknown").toLowerCase();
+      
+      // Remove all mood classes
+      badge.className = "mood-badge";
+      
+      // Set new mood class
+      if (moodLower.includes('happy') || moodLower.includes('joy')) {
+        badge.className += " mood-happy";
+        badge.innerHTML = '<i class="fas fa-smile-beam mr-1"></i> happy';
+      } else if (moodLower.includes('sad') || moodLower.includes('sorrow')) {
+        badge.className += " mood-sad";
+        badge.innerHTML = '<i class="fas fa-sad-tear mr-1"></i> sad';
+      } else if (moodLower.includes('angry') || moodLower.includes('anger')) {
+        badge.className += " mood-angry";
+        badge.innerHTML = '<i class="fas fa-angry mr-1"></i> angry';
+      } else if (moodLower.includes('calm') || moodLower.includes('peaceful')) {
+        badge.className += " mood-calm";
+        badge.innerHTML = '<i class="fas fa-spa mr-1"></i> calm';
+      } else {
+        badge.className += " mood-neutral";
+        badge.innerHTML = '<i class="fas fa-user mr-1"></i> ' + moodLower;
+      }
+    }
+
+    // -----------------------------
+    // Message Handling
+    // -----------------------------
+    function appendMessage(role, content) {
+      const chatMessages = document.getElementById("chat-messages");
+      const safeContent = escapeHtml(content).replaceAll("\n", "<br/>");
+      
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message-container ${role === "user" ? "user-message-container" : "bot-message-container"}`;
+      
+      if (role === "user") {
+        messageDiv.innerHTML = `
+          <div class="message-bubble user-bubble">
+            <div class="text-sm whitespace-pre-wrap leading-relaxed">${safeContent}</div>
+            <div class="text-xs text-white/80 mt-2 text-right">
+              ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+          <div class="message-avatar user-avatar-small flex-shrink-0">
+            <i class="fas fa-user text-sm"></i>
+          </div>
+        `;
+      } else {
+        messageDiv.innerHTML = `
+          <div class="message-avatar bot-avatar flex-shrink-0">
+            <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+          </div>
+          <div class="message-bubble bot-bubble">
+            <div class="text-sm whitespace-pre-wrap leading-relaxed">${safeContent}</div>
+            <div class="text-xs text-gray-400 mt-2 text-right">
+              ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </div>
+          </div>
+        `;
+      }
+      
+      chatMessages.appendChild(messageDiv);
+      scrollToBottom();
+    }
+
+    function showTypingIndicator() {
+      const chatMessages = document.getElementById("chat-messages");
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "message-container bot-message-container";
+      typingDiv.id = "typing-indicator";
+      typingDiv.innerHTML = `
+        <div class="message-avatar bot-avatar flex-shrink-0">
+          <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+        </div>
+        <div class="message-bubble bot-bubble">
+          <div class="flex items-center space-x-1">
+            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse"></div>
+            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+          </div>
+        </div>
+      `;
+      chatMessages.appendChild(typingDiv);
+      scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+      const typingDiv = document.getElementById("typing-indicator");
+      if (typingDiv) typingDiv.remove();
+    }
+
+    // -----------------------------
+    // Camera Functionality
+    // -----------------------------
+    let camStream = null;
+    let camEnabled = false;
+
+    const toggleCamBtn = document.getElementById("toggleCamBtn");
+    const camVideo = document.getElementById("camVideo");
+    const cameraPreview = document.getElementById("cameraPreview");
+    const camStatus = document.getElementById("camStatus");
+    const camBtnText = document.getElementById("camBtnText");
+
+    async function toggleCamera() {
+      if (camStream) {
+        // Disable camera
+        camStream.getTracks().forEach(track => track.stop());
+        camStream = null;
+        camVideo.srcObject = null;
+        cameraPreview.classList.add("hidden");
+        camEnabled = false;
+        camBtnText.textContent = "Enable Camera";
+        camStatus.textContent = "Camera disabled";
+        camStatus.className = "text-sm text-gray-500";
+        return;
+      }
+
+      try {
+        // Enable camera
+        camStream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            width: { ideal: 640 },
+            height: { ideal: 480 },
+            facingMode: "user" 
+          }, 
+          audio: false 
+        });
+        
+        camVideo.srcObject = camStream;
+        cameraPreview.classList.remove("hidden");
+        camEnabled = true;
+        camBtnText.textContent = "Disable Camera";
+        camStatus.textContent = "Camera enabled";
+        camStatus.className = "text-sm text-green-600";
+        
+        // Auto-hide preview after 10 seconds
+        setTimeout(() => {
+          if (camEnabled) {
+            cameraPreview.classList.add("hidden");
+          }
+        }, 10000);
+        
+      } catch (err) {
+        console.error("Camera error:", err);
+        camStatus.textContent = "Camera permission denied";
+        camStatus.className = "text-sm text-red-600";
+        alert("Camera permission is required for mood analysis. Please enable camera access in your browser settings.");
+      }
+    }
+
+    function captureSnapshotDataURL() {
+      if (!camStream) return null;
+
+      const canvas = document.getElementById("camCanvas");
+      const video = camVideo;
+      
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 480;
+      
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      
+      return canvas.toDataURL("image/jpeg", 0.8);
+    }
+
+    // -----------------------------
+    // Send Message
+    // -----------------------------
+    async function sendMessage() {
+      const chatInput = document.getElementById("chatInput");
+      const sendBtn = document.getElementById("sendBtn");
+      
+      const text = (chatInput.value || "").trim();
+      if (!text) return;
+
+      // Disable send button
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+      // Add user message
+      appendMessage("user", text);
+      chatInput.value = "";
+      chatInput.style.height = "auto";
+
+      // Capture snapshot if camera enabled
+      const snapshot = camEnabled ? captureSnapshotDataURL() : null;
+
+      // Show typing indicator
+      showTypingIndicator();
+
+      try {
+        // Send to server
+        const res = await fetch("/chat/mental/api/send/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken(),
+          },
+          body: JSON.stringify({
+            content: text,
+            image: snapshot
+          })
+        });
+
+        const data = await res.json();
+        removeTypingIndicator();
+
+        if (!res.ok || !data.success) {
+          appendMessage("assistant", data.message || "Sorry, I encountered an error. Please try again.");
+        } else {
+          // Add bot response
+          const botText = data.bot_message?.content || "I understand how you're feeling. Would you like to talk more about it?";
+          appendMessage("assistant", botText);
+
+          // Update mood badge if available
+          if (data.detected_mood) {
+            setMoodBadge(data.detected_mood);
+          }
+        }
+
+      } catch (err) {
+        console.error("Network error:", err);
+        removeTypingIndicator();
+        appendMessage("assistant", "I'm having trouble connecting. Please check your internet connection and try again.");
+      } finally {
+        // Re-enable send button
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span class="hidden sm:inline ml-2">Send</span>';
+        chatInput.focus();
+      }
+    }
+
+    // -----------------------------
+    // Event Listeners
+    // -----------------------------
+    document.addEventListener("DOMContentLoaded", () => {
+      // Initialize mood badge
+      setMoodBadge("unknown");
+      
+      // Auto-focus input
+      const chatInput = document.getElementById("chatInput");
+      if (chatInput) {
+        chatInput.focus();
+      }
+
+      // Camera toggle
+      const toggleCamBtn = document.getElementById("toggleCamBtn");
+      if (toggleCamBtn) {
+        toggleCamBtn.addEventListener("click", toggleCamera);
+      }
+
+      // Send button
+      const sendBtn = document.getElementById("sendBtn");
+      if (sendBtn) {
+        sendBtn.addEventListener("click", sendMessage);
+      }
+
+      // Enter key to send (Shift+Enter for new line)
+      if (chatInput) {
+        chatInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        });
+
+        // Auto-resize textarea
+        chatInput.addEventListener("input", () => {
+          chatInput.style.height = "auto";
+          chatInput.style.height = Math.min(chatInput.scrollHeight, 150) + "px";
+        });
+      }
+
+      // Mood button (optional feature)
+      const toggleMoodBtn = document.getElementById("toggleMoodBtn");
+      if (toggleMoodBtn) {
+        toggleMoodBtn.addEventListener("click", () => {
+          const moods = ["happy", "sad", "angry", "calm", "anxious", "tired"];
+          const randomMood = moods[Math.floor(Math.random() * moods.length)];
+          setMoodBadge(randomMood);
+          
+          // Show temporary notification
+          const originalText = toggleMoodBtn.innerHTML;
+          toggleMoodBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            toggleMoodBtn.innerHTML = originalText;
+          }, 1000);
+        });
+      }
+
+      // Scroll to bottom on load
+      scrollToBottom();
+    });
+
+    // -----------------------------
+    // Emergency Handler
+    // -----------------------------
+    function handleEmergency() {
+      if (confirm('🚨 Are you experiencing a mental health crisis?\n\nCall these crisis hotlines immediately:\n\n📞 988 (Suicide & Crisis Lifeline)\n📞 741-741 (Crisis Text Line: text HOME)\n📞 1-800-273-8255 (National Suicide Prevention Lifeline)\n\nWould you like me to help you find local mental health resources?')) {
+        appendMessage("user", "I need emergency mental health support");
+        setTimeout(() => {
+          appendMessage("assistant", "I understand this is urgent. Here are immediate steps:\n\n1. Call 988 for immediate support\n2. Contact a trusted friend or family member\n3. Go to the nearest emergency room if in danger\n\nI can help you find local therapists and mental health services. Would you like me to search for resources in your area?");
+        }, 1000);
+      }
+    }
+
+    // Expose emergency function globally
+    window.handleEmergency = handleEmergency;
+  </script>
+</body>
+</html>

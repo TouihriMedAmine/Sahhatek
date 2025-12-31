@@ -929,3 +929,176 @@ def text_to_speech(request):
         except:
             return JsonResponse({"success": False, "message": "Invalid request"}, status=400)
     return JsonResponse({"success": False, "message": "Invalid method"}, status=405)
+
+
+
+
+# ---------------------MENTALHEALTH-------------------------
+import json
+import base64
+import numpy as np
+import cv2
+
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+
+from .models import Conversation, Message  # adjust if your models import path differs
+
+# DeepFace (mood detection)
+try:
+    from deepface import DeepFace
+    DEEPFACE_AVAILABLE = True
+except Exception:
+    DeepFace = None
+    DEEPFACE_AVAILABLE = False
+
+
+def _decode_base64_image(data_url: str):
+    """
+    Accepts:
+      - "data:image/jpeg;base64,AAAA..."
+      - or raw base64 "AAAA..."
+    Returns: OpenCV image (BGR) or None
+    """
+    if not data_url:
+        return None
+
+    try:
+        # remove dataurl prefix if exists
+        if "," in data_url:
+            data_url = data_url.split(",", 1)[1]
+
+        raw = base64.b64decode(data_url)
+        np_arr = np.frombuffer(raw, np.uint8)
+        img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)  # BGR
+        return img
+    except Exception:
+        return None
+
+
+def _detect_mood_from_image(img_bgr):
+    """
+    Returns dominant emotion string, or "unknown".
+    Uses DeepFace if installed.
+    """
+    if not DEEPFACE_AVAILABLE or img_bgr is None:
+        return "unknown"
+
+    try:
+        result = DeepFace.analyze(
+            img_path=img_bgr,
+            actions=["emotion"],
+            enforce_detection=False
+        )
+        if isinstance(result, list):
+            result = result[0]
+        mood = (result.get("dominant_emotion") or "unknown").strip().lower()
+        return mood or "unknown"
+    except Exception:
+        return "unknown"
+
+
+@login_required
+def mental_health_chat(request):
+    """Dedicated UI page for the mental health agent only."""
+    return render(request, "mental_health.html", {"user": request.user})
+
+
+@csrf_exempt
+@login_required
+@require_POST
+def mental_health_send(request):
+    """
+    Dedicated API endpoint that talks ONLY to mental_health_agent.
+    Uses Conversation/Message tables (same as main chat) but isolates messages
+    by creating (or reusing) a dedicated conversation for mental health.
+
+    Accepts JSON:
+    {
+      "content": "text",
+      "image": "data:image/jpeg;base64,...."   // optional (webcam snapshot)
+    }
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        return JsonResponse({"success": False, "message": "Invalid JSON"}, status=400)
+
+    user_text = (data.get("content") or "").strip()
+    if not user_text:
+        return JsonResponse({"success": False, "message": "Empty message"}, status=400)
+
+    # Optional webcam snapshot
+    image_data = data.get("image")  # dataURL base64 from browser
+
+    # 1) Detect mood (ONLY for mental_health)
+    detected_mood = "unknown"
+    if image_data:
+        img = _decode_base64_image(image_data)
+        detected_mood = _detect_mood_from_image(img)
+
+    # 2) Create/find a dedicated conversation for mental health
+    conversation, _ = Conversation.objects.get_or_create(
+        user=request.user,
+        title="🧠 Mental Health (private)",
+        defaults={"is_pinned": True}
+    )
+
+    # Save user message (store mood in metadata too, so you can review later)
+    user_msg = Message.objects.create(
+        conversation=conversation,
+        role="user",
+        content=user_text,
+        metadata={"detected_mood": detected_mood} if detected_mood != "unknown" else {}
+    )
+
+    # 3) Build history (last 12 messages)
+    recent = conversation.messages.filter(is_deleted=False).order_by("-created_at")[:12]
+    history = [{"role": m.role, "content": m.content} for m in reversed(recent)]
+
+    # 4) Call ONLY the mental_health_agent
+    from agents.mental_health.agent import mental_health_agent
+
+    state = {
+        "user_input": user_text,
+        "messages": history,
+        "metadata": {
+            "conversation_id": conversation.id,
+            "user_id": request.user.id,
+            "detected_mood": detected_mood,   # ✅ added
+        },
+        "current_agent": None,
+        "next_agent": None,
+        "agent_output": None,
+    }
+
+    out = mental_health_agent(state)
+
+    bot_text = out.get("agent_output") or "Sorry, I couldn't generate a response."
+    meta = out.get("metadata", {}) or {}
+    # Ensure mood is always included in response metadata (so UI can display it if you want)
+    meta["detected_mood"] = detected_mood
+
+    # Save bot message with metadata
+    bot_msg = Message.objects.create(
+        conversation=conversation,
+        role="assistant",
+        content=bot_text,
+        metadata=meta
+    )
+
+    return JsonResponse({
+        "success": True,
+        "conversation_id": conversation.id,
+        "detected_mood": detected_mood,
+        "bot_message": {
+            "id": bot_msg.id,
+            "role": "assistant",
+            "content": bot_text,
+            "metadata": meta
+        }
+    })
+
