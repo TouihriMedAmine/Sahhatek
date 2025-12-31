@@ -20,6 +20,8 @@ transformers==4.36.2
 torch==2.4.0
 torchvision==0.18.1
 torchaudio==2.4.0
+# Translation models (MarianMT for English-Arabic)
+sentencepiece==0.1.99
 
 # Vector Search and Similarity
 faiss-cpu==1.13.1
@@ -42,6 +44,9 @@ pydantic==2.5.3
 # Speech Recognition and Audio Processing
 vosk==0.3.45
 sounddevice==0.4.6
+arabic-reshaper==3.0.0
+pydub==0.25.1
+edge-tts>=6.1.0
 
 # Gradio (for UI, optional)
 gradio==4.8.0
