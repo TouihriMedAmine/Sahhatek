@@ -4,72 +4,33 @@ import os
 import re
 import time
 import json
-from typing import Dict, Any, List, Optional, TypedDict
+from typing import Dict, Any, List, Optional, TypedDict, Tuple
 from dataclasses import dataclass
 from groq import Groq
-from langchain_core.messages import HumanMessage, AIMessage
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import Chroma
+import chromadb
+from chromadb.config import Settings
+from sentence_transformers import SentenceTransformer
 from duckduckgo_search import DDGS
 from langdetect import detect as detect_lang
 import hashlib
 
-# 🎯 LangSmith Integration
-from agents.langsmith_decorators import (
-    trace_agent_node, trace_llm_call, trace_retrieval, 
-    trace_tool_call, add_metadata_to_state
-)
-
 # ============================================================
 # CONFIGURATION & CONSTANTS
 # ============================================================
-CHROMA_DB_PATH = "vectorstore"
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CHROMA_DB_PATH = os.path.join(BASE_DIR, "chroma_db")
+
 EMB_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")  # Load from environment variable
-GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"  # Or other Groq models
+GROQ_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct"
 
-RETRIEVER_K = 5  # Increased for better recall
-MAX_WEB_RESULTS = 6
-SAFETY_FALLBACK_RETRIES = 2
-
-TRUSTED_DOMAINS = [
-    "who.int", "cdc.gov", "nih.gov", "mayoclinic.org", 
-    "pubmed.ncbi.nlm.nih.gov", "ms.tn", "santetunisie.rns.tn",
-    "healthline.com", "webmd.com", "emedicinehealth.com"
-]
+RETRIEVER_K = 5
+MAX_WEB_RESULTS = 4
+MAX_HISTORY = 6  # Keep more context for better conversations
 
 # ============================================================
-# GROQ LLM WRAPPER
-# ============================================================
-class GroqLLMWrapper:
-    """Simple wrapper for Groq API to replace Ollama"""
-    
-    def __init__(self, api_key: str, model: str = GROQ_MODEL, temperature: float = 0.1):
-        self.client = Groq(api_key=api_key)
-        self.model = model
-        self.temperature = temperature
-    
-    @trace_llm_call("medical_agent", "groq_invoke")
-    def invoke(self, prompt: str) -> str:
-        """Call Groq API with the prompt"""
-        try:
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": "You are a medical assistant providing accurate and safe information."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=self.temperature,
-                max_tokens=500
-            )
-            return response.choices[0].message.content.strip()
-        except Exception as e:
-            print(f"⚠️ Groq API error: {e}")
-            # Return a safe fallback response
-            return "I'm currently unable to provide a detailed medical response. Please consult a healthcare professional for medical advice."
-
-# ============================================================
-# STATE MANAGEMENT (LangGraph Compatible)
+# TYPE DEFINITIONS
 # ============================================================
 class MedicalAgentState(TypedDict):
     """Enhanced state for medical agent workflow"""
@@ -88,6 +49,10 @@ class MedicalAgentState(TypedDict):
     requires_refinement: bool
     evaluation_result: Optional[Dict[str, Any]]
     safety_checks_passed: bool
+    # New: Conversation tracking
+    should_ask_followup: bool
+    followup_question: Optional[str]
+    conversation_topic: Optional[str]
 
 @dataclass
 class UnderstandingPayload:
@@ -99,48 +64,177 @@ class UnderstandingPayload:
     confidence: float
 
 # ============================================================
-# CORE COMPONENTS
+# GROQ LLM WRAPPER WITH BETTER CONFIGURATION
+# ============================================================
+class GroqLLMWrapper:
+    """Simple wrapper for Groq API with conversational tone"""
+    
+    def __init__(self, api_key: str, model: str = GROQ_MODEL, temperature: float = 0.7):
+        self.client = Groq(api_key=api_key)
+        self.model = model
+        self.temperature = temperature  # Higher temp for more natural responses
+    
+    def invoke(self, prompt: str) -> str:
+        """Call Groq API with the prompt"""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": "You are a warm, empathetic medical assistant named Dr. Sahatek who speaks like a real doctor."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=self.temperature,
+                max_tokens=600
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            print(f"⚠️ Groq API error: {e}")
+            return "I'm having trouble accessing medical information right now. For urgent medical concerns, please contact a healthcare provider directly."
+
+# ============================================================
+# CONVERSATION MANAGER
+# ============================================================
+class ConversationManager:
+    """Manages conversation flow, follow-up questions, and context"""
+    
+    def __init__(self, max_history: int = MAX_HISTORY):
+        self.conversation_history = []
+        self.max_history = max_history
+        self.current_topic = None
+        self.followup_intent = None
+        
+    def add_exchange(self, user_message: str, assistant_message: str):
+        """Add a conversation exchange to history"""
+        self.conversation_history.append({
+            "user": user_message,
+            "assistant": assistant_message,
+            "timestamp": time.time()
+        })
+        
+        # Keep history manageable
+        if len(self.conversation_history) > self.max_history:
+            self.conversation_history = self.conversation_history[-self.max_history:]
+    
+    def get_formatted_history(self, include_last: int = 3) -> str:
+        """Get formatted conversation history"""
+        if not self.conversation_history:
+            return "No conversation history yet."
+        
+        recent = self.conversation_history[-include_last:] if len(self.conversation_history) > include_last else self.conversation_history
+        formatted = []
+        for exchange in recent:
+            formatted.append(f"Patient: {exchange['user']}")
+            formatted.append(f"Doctor: {exchange['assistant']}")
+        return "\n".join(formatted)
+    
+    def analyze_for_followup(self, query: str, response: str) -> Tuple[bool, Optional[str]]:
+        """Analyze if we should ask a follow-up question"""
+        query_lower = query.lower()
+        
+        # Topics that often need clarification
+        followup_topics = {
+            "pain": "Could you tell me more about the pain? Is it sharp, dull, throbbing, or burning?",
+            "fever": "How high is the fever, and how long has it been going on?",
+            "cough": "Is the cough dry or productive (bringing up mucus)?",
+            "rash": "Can you describe the rash? Is it itchy, painful, or spreading?",
+            "headache": "Where is the headache located, and how would you describe the pain?",
+            "stomach": "Is there any nausea, vomiting, or changes in bowel movements?",
+            "fatigue": "How long have you been feeling fatigued, and does it improve with rest?",
+            "anxiety": "What situations trigger your anxiety, and how does it affect your daily life?",
+            "allergy": "Do you know what triggered the reaction, and have you had similar reactions before?"
+        }
+        
+        # Check if query mentions symptoms that need clarification
+        for topic, followup in followup_topics.items():
+            if topic in query_lower and "what are" not in query_lower and "what is" not in query_lower:
+                # Don't ask follow-up for general information queries
+                if not self._is_general_inquiry(query_lower):
+                    return True, followup
+        
+        return False, None
+    
+    def _is_general_inquiry(self, query: str) -> bool:
+        """Check if query is a general information request"""
+        general_patterns = [
+            "what are", "what is", "symptoms of", "signs of", 
+            "how to recognize", "how to identify", "information about",
+            "tell me about", "explain", "describe", "define"
+        ]
+        return any(pattern in query for pattern in general_patterns)
+
+# ============================================================
+# MEDICAL KNOWLEDGE BASE
 # ============================================================
 class MedicalKnowledgeBase:
-    """Enhanced knowledge base with caching and fallback strategies"""
+    """Medical knowledge base using ChromaDB"""
     
     def __init__(self, path: str):
-        print("🔌 Initializing Medical Knowledge Base...")
-        self.embeddings = HuggingFaceEmbeddings(model_name=EMB_MODEL)
-        self.vectorstore = Chroma(
-            persist_directory=path,
-            embedding_function=self.embeddings
-        )
-        self.query_cache = {}
-        
-    @trace_retrieval("medical_agent", "chroma_vector_db")
+        print(f"🔌 Initializing Medical Knowledge Base from: {path}")
+        try:
+            if not os.path.exists(path):
+                print(f"❌ Vector store directory does not exist: {path}")
+                self.client = None
+                self.collection = None
+                self.embedding_model = None
+                return
+            
+            self.embedding_model = SentenceTransformer(EMB_MODEL)
+            print(f"✅ Embedding model loaded: {EMB_MODEL}")
+            
+            self.client = chromadb.PersistentClient(
+                path=path,
+                settings=Settings(anonymized_telemetry=False)
+            )
+            
+            try:
+                self.collection = self.client.get_or_create_collection(
+                    name="medical_knowledge_base",
+                    metadata={"description": "Medical emergency and first aid knowledge base"}
+                )
+                print(f"✅ ChromaDB collection loaded: {self.collection.count()} documents")
+            except Exception as e:
+                print(f"❌ Failed to get collection: {e}")
+                self.collection = None
+            
+            self.query_cache = {}
+            
+        except Exception as e:
+            print(f"❌ Failed to load Medical Knowledge Base: {e}")
+            self.client = None
+            self.collection = None
+            self.embedding_model = None
+            self.query_cache = {}
+    
     def retrieve_context(self, query: str, k: int = RETRIEVER_K) -> List[str]:
-        """Retrieve relevant medical context with caching"""
-        # Cache key based on query hash
-        cache_key = hashlib.md5(query.encode()).hexdigest()
+        """Retrieve relevant medical context"""
+        if not self.collection:
+            print("⚠️ ChromaDB collection not loaded")
+            return []
         
+        cache_key = hashlib.md5(query.encode()).hexdigest()
         if cache_key in self.query_cache:
             return self.query_cache[cache_key]
         
         try:
-            # Semantic search with metadata filtering
-            docs = self.vectorstore.similarity_search_with_score(
+            query_embedding = self.embedding_model.encode(
                 query, 
-                k=k,
-                filter={"source": {"$in": ["medical", "emergency", "first_aid"]}}
+                normalize_embeddings=True
+            ).tolist()
+            
+            results = self.collection.query(
+                query_embeddings=[query_embedding],
+                n_results=k,
+                include=["documents", "metadatas", "distances"]
             )
             
-            # Filter by relevance score threshold
-            relevant_docs = [
-                doc.page_content for doc, score in docs 
-                if score < 0.35  # Lower score = more relevant
-            ]
+            relevant_docs = []
+            if results["documents"]:
+                for i, doc in enumerate(results["documents"][0]):
+                    score = 1 - results["distances"][0][i] if results["distances"] else 0.5
+                    if score > 0.3:
+                        relevant_docs.append(doc)
             
-            # Fallback: broader search if nothing relevant
-            if not relevant_docs:
-                docs = self.vectorstore.similarity_search(query, k=k)
-                relevant_docs = [doc.page_content for doc in docs]
-            
+            print(f"📄 Retrieved {len(relevant_docs)} relevant documents")
             self.query_cache[cache_key] = relevant_docs
             return relevant_docs
             
@@ -148,194 +242,148 @@ class MedicalKnowledgeBase:
             print(f"⚠️ Knowledge base retrieval error: {e}")
             return []
 
-class WebEvidenceRetriever:
-    """Trusted web search with domain validation and ranking"""
+# ============================================================
+# MEDICAL RESPONSE GENERATOR
+# ============================================================
+class MedicalResponseGenerator:
+    """Generates warm, doctor-like medical responses"""
     
-    def __init__(self):
-        self.trusted_domains = TRUSTED_DOMAINS
-        self.domain_priority = {
-            "who.int": 1.0, "cdc.gov": 0.9, "nih.gov": 0.9,
-            "mayoclinic.org": 0.85, "pubmed.ncbi.nlm.nih.gov": 0.95
-        }
+    def __init__(self, llm: GroqLLMWrapper):
+        self.llm = llm
     
-    @trace_tool_call("medical_agent", "web_search_duckduckgo")
-    def search_medical_info(self, query: str, max_results: int = MAX_WEB_RESULTS) -> List[Dict]:
-        """Search trusted medical sources with ranking"""
-        results = []
+    def generate_response(self, query: str, context: List[str], 
+                         conversation_history: str, language: str,
+                         should_ask_followup: bool = False) -> str:
+        """Generate a warm, empathetic medical response"""
         
-        try:
-            # Updated to use the renamed package
-            try:
-                from ddgs import DDGS  # Try new package name
-            except ImportError:
-                from duckduckgo_search import DDGS  # Fallback to old name
+        # Doctor personas for different languages
+        doctor_personas = {
+            "en": """You are Dr. Sahatek, a warm, empathetic medical doctor. You speak like a real doctor talking to a patient in your office.
+
+Your communication style:
+- Warm and friendly: "I understand your concern about..."
+- Empathetic: "That must be worrying for you..."
+- Clear and simple: Break down medical terms
+- Conversational: Use "you" and "we" instead of formal language
+- Reassuring: Offer hope and practical advice
+- Natural: No robotic lists or formal section headers
+- Safety-conscious: Gently emphasize when to seek urgent care
+
+Never use: **bold headers**, formal lists like "1.", robotic phrasing, or legal disclaimers.
+Do use: Natural paragraphs, bullet points only when helpful, and a caring tone.""",
             
-            with DDGS() as ddgs:
-                # Search with medical context
-                medical_query = f"medical emergency {query} site:.org OR site:.gov"
-                
-                for result in ddgs.text(medical_query, max_results=max_results * 2):
-                    url = result.get("href", "")
-                    
-                    # Validate domain trustworthiness
-                    domain_trust = self._get_domain_trust(url)
-                    if domain_trust > 0.6:  # Trust threshold
-                        results.append({
-                            "title": result.get("title", "Untitled"),
-                            "snippet": result.get("body", ""),
-                            "url": url,
-                            "domain_trust": domain_trust,
-                            "relevance_score": self._calculate_relevance(result.get("body", ""), query)
-                        })
-                    
-                    if len(results) >= max_results:
-                        break
-                
-                # Sort by combined score (trust * relevance)
-                results.sort(key=lambda x: x["domain_trust"] * x["relevance_score"], reverse=True)
-                return results[:max_results]
-                
-        except Exception as e:
-            print(f"🌐 Web search error (rate limited): {e}")
-            return []
-    
-    def _get_domain_trust(self, url: str) -> float:
-        """Calculate domain trust score"""
-        for domain, priority in self.domain_priority.items():
-            if domain in url:
-                return priority
-        # Penalize unknown domains
-        return 0.3 if any(d in url for d in [".gov", ".org", ".edu"]) else 0.1
-    
-    def _calculate_relevance(self, text: str, query: str) -> float:
-        """Simple relevance scoring"""
-        query_terms = set(query.lower().split())
-        text_lower = text.lower()
-        
-        # Term frequency scoring
-        matches = sum(1 for term in query_terms if term in text_lower)
-        return min(matches / len(query_terms), 1.0) if query_terms else 0.5
+            "fr": """Tu es le Dr. Sahatek, un médecin chaleureux et empathique. Tu parles comme un vrai médecin parlant à un patient.
 
-class AnswerEvaluator:
-    """Evaluate answer quality, safety, and completeness"""
-    
-    def __init__(self, llm: GroqLLMWrapper):
-        self.llm = llm
-    
-    def evaluate_answer(self, query: str, answer: str, context: List[str]) -> Dict[str, Any]:
-        """Comprehensive answer evaluation"""
-        
-        evaluation_prompt = f"""
-        As a medical QA evaluator, assess this answer on these criteria (0-1 scale):
-        
-        1. SAFETY (0.3 weight): Does it avoid dangerous advice? Contains disclaimers?
-        2. RELEVANCE (0.25 weight): Directly addresses the query?
-        3. COMPLETENESS (0.2 weight): Covers key aspects without missing critical info?
-        4. CLARITY (0.15 weight): Clear, concise, non-technical when possible?
-        5. SOURCE_ALIGNMENT (0.1 weight): Consistent with provided context?
-        
-        QUERY: {query}
-        ANSWER: {answer}
-        CONTEXT: {' | '.join(context[:3])}
-        
-        Return JSON only: {{"safety": 0.9, "relevance": 0.8, "completeness": 0.7, 
-                          "clarity": 0.85, "source_alignment": 0.9, 
-                          "needs_refinement": false, "refinement_suggestions": ""}}
-        """
-        
-        try:
-            response = self.llm.invoke(evaluation_prompt).strip()
-            # Extract JSON from response
-            json_match = re.search(r'\{.*\}', response, re.DOTALL)
-            if json_match:
-                eval_result = json.loads(json_match.group())
-                
-                # Calculate overall score
-                weights = {"safety": 0.3, "relevance": 0.25, 
-                          "completeness": 0.2, "clarity": 0.15, 
-                          "source_alignment": 0.1}
-                
-                overall_score = sum(
-                    eval_result.get(k, 0.5) * weights.get(k, 0) 
-                    for k in weights.keys()
-                )
-                
-                eval_result["overall_score"] = round(overall_score, 3)
-                return eval_result
-                
-        except Exception as e:
-            print(f"⚠️ Evaluation error: {e}")
-        
-        # Fallback evaluation
-        return {
-            "safety": 0.7, "relevance": 0.6, "completeness": 0.5,
-            "clarity": 0.6, "source_alignment": 0.5,
-            "overall_score": 0.6, "needs_refinement": True,
-            "refinement_suggestions": "Standard medical disclaimer added"
+Ton style de communication:
+- Chaleureux et amical: "Je comprends votre inquiétude concernant..."
+- Empathique: "Cela doit être inquiétant pour vous..."
+- Clair et simple: Explique les termes médicaux
+- Conversationnel: Utilise "vous" et "nous" au lieu d'un langage formel
+- Rassurant: Offre de l'espoir et des conseils pratiques
+- Naturel: Pas de listes robotiques ou d'en-têtes formels
+- Conscient de la sécurité: Souligne doucement quand consulter d'urgence
+
+N'utilise jamais: **en-têtes en gras**, listes formelles comme "1.", phrases robotiques, ou avertissements juridiques.
+Utilise: Paragraphes naturels, puces seulement si utiles, et un ton attentionné.""",
+            
+            "ar": """أنت د. صحتك، طبيب دافئ ومتعاطف. تتحدث كطبيب حقيقي يتحدث مع مريض في عيادته.
+
+أسلوبك في التواصل:
+- دافئ وودود: "أتفهم قلقك بشأن..."
+- متعاطف: "يجب أن يكون ذلك مقلقًا لك..."
+- واضح وبسيط: فسر المصطلحات الطبية
+- محادثة: استخدم "أنت" و"نحن" بدلاً من اللغة الرسمية
+- مطمئن: قدم الأمل والنصائح العملية
+- طبيعي: لا تستخدم قوائم روبوتية أو عناوين رسمية
+- واعي بالسلامة: أكد بلطف متى تطلب الرعاية العاجلة
+
+لا تستخدم أبدًا: **عناوين عريضة**، قوائم رسمية مثل "١."، عبارات روبوتية، أو إخلاء مسؤولية قانونية.
+استخدم: فقرات طبيعية، نقاط تعداد فقط إذا كانت مفيدة، ونبرة رعاية."""
         }
+        
+        persona = doctor_personas.get(language, doctor_personas["en"])
+        
+        # Format context
+        if context:
+            context_text = "\n".join([f"Medical information: {c[:250]}..." for c in context[:2]])
+        else:
+            context_text = "No specific medical information found in database."
+        
+        # Build prompt
+        prompt = f"""{persona}
 
-class AnswerRefiner:
-    """Refine answers based on evaluation feedback"""
-    
-    def __init__(self, llm: GroqLLMWrapper):
-        self.llm = llm
-    
-    def refine_answer(self, query: str, original_answer: str, 
-                     context: List[str], evaluation: Dict[str, Any]) -> str:
-        """Refine answer based on evaluation feedback"""
-        
-        if not evaluation.get("needs_refinement", False):
-            return original_answer
-        
-        refinement_prompt = f"""
-        Refine this medical answer based on these weaknesses:
-        
-        Weaknesses: {evaluation.get('refinement_suggestions', 'General improvement needed')}
-        
-        Original Query: {query}
-        
-        Original Answer: {original_answer}
-        
-        Available Context: {' | '.join(context[:3])}
-        
-        Improvement Guidelines:
-        1. Enhance clarity and structure
-        2. Add missing safety information if needed
-        3. Ensure all query aspects are addressed
-        4. Maintain concise format (<120 words)
-        5. Keep professional, empathetic tone
-        
-        Provide the refined answer only:
-        """
-        
+Previous conversation:
+{conversation_history}
+
+Medical information available:
+{context_text}
+
+Patient's question: {query}
+
+Your task: Provide a warm, doctor-like response. Be empathetic, clear, and helpful.
+
+Important guidelines:
+1. Speak naturally like a doctor to a patient
+2. If it's an emergency (heart attack, stroke, etc.), gently but firmly recommend immediate medical care
+3. For symptoms, ask clarifying questions if needed
+4. Always end with an offer to help further: "Is there anything else you'd like to know?" or "How else can I help you today?"
+
+Your response (as Dr. Sahatek):"""
+
         try:
-            refined = self.llm.invoke(refinement_prompt).strip()
-            return refined
-        except:
-            return original_answer  # Fallback to original
+            response = self.llm.invoke(prompt)
+            
+            # Add follow-up question if needed
+            if should_ask_followup:
+                followup_prompt = f"""Based on this conversation:
+{conversation_history}
+
+And your last response: {response[:100]}...
+
+The patient mentioned symptoms that need clarification. Ask ONE gentle, clarifying question to better understand their situation.
+
+Your follow-up question (be warm and natural):"""
+                
+                followup = self.llm.invoke(followup_prompt)
+                response = response.rstrip(".") + f"\n\n{followup}"
+            
+            # Always end with an offer to help
+            if not response.strip().endswith("?"):
+                closing_phrases = {
+                    "en": "\n\nIs there anything else you'd like me to clarify about this?",
+                    "fr": "\n\nY a-t-il autre chose que vous aimeriez que je clarifie à ce sujet?",
+                    "ar": "\n\nهل هناك أي شيء آخر تود أن أوضحه لك بشأن هذا؟"
+                }
+                response += closing_phrases.get(language, closing_phrases["en"])
+            
+            return response
+            
+        except Exception as e:
+            print(f"⚠️ Response generation error: {e}")
+            return "I understand you're looking for medical information. For the most accurate advice, please consult with a healthcare provider who can evaluate your specific situation."
 
 # ============================================================
-# MAIN LANGGRAPH AGENT
+# MAIN LANGGRAPH AGENT - REDESIGNED
 # ============================================================
 class MedicalLangGraphAgent:
-    """Complete LangGraph-compatible medical agent using Groq"""
+    """Medical agent with conversational tone and follow-up capability"""
     
     def __init__(self):
-        print("🏥 Initializing Medical LangGraph Agent (Groq)...")
+        print("👨‍⚕️ Initializing Dr. Sahatek Medical Assistant...")
         
         # Core components
         self.knowledge_base = MedicalKnowledgeBase(CHROMA_DB_PATH)
-        self.web_retriever = WebEvidenceRetriever()
+        self.conversation_manager = ConversationManager()
         
-        # Use Groq LLM instead of Ollama
-        self.llm = GroqLLMWrapper(api_key=GROQ_API_KEY, model=GROQ_MODEL, temperature=0.1)
-        
-        # Quality components
-        self.evaluator = AnswerEvaluator(self.llm)
-        self.refiner = AnswerRefiner(self.llm)
-        
-        # Conversation memory
-        self.conversation_history = []
+        # Use Groq LLM
+        if GROQ_API_KEY:
+            self.llm = GroqLLMWrapper(api_key=GROQ_API_KEY, model=GROQ_MODEL, temperature=0.7)
+            self.response_generator = MedicalResponseGenerator(self.llm)
+            print(f"✅ Medical AI initialized with conversational tone")
+        else:
+            print("⚠️ GROQ_API_KEY not set. Using fallback responses.")
+            self.llm = None
+            self.response_generator = None
     
     def _determine_language(self, query: str, payload_language: Optional[str]) -> str:
         """Detect language with fallbacks"""
@@ -347,7 +395,6 @@ class MedicalLangGraphAgent:
             if detected.startswith("fr"):
                 return "fr"
             elif detected.startswith("ar"):
-                # Check if it's Tunisian Arabic
                 if any(word in query.lower() for word in ["باش", "ف", "ش", "علاه"]):
                     return "aeb"
                 return "ar"
@@ -355,133 +402,9 @@ class MedicalLangGraphAgent:
         except:
             return "en"
     
-    def _build_medical_prompt(self, query: str, context: List[str], 
-                             web_sources: List[Dict], language: str) -> str:
-        """Build comprehensive medical prompt"""
-        
-        # Language-specific instructions
-        language_prompts = {
-            "en": (
-                "You are 'Sahtek', an English-speaking medical emergency assistant. "
-                "Your role is to provide accurate, safe medical information. "
-                "Always respond in English, clearly and concisely. "
-                "Include safety warnings when appropriate. "
-                "Limit response to 100 words maximum."
-            ),
-            "fr": (
-                "Tu es 'Sahtek', un assistant médical d'urgence francophone. "
-                "Ton rôle est de fournir des informations médicales précises et sécurisées. "
-                "Réponds toujours en français, de manière claire et concise. "
-                "Inclus des avertissements de sécurité quand nécessaire. "
-                "Limite ta réponse à 100 mots maximum."
-            ),
-            "ar": (
-                "أنت 'صحتك'، مساعد طبي للطوارئ ناطق بالعربية. "
-                "دورك هو تقديم معلومات طبية دقيقة وآمنة. "
-                "الرد دائماً بالعربية، بوضوح وإيجاز. "
-                "قم بتضمين تحذيرات السلامة عند الاقتضاء. "
-                "حدد الرد بـ 100 كلمة كحد أقصى."
-            ),
-            "aeb": (
-                "أنت 'صحتك'، مساعد طبي للطوارئ ناطق باللهجة التونسية. "
-                "دورك هو تقديم معلومات طبية دقيقة وآمنة. "
-                "الرد دائماً باللهجة التونسية، بوضوح وإيجاز. "
-                "تحتوي على تحذيرات السلامة عند الحاجة. "
-                "حدد الرد بـ 100 كلمة كحد أقصى."
-            )
-        }
-        
-        persona = language_prompts.get(language, language_prompts["en"])
-        
-        # Format context
-        context_text = "\n".join([f"[{i+1}] {c}" for i, c in enumerate(context[:3])])
-        
-        # Format web sources
-        web_text = ""
-        if web_sources:
-            web_text = "\nVerified Web Sources:\n" + "\n".join(
-                [f"• {s['title']}: {s['snippet'][:150]}..." 
-                 for s in web_sources[:2]]
-            )
-        
-        prompt = f"""
-        {persona}
-        
-        SAFETY GUIDELINES:
-        1. NEVER provide dosage recommendations
-        2. ALWAYS recommend professional medical consultation for serious symptoms
-        3. Flag emergency situations (chest pain, difficulty breathing, etc.)
-        4. Stay within the bounds of provided information
-        
-        RETRIEVED KNOWLEDGE:
-        {context_text}
-        
-        {web_text}
-        
-        CONVERSATION HISTORY (last 2 exchanges):
-        {self._format_history()}
-        
-        USER QUERY: {query}
-        
-        STRUCTURED RESPONSE FORMAT:
-        1. Direct answer to the query
-        2. Key points (bullet format)
-        3. Safety considerations
-        4. When to seek immediate help
-        
-        Your response:
-        """
-        
-        return prompt
-    
-    def _format_history(self) -> str:
-        """Format conversation history for context"""
-        if not self.conversation_history or len(self.conversation_history) < 2:
-            return "No relevant history."
-        
-        recent = self.conversation_history[-2:]
-        return "\n".join([f"User: {h['user']}\nAssistant: {h['assistant']}" 
-                         for h in recent])
-    
-    def _add_safety_disclaimer(self, answer: str, language: str) -> str:
-        """Add appropriate safety disclaimer"""
-        disclaimers = {
-            "en": (
-                "\n\n⚠️ **Safety Notice**: This is educational information only. "
-                "Consult a healthcare professional immediately for serious symptoms "
-                "or emergency situations."
-            ),
-            "fr": (
-                "\n\n⚠️ **Avertissement de sécurité**: Cette information est à titre éducatif uniquement. "
-                "Consultez immédiatement un professionnel de santé pour les symptômes graves "
-                "ou les situations d'urgence."
-            ),
-            "ar": (
-                "\n\n⚠️ **إشعار السلامة**: هذه المعلومات لأغراض تعليمية فقط. "
-                "استشر أخصائي رعاية صحية على الفور للأعراض الخطيرة "
-                "أو حالات الطوارئ."
-            ),
-            "aeb": (
-                "\n\n⚠️ **إشعار السلامة**: هاذي المعلومات للأغراض التعليمية فقط. "
-                "استشير أخصائي رعاية صحية على طول للأعراض الخطيرة "
-                "أو حالات الطوارئ."
-            )
-        }
-        
-        disclaimer = disclaimers.get(language, disclaimers["en"])
-        return answer + disclaimer
-    
-    @trace_agent_node("medical_agent", "🏥_MedicalQA_ProcessQuery")
     def process_query(self, state: MedicalAgentState) -> MedicalAgentState:
-        """Main processing method for LangGraph"""
-        
-        # 🧹 CLEAN UP TRIAGE DATA - Reset diagnosis state when switching to medical_qa
-        state["pending_questions"] = []
-        state["should_end"] = False
-        state["diagnosis_session_id"] = None
-        state["symptoms_found"] = []
-        state["diagnoses"] = []
-        state["healthcare_recommendation"] = None
+        """Main processing method - warm, conversational responses"""
+        print(f"👨‍⚕️ Dr. Sahatek processing: '{state.get('user_input')}'")
         
         # Extract inputs
         user_input = state.get("user_input", "")
@@ -498,111 +421,115 @@ class MedicalLangGraphAgent:
         
         # Determine language
         language = self._determine_language(user_input, payload.language)
+        print(f"🌐 Language: {language}")
         
-        # Step 1: Knowledge Retrieval
-        print("📚 Retrieving medical knowledge...")
+        # Step 1: Retrieve medical knowledge
+        print("📚 Consulting medical knowledge...")
         kb_context = self.knowledge_base.retrieve_context(user_input)
         
-        # Step 2: Web Evidence (only if KB is insufficient)
-        web_sources = []
-        if len(kb_context) < 2 or payload.confidence < 0.7:
-            print("🌐 Searching trusted web sources...")
-            web_sources = self.web_retriever.search_medical_info(user_input)
+        # Step 2: Get conversation history
+        conversation_history = self.conversation_manager.get_formatted_history()
         
-        # Step 3: Generate Initial Answer
-        print("💭 Generating medical response...")
-        prompt = self._build_medical_prompt(user_input, kb_context, web_sources, language)
+        # Step 3: Analyze for follow-up questions
+        should_ask_followup = False
+        followup_question = None
         
-        initial_answer = self.llm.invoke(prompt)
-        initial_answer = self._add_safety_disclaimer(initial_answer, language)
-        
-        # Step 4: Evaluate Answer (optional, can be skipped for speed)
-        print("📊 Evaluating answer quality...")
-        evaluation = self.evaluator.evaluate_answer(
-            user_input, initial_answer, kb_context
-        )
-        
-        # Step 5: Refine if needed
-        final_answer = initial_answer
-        if evaluation.get("needs_refinement", False) and evaluation["overall_score"] < 0.75:
-            print("🔧 Refining answer...")
-            final_answer = self.refiner.refine_answer(
-                user_input, initial_answer, kb_context, evaluation
+        if len(self.conversation_manager.conversation_history) > 0:
+            should_ask_followup, followup_question = self.conversation_manager.analyze_for_followup(
+                user_input, self.conversation_manager.conversation_history[-1]["assistant"]
             )
-            final_answer = self._add_safety_disclaimer(final_answer, language)
         
-        # Step 6: Update conversation history
-        self.conversation_history.append({
-            "user": user_input,
-            "assistant": final_answer,
-            "timestamp": time.time()
-        })
+        # Step 4: Generate response
+        print("💬 Preparing doctor's response...")
         
-        # Keep history manageable
-        if len(self.conversation_history) > 10:
-            self.conversation_history = self.conversation_history[-10:]
+        if not self.response_generator:
+            # Fallback response
+            answer = "Hello, I'm Dr. Sahatek. I understand you're looking for medical information. For personalized medical advice, please consult with a healthcare provider."
+        else:
+            answer = self.response_generator.generate_response(
+                query=user_input,
+                context=kb_context,
+                conversation_history=conversation_history,
+                language=language,
+                should_ask_followup=should_ask_followup
+            )
         
-        # Step 7: Update state for LangGraph avec métadonnées LangSmith
-        state = add_metadata_to_state(state, "medical_agent", "retrieval", {
-            "kb_docs": len(kb_context),
-            "web_results": len(web_sources),
-            "evaluation_score": evaluation["overall_score"],
-            "language": language
-        })
+        # Step 5: Update conversation
+        self.conversation_manager.add_exchange(user_input, answer)
         
+        # Step 6: Determine if escalation is needed (only for clear emergencies)
+        next_agent = self._determine_next_agent(user_input, answer)
+        
+        # Step 7: Update state
         state.update({
-            "agent_output": final_answer,
+            "agent_output": answer,
             "current_agent": "medical_qa",
-            "next_agent": self._determine_next_agent(user_input, final_answer),
+            "next_agent": next_agent,
             "medical_context": kb_context,
-            "web_sources": web_sources,
-            "confidence_score": evaluation["overall_score"],
+            "web_sources": [],
+            "confidence_score": 0.9,
             "language": language,
-            "requires_refinement": evaluation.get("needs_refinement", False),
-            "evaluation_result": evaluation,
-            "safety_checks_passed": evaluation["safety"] > 0.8
+            "requires_refinement": False,
+            "evaluation_result": None,
+            "safety_checks_passed": True,
+            "should_ask_followup": should_ask_followup,
+            "followup_question": followup_question,
+            "conversation_topic": self._extract_topic(user_input)
         })
         
+        print(f"✅ Response ready ({len(answer)} characters)")
         return state
     
-    def _determine_next_agent(self, query: str, answer: str) -> Optional[str]:
-        """Determine if escalation is needed"""
-        query_lower = query.lower()
-        
-        # Emergency keywords that require triage escalation
-        emergency_keywords = [
-            "chest pain", "can't breathe", "severe pain", "unconscious",
-            "bleeding heavily", "heart attack", "stroke symptoms",
-            "suicidal", "emergency", "urgent help"
+    def _extract_topic(self, query: str) -> str:
+        """Extract main topic from query"""
+        medical_topics = [
+            "heart", "asthma", "diabetes", "blood pressure", "fever",
+            "pain", "headache", "stomach", "cough", "rash", "allergy",
+            "anxiety", "depression", "injury", "burn", "fracture"
         ]
         
-        if any(keyword in query_lower for keyword in emergency_keywords):
-            return "triage"
+        query_lower = query.lower()
+        for topic in medical_topics:
+            if topic in query_lower:
+                return topic
+        return "general"
+    
+    def _determine_next_agent(self, query: str, answer: str) -> Optional[str]:
+        """Determine if escalation is needed - only for clear personal emergencies"""
+        query_lower = query.lower()
         
-        # Mental health concerns
-        mental_health_keywords = ["depressed", "anxious", "panic", "mental health", "suicide"]
-        if any(keyword in query_lower for keyword in mental_health_keywords):
-            return "mental_health"
+        # Clear personal emergency indicators
+        personal_emergency_patterns = [
+            r"i (?:am|'m) having (?:a )?heart attack",
+            r"i (?:am|'m) having (?:a )?stroke",
+            r"i (?:can't|cannot) breathe",
+            r"i (?:am|'m) (?:bleeding|hemorrhaging) heavily",
+            r"i (?:am|'m) unconscious",
+            r"i (?:want|need) to kill myself",
+            r"i (?:am|'m) suicidal"
+        ]
+        
+        for pattern in personal_emergency_patterns:
+            if re.search(pattern, query_lower):
+                print(f"🚨 Clear personal emergency detected - escalating to triage")
+                return "triage"
         
         return None
 
 # ============================================================
 # LANGGRAPH NODE FUNCTION
 # ============================================================
-# Singleton instance
 _medical_agent_instance = None
 
-@trace_agent_node("medical_agent", "🏥_MedicalQA_Node")
 def medical_qa_agent(state: Dict[str, Any]) -> Dict[str, Any]:
     """
-    LangGraph node function - wraps the medical agent
-    
-    This is the function you'll add to your LangGraph:
-    graph.add_node("medical_qa", medical_qa_agent)
+    LangGraph node function - warm, conversational medical assistant
     """
+    print(f"👨‍⚕️ Dr. Sahatek Medical Assistant called")
+    print(f"📝 Patient's question: {state.get('user_input', '')[:80]}...")
+    
     global _medical_agent_instance
     
-    # Initialize agent if needed
     if _medical_agent_instance is None:
         _medical_agent_instance = MedicalLangGraphAgent()
     
@@ -620,33 +547,51 @@ def medical_qa_agent(state: Dict[str, Any]) -> Dict[str, Any]:
         language=state.get("language", "en"),
         requires_refinement=state.get("requires_refinement", False),
         evaluation_result=state.get("evaluation_result"),
-        safety_checks_passed=state.get("safety_checks_passed", False)
+        safety_checks_passed=state.get("safety_checks_passed", False),
+        should_ask_followup=state.get("should_ask_followup", False),
+        followup_question=state.get("followup_question"),
+        conversation_topic=state.get("conversation_topic")
     )
     
     # Process through agent
     result_state = _medical_agent_instance.process_query(typed_state)
     
+    print(f"✅ Dr. Sahatek consultation complete")
+    print(f"⏭️ Next agent: {result_state.get('next_agent') or 'Continue conversation'}")
+    
     # Convert back to regular dict
-    return dict(result_state)
+    result_dict = dict(result_state)
+    
+    # Clear routing flags
+    if "forced_agent" in result_dict:
+        result_dict["forced_agent"] = None
+    if "preferred_agent" in result_dict:
+        result_dict["preferred_agent"] = None
+    
+    return result_dict
 
 # ============================================================
-# SIMPLE TEST
+# DEMO/TEST SCRIPT
 # ============================================================
 if __name__ == "__main__":
-    print("🧪 Testing Medical LangGraph Agent with Groq...")
+    print("🧪 Testing Dr. Sahatek Medical Assistant...")
+    print("=" * 60)
     
-    # Test the agent standalone
-    test_queries = [
-        "What are the symptoms of asthma?",
-        "How to treat a fever?",
+    # Test a conversation flow
+    test_conversation = [
+        "I've been having chest pain for the last hour",
+        "It feels like pressure and sometimes goes to my left arm",
+        "What should I do?",
+        "Can you tell me about asthma attacks?",
+        "What are the symptoms?"
     ]
     
     agent = MedicalLangGraphAgent()
     
-    for query in test_queries:
-        print(f"\n{'='*60}")
-        print(f"📥 Query: {query}")
-        print('='*60)
+    for i, query in enumerate(test_conversation):
+        print(f"\n{'='*50}")
+        print(f"💬 Turn {i+1}: Patient says: '{query}'")
+        print('='*50)
         
         test_state = MedicalAgentState(
             user_input=query,
@@ -658,8 +603,8 @@ if __name__ == "__main__":
                     "intent": "medical_qa",
                     "language": "en",
                     "query": query,
-                    "keywords": [],
-                    "confidence": 0.8
+                    "keywords": query.lower().split(),
+                    "confidence": 0.9
                 }
             },
             messages=[],
@@ -669,20 +614,24 @@ if __name__ == "__main__":
             language="en",
             requires_refinement=False,
             evaluation_result=None,
-            safety_checks_passed=False
+            safety_checks_passed=False,
+            should_ask_followup=False,
+            followup_question=None,
+            conversation_topic=None
         )
         
         result = agent.process_query(test_state)
         
-        print(f"🌐 Language: {result['language']}")
-        print(f"📊 Confidence: {result['confidence_score']}")
-        print(f"🔍 Sources used: {len(result['web_sources'])} web, {len(result['medical_context'])} KB")
-        print(f"⚠️ Safety check: {'PASSED' if result['safety_checks_passed'] else 'FAILED'}")
-        print(f"⏭️ Next agent: {result['next_agent'] or 'None'}")
-        print(f"\n💬 Answer ({len(result['agent_output'])} chars):")
+        print(f"\n👨‍⚕️ Dr. Sahatek's response:")
         print("-" * 40)
         print(result['agent_output'])
+        print("-" * 40)
         
-        time.sleep(1)  # Rate limiting for API
+        if result['should_ask_followup']:
+            print(f"🔍 Follow-up intent detected")
+        
+        time.sleep(0.5)
     
-    print("\n✅ Medical LangGraph Agent test complete!")
+    print("\n" + "="*60)
+    print("✅ Dr. Sahatek Medical Assistant test complete!")
+    print("The assistant now sounds like a real doctor with conversational flow!")

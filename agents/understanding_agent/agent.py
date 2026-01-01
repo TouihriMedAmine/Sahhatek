@@ -36,6 +36,7 @@ class Intent(Enum):
     TRIAGE = "triage"
     MENTAL_HEALTH = "mental_health"
     RUMOR = "rumor"
+    WOUND_ANALYZER = "wound_analyzer"
     GREETING = "greeting"
     CLARIFICATION_NEEDED = "clarification_needed"
     OUT_OF_SCOPE = "out_of_scope"
@@ -125,19 +126,15 @@ class SpeechHandler:
             return ""
 
 # ============================================================
-# CORE UNDERSTANDING AGENT - SIMPLE & RELIABLE
+# CORE UNDERSTANDING AGENT - IMPROVED FOR DIRECT AGENT SUPPORT
 # ============================================================
 class UnderstandingAgent:
     """
-    Simple understanding agent that:
-    1. Listens to user
-    2. Understands intent
-    3. Routes to correct agent
-    That's it.
+    Understanding agent that respects direct agent conversations.
     """
     
     def __init__(self):
-        print("🤖 Initializing Simple Understanding Agent...")
+        print("🤖 Initializing Understanding Agent...")
         self.groq = Groq(api_key=GROQ_API_KEY)
         self.speech = SpeechHandler() if SPEECH_ENABLED else None
         
@@ -147,20 +144,20 @@ class UnderstandingAgent:
         # Simple language mappings
         self.language_responses = {
             "en": {
-                "greeting": "Hello! I'm Sahatek, your medical assistant. I can help with:\n• Medical questions (medical_qa)\n• Symptom assessment (triage)\n• Mental health support (mental_health)\n• Medical rumor verification (rumor)\n\nHow can I help you today?",
+                "greeting": "Hello! I'm Sahatek, your medical assistant. I can help with:\n• Medical questions (medical_qa)\n• Symptom assessment (triage)\n• Mental health support (mental_health)\n• Medical rumor verification (rumor)\n• Wound analysis (wound_analyzer)\n\nHow can I help you today?",
                 "clarify": "I want to make sure I understand correctly. Could you please provide more details about your medical concern?",
                 "out_of_scope": "I specialize in medical assistance only. Please describe your medical concern and I'll help you.",
                 "routing": "I understand. Let me connect you to the right specialist..."
             },
             "aeb": {
-                "greeting": "السلام! أنا ساهاتيك، المساعد الطبي تاعك. نقدر نعاونك في:\n• أسئلة طبية (medical_qa)\n• تقييم الأعراض (triage)\n• دعم الصحة النفسية (mental_health)\n• تحقق من الشائعات الطبية (rumor)\n\nكيفاش نقدر نعاونك اليوم؟",
+                "greeting": "السلام! أنا ساهاتيك، المساعد الطبي تاعك. نقدر نعاونك في:\n• أسئلة طبية (medical_qa)\n• تقييم الأعراض (triage)\n• دعم الصحة النفسية (mental_health)\n• تحقق من الشائعات الطبية (rumor)\n• تحليل الجروح (wound_analyzer)\n\nكيفاش نقدر نعاونك اليوم؟",
                 "clarify": "نبغي نتأكد باش نفهم صح. تقدر تعطيني تفاصيل أكثر على القلق الطبي تاعك؟",
                 "out_of_scope": "نتخصص في المساعدة الطبية فقط. نرجيوصف القلق الطبي تاعك ونعاونك.",
                 "routing": "فهمتك. نرجع نوصلك مع الأخصائي المناسب..."
             },
             "ar": {
-                "greeting": "مرحباً! أنا ساهاتيك، مساعدك الطبي. يمكنني المساعدة في:\n• الأسئلة الطبية (medical_qa)\n• تقييم الأعراض (triage)\n• دعم الصحة النفسية (mental_health)\n• التحقق من الشائعات الطبية (rumor)\n\nكيف يمكنني مساعدتك اليوم؟",
-                "clarify": "أريد التأكد من فهمي الصحيح. هل يمكنك تقديم المزيد من التفاصيل عن مخاوفك الطبية؟",
+                "greeting": "مرحباً! أنا ساهاتيك، مساعدك الطبي. يمكنني المساعدة في:\n• الأسئلة الطبية (medical_qa)\n• تقييم الأعراض (triage)\n• دعم الصحة النفسية (mental_health)\n• التحقق من الشائعات الطبية (rumor)\n• تحليل الجروح (wound_analyzer)\n\nكيف يمكنني مساعدتك اليوم?",
+                "clarify": "أريد التأكد من فهمي الصحيح. هل يمكنك تقديم المزيد من التفاصيل عن مخاوفك الطبية?",
                 "out_of_scope": "أتخصص في المساعدة الطبية فقط. يرجى وصف مخاوفك الطبية وسأساعدك.",
                 "routing": "فهمتك. دعني أوصلك بالمتخصص المناسب..."
             }
@@ -200,13 +197,75 @@ class UnderstandingAgent:
                 return "ar"
             return "en"
     
-    # ==================== SIMPLE INTENT CLASSIFICATION ====================
+    # ==================== IMPROVED INTENT CLASSIFICATION ====================
     
-    def classify_intent(self, text: str, language: str) -> AgentDecision:
+    def classify_intent(self, text: str, language: str, conversation_metadata=None) -> AgentDecision:
         """
-        Simple intent classification using LLM
-        Returns: what to do next
+        Improved intent classification that respects conversation context.
         """
+        # If this is a specialized conversation (from metadata), respect that intent
+        if conversation_metadata and "agent" in conversation_metadata:
+            preferred_agent = conversation_metadata["agent"]
+            print(f"🎯 SPECIALIZED CONVERSATION CONTEXT: {preferred_agent}")
+            
+            # Map to intent based on conversation agent
+            agent_to_intent = {
+                "general-info": Intent.MEDICAL_QA,
+                "symptoms-checker": Intent.TRIAGE,
+                "mental-health": Intent.MENTAL_HEALTH,
+                "rumor-check": Intent.RUMOR,
+                "orientation": Intent.TRIAGE,  # Orientation uses triage intent
+                "wound-analyzer": Intent.WOUND_ANALYZER  # Added wound analyzer mapping
+            }
+            
+            intent = agent_to_intent.get(preferred_agent, Intent.MEDICAL_QA)
+            
+            # For general-info conversations, always return medical_qa intent
+            if preferred_agent == "general-info":
+                return AgentDecision(
+                    intent=Intent.MEDICAL_QA,
+                    route_to="medical_qa",
+                    response=self.language_responses.get(language, self.language_responses["en"])["routing"],
+                    confidence=0.95,
+                    needs_clarification=False
+                )
+            # For symptoms-checker, route to triage
+            elif preferred_agent == "symptoms-checker":
+                return AgentDecision(
+                    intent=Intent.TRIAGE,
+                    route_to="triage",
+                    response=self.language_responses.get(language, self.language_responses["en"])["routing"],
+                    confidence=0.95,
+                    needs_clarification=False
+                )
+            # For mental-health, route to mental_health
+            elif preferred_agent == "mental-health":
+                return AgentDecision(
+                    intent=Intent.MENTAL_HEALTH,
+                    route_to="mental_health",
+                    response="Routing to mental health specialist...",
+                    confidence=0.95,
+                    needs_clarification=False
+                )
+            # For rumor-check, route to rumor
+            elif preferred_agent == "rumor-check":
+                return AgentDecision(
+                    intent=Intent.RUMOR,
+                    route_to="rumor",
+                    response="Routing to rumor verification...",
+                    confidence=0.95,
+                    needs_clarification=False
+                )
+            # For wound-analyzer, route to wound_analyzer
+            elif preferred_agent == "wound-analyzer":
+                return AgentDecision(
+                    intent=Intent.WOUND_ANALYZER,
+                    route_to="wound_analyzer",
+                    response="Routing to wound analysis assistant...",
+                    confidence=0.95,
+                    needs_clarification=False
+                )
+        
         # Quick check for short answers that should go to triage
         text_lower = text.lower().strip()
         short_answers = ["yes", "y", "no", "n", "maybe", "sometimes", "occasionally", "oui", "non", "نعم", "لا", "أي", "لا"]
@@ -221,7 +280,7 @@ class UnderstandingAgent:
                 needs_clarification=False
             )
         
-        # Check for direct facility requests (e.g., "show me nearest pharmacies", "where is the nearest hospital")
+        # Check for direct facility requests
         facility_keywords = {
             "pharmacy": ["pharmacy", "pharmacies", "pharmacie", "صيدلية", "صيدليات", "pharma"],
             "hospital": ["hospital", "hospitals", "مستشفى", "مستشفيات", "hopital"],
@@ -259,12 +318,12 @@ class UnderstandingAgent:
             if detected_facility:
                 print(f"🔍 Detected facility request: '{text}' - routing to orientation with {detected_facility}")
                 return AgentDecision(
-                    intent=Intent.TRIAGE,  # Use TRIAGE intent but route to orientation
-                    route_to="orientation",  # Route directly to orientation
+                    intent=Intent.TRIAGE,
+                    route_to="orientation",
                     response=self.language_responses.get(language, self.language_responses["en"])["routing"],
                     confidence=0.95,
                     needs_clarification=False,
-                    facility_type=detected_facility  # Pass facility type in decision
+                    facility_type=detected_facility
                 )
         
         # Check cache first
@@ -319,40 +378,63 @@ class UnderstandingAgent:
 Message: "{text}"
 
 Possible intents:
-1. medical_qa - General medical questions (what is X, symptoms of Y)
-2. triage - Emergency symptoms, "should I go to hospital", urgent care
-3. mental_health - Depression, anxiety, stress, emotional issues
-4. rumor - "Is it true that...", medical rumors
-5. greeting - Hello, hi, greetings
-6. clarification_needed - Vague, unclear, needs more details
-7. out_of_scope - Not medical, nonsense, unrelated
+1. medical_qa - General medical questions (what is X, symptoms of Y, information about conditions)
+2. triage - Emergency symptoms, "should I go to hospital", urgent care, physical symptoms
+3. mental_health - Depression, anxiety, stress, emotional issues, psychological concerns
+4. rumor - "Is it true that...", medical rumors, fact checking
+5. wound_analyzer - Analyzing wounds, cuts, burns, skin conditions, rashes, injuries, medical images
+6. greeting - Hello, hi, greetings
+7. clarification_needed - Vague, unclear, needs more details
+8. out_of_scope - Not medical, nonsense, unrelated
 
 Return JSON with:
 - intent: one of the above
 - confidence: 0.0 to 1.0
 - needs_clarification: true/false (if confidence < 0.7)
 
-Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": false}}""",
+Example: {{"intent": "wound_analyzer", "confidence": 0.9, "needs_clarification": false}}""",
             
             "aeb": f"""صنّف هادي الرسالة لمساعد طبي:
 
 الرسالة: "{text}"
 
 النوايا الممكنة:
-1. medical_qa - أسئلة طبية عامة (شنوة X، أعراض Y)
-2. triage - أعراض طارئة، "نروح للمستشفى ولا لا"، رعاية عاجلة
-3. mental_health - اكتئاب، قلق، توتر، مشاكل عاطفية
-4. rumor - "هاديك حقيقة ولا لا..."، شائعات طبية
-5. greeting - سلام، أهلا، تحية
-6. clarification_needed - مبهم، غير واضح، يحتاج تفاصيل أكثر
-7. out_of_scope - غير طبي، كلام فاضي، غير مرتبط
+1. medical_qa - أسئلة طبية عامة (شنوة X، أعراض Y، معلومات على حالات)
+2. triage - أعراض طارئة، "نروح للمستشفى ولا لا"، رعاية عاجلة، أعراض جسمية
+3. mental_health - اكتئاب، قلق، توتر، مشاكل عاطفية، مخاوف نفسية
+4. rumor - "هاديك حقيقة ولا لا..."، شائعات طبية، تدقيق الحقائق
+5. wound_analyzer - تحليل الجروح، القطوع، الحروق، حالات الجلد، الطفح الجلدي، الإصابات، الصور الطبية
+6. greeting - سلام، أهلا، تحية
+7. clarification_needed - مبهم، غير واضح، يحتاج تفاصيل أكثر
+8. out_of_scope - غير طبي، كلام فاضي، غير مرتبط
 
 ارجع JSON مع:
 - intent: واحد من فوق
 - confidence: من 0.0 ل 1.0
 - needs_clarification: true/false (إذا الثقة أقل من 0.7)
 
-مثال: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": false}}"""
+مثال: {{"intent": "wound_analyzer", "confidence": 0.9, "needs_clarification": false}}""",
+            
+            "ar": f"""صنف هذه الرسالة لمساعد طبي:
+
+الرسالة: "{text}"
+
+النوايا الممكنة:
+1. medical_qa - أسئلة طبية عامة (ما هو X، أعراض Y، معلومات عن الحالات)
+2. triage - أعراض الطوارئ، "هل يجب أن أذهب إلى المستشفى"، الرعاية العاجلة، الأعراض الجسدية
+3. mental_health - الاكتئاب، القلق، التوتر، القضايا العاطفية، المخاوف النفسية
+4. rumor - "هل صحيح أن..."، الشائعات الطبية، التحقق من الحقائق
+5. wound_analyzer - تحليل الجروح، الجروح، الحروق، حالات الجلد، الطفح الجلدي، الإصابات، الصور الطبية
+6. greeting - مرحبا، أهلاً، تحية
+7. clarification_needed - غامض، غير واضح، يحتاج إلى مزيد من التفاصيل
+8. out_of_scope - غير طبي، هراء، غير ذي صلة
+
+ارجع JSON مع:
+- intent: واحد مما سبق
+- confidence: من 0.0 إلى 1.0
+- needs_clarification: true/false (إذا كانت الثقة أقل من 0.7)
+
+مثال: {{"intent": "wound_analyzer", "confidence": 0.9, "needs_clarification": false}}"""
         }
         
         return prompts.get(language, prompts["en"])
@@ -381,6 +463,7 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             "triage": Intent.TRIAGE,
             "mental_health": Intent.MENTAL_HEALTH,
             "rumor": Intent.RUMOR,
+            "wound_analyzer": Intent.WOUND_ANALYZER,  # Added wound_analyzer
             "greeting": Intent.GREETING,
             "clarification_needed": Intent.CLARIFICATION_NEEDED,
             "out_of_scope": Intent.OUT_OF_SCOPE
@@ -396,7 +479,8 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             Intent.MEDICAL_QA: "medical_qa",
             Intent.TRIAGE: "triage",
             Intent.MENTAL_HEALTH: "mental_health",
-            Intent.RUMOR: "rumor"
+            Intent.RUMOR: "rumor",
+            Intent.WOUND_ANALYZER: "wound_analyzer"  # Added wound_analyzer routing
         }
         
         route_to = route_map.get(intent)
@@ -427,6 +511,15 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
         if intent == Intent.OUT_OF_SCOPE:
             return responses["out_of_scope"]
         
+        if intent == Intent.WOUND_ANALYZER:
+            # Special response for wound analyzer
+            if language == "en":
+                return "I'll analyze that wound for you. Please upload an image if you haven't already."
+            elif language == "aeb":
+                return "نحلللك هاديك الجرح. تحميل صورة إذا مازلتش حمّلت."
+            elif language == "ar":
+                return "سأقوم بتحليل هذا الجرح لك. يرجى تحميل صورة إذا لم تقم بذلك بالفعل."
+        
         # For medical intents that will be routed, return empty or minimal message
         # The actual response will come from the specialized agent
         return ""  # Let the next agent handle the response
@@ -445,6 +538,46 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
                 response=self.language_responses.get(language, self.language_responses["en"])["greeting"],
                 confidence=0.8
             )
+        
+        # Check for wound-related keywords (HIGH PRIORITY) - CRITICAL FIX
+        wound_keywords = [
+            "wound", "wounds", "cut", "cuts", "bleeding", "bleed", "injury", "injured", 
+            "sore", "sores", "rash", "skin", "burn", "burns", "bruise", "bruises",
+            "laceration", "abrasion", "scrape", "blister", "blister", "ulcer", "ulcers",
+            "scar", "scars", "gash", "gashes", "infections", "infected", "infection",
+            "scab", "scabs", "pustule", "pustules", "boil", "boils", "abscess", "cyst",
+            "dermatitis", "eczema", "psoriasis", "impetigo", "cellulitis", "mrsa",
+            "gangrene", "necrosis", "pressure", "diabetic", "venous", "surgical",
+            "analyze", "analysis", "image", "picture", "photo", "look at", "check this",
+            "جرح", "جروح", "دم", "تنزيف", "نزيف", "إصابة", "حرق", "كدمة", "كدمات",
+            "تقرح", "تقرحات", "تهيج", "حساسية", "التهاب", "قطع", "خدش", "جدري",
+            "صديد", "قيح", "عدوى", "إصابة جلدية", "جلد", "طفح", "فحص", "تحليل",
+            "صورة", "صورة", "شوف", "تفقد", "انظر", "راجع"
+        ]
+        
+        if any(keyword in text_lower for keyword in wound_keywords):
+            print(f"🔍 Detected wound-related keywords in: '{text[:50]}...'")
+            
+            # Check if it's emergency (severe wound)
+            emergency_words = ["emergency", "urgent", "hospital", "bleeding heavily", "severe", "critical",
+                             "طوارئ", "عاجل", "مستشفى", "نزيف شديد", "حرج", "خطير"]
+            
+            if any(word in text_lower for word in emergency_words):
+                print(f"⚠️ Emergency wound detected - routing to triage")
+                return AgentDecision(
+                    intent=Intent.TRIAGE,
+                    route_to="triage",
+                    response=self.language_responses.get(language, self.language_responses["en"])["routing"],
+                    confidence=0.85
+                )
+            else:
+                print(f"🩺 Wound analysis requested - routing to wound_analyzer")
+                return AgentDecision(
+                    intent=Intent.WOUND_ANALYZER,
+                    route_to="wound_analyzer",
+                    response="Routing to wound analysis assistant...",
+                    confidence=0.85
+                )
         
         # Check for medical keywords
         medical_keywords = ["pain", "hurt", "symptom", "fever", "cough", "وجع", "عرض", "حمى"]
@@ -466,6 +599,16 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
                     confidence=0.7
                 )
         
+        # Check for mental health keywords
+        mental_health_keywords = ["depressed", "anxious", "stress", "sad", "overwhelmed", "اكتئاب", "قلق", "توتر"]
+        if any(keyword in text_lower for keyword in mental_health_keywords):
+            return AgentDecision(
+                intent=Intent.MENTAL_HEALTH,
+                route_to="mental_health",
+                response=self.language_responses.get(language, self.language_responses["en"])["routing"],
+                confidence=0.7
+            )
+        
         # Default to out of scope
         return AgentDecision(
             intent=Intent.OUT_OF_SCOPE,
@@ -478,9 +621,9 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
     # ==================== MAIN PROCESSING ====================
     
     def process(self, user_input: str, is_audio: bool = False, 
-               audio_data: bytes = None) -> Tuple[AgentDecision, UserMessage]:
+               audio_data: bytes = None, conversation_metadata=None) -> Tuple[AgentDecision, UserMessage]:
         """
-        Main entry point - process user input
+        Main entry point - process user input with conversation context
         Returns: (decision, user_message)
         """
         
@@ -502,8 +645,8 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             audio_data=audio_data
         )
         
-        # Step 3: Classify intent
-        decision = self.classify_intent(user_input, language)
+        # Step 3: Classify intent WITH conversation context
+        decision = self.classify_intent(user_input, language, conversation_metadata)
         
         # Step 4: Log result
         print(f"🌍 Language: {language}")
@@ -517,21 +660,64 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
     
     def router_agent(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """
-        LangGraph router function
-        Simple and reliable
+        LangGraph router function that respects conversation context
         """
         # Get user input from state
         user_input = state.get("user_input", "").strip()
         metadata = state.get("metadata", {})
+        conversation_metadata = metadata.get("conversation_metadata", {})
         
-        # CRITICAL: Check for pending questions or active triage session
-        # If there are pending questions, route directly to triage without classification
+        print("=" * 60)
+        print("🤖 ROUTER AGENT CALLED:")
+        print(f"   User input: {user_input[:100]}")
+        print(f"   Conversation metadata: {conversation_metadata}")
+        
+        # CRITICAL: Check if this is a specialized conversation that should bypass router
+        # If conversation has an agent in metadata, the entry_decision should have handled it
+        # But as a safety check, if we're in router for a specialized conversation, route directly
+        if conversation_metadata and "agent" in conversation_metadata:
+            preferred_agent = conversation_metadata["agent"]
+            print(f"⚠️ WARNING: Router called for specialized conversation: {preferred_agent}")
+            print(f"   This should have been handled by entry_decision. Routing directly...")
+            
+            # Map to appropriate agent
+            agent_mapping = {
+                "general-info": "medical_qa",
+                "symptoms-checker": "extraction",
+                "mental-health": "mental_health",
+                "rumor-check": "rumor",
+                "orientation": "orientation",
+                "wound-analyzer": "wound_analyzer"  # Added wound analyzer mapping
+            }
+            
+            mapped_agent = agent_mapping.get(preferred_agent)
+            
+            if mapped_agent:
+                return {
+                    "agent_output": f"Routing to {preferred_agent}...",
+                    "current_agent": "router",
+                    "next_agent": mapped_agent,
+                    "should_end": False,
+                    "intent": preferred_agent.replace("-", "_"),
+                    "language": metadata.get("language", "en"),
+                    "metadata": {
+                        **metadata,
+                        "understanding_agent": {
+                            "original_input": user_input,
+                            "detected_language": metadata.get("language", "en"),
+                            "intent": preferred_agent.replace("-", "_"),
+                            "confidence": 1.0,
+                            "router_bypassed": True,
+                            "reason": "specialized_conversation"
+                        }
+                    }
+                }
+        
+        # Check for pending questions or active triage session
         pending_questions = state.get("pending_questions", [])
         session_id = state.get("session_id")
         
         # IMPORTANT: Check if this is a NEW request vs answer to pending question
-        # If user says something like "i feel depressed", "i have chest pain", etc, 
-        # it's a NEW request even if there are pending_questions from triage
         is_likely_new_request = False
         if pending_questions or session_id:
             # Quick check: does this look like a new medical intent?
@@ -563,7 +749,24 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
                 "tiktok": "rumor",
                 "facebook": "rumor",
                 "twitter": "rumor",
-                "true or false": "rumor"
+                "true or false": "rumor",
+                "wound": "wound_analyzer",
+                "cut": "wound_analyzer",
+                "bleeding": "wound_analyzer",
+                "rash": "wound_analyzer",
+                "skin": "wound_analyzer",
+                "burn": "wound_analyzer",
+                "analyze": "wound_analyzer",
+                "analysis": "wound_analyzer",
+                "image": "wound_analyzer",
+                "picture": "wound_analyzer",
+                "photo": "wound_analyzer",
+                "جرح": "wound_analyzer",
+                "جروح": "wound_analyzer",
+                "دم": "wound_analyzer",
+                "تحليل": "wound_analyzer",
+                "فحص": "wound_analyzer",
+                "صورة": "wound_analyzer"
             }
             
             user_input_lower = user_input.lower().strip()
@@ -573,10 +776,9 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
                     is_likely_new_request = True
                     break
         
-        # If it's a new request, classify it (don't assume it's answering the question)
+        # If it's a new request, classify it
         if is_likely_new_request:
             print(f"🔀 New request detected despite pending questions - reclassifying intent")
-            # Fall through to normal classification below - NEW INTENT overrides pending questions
         elif pending_questions or session_id:
             # Only route to triage if NO new request detected
             print(f"🔄 Active triage session detected (session_id: {session_id}, pending_questions: {len(pending_questions)})")
@@ -584,7 +786,7 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             return {
                 "agent_output": "Processing your answer...",
                 "current_agent": "router",
-                "next_agent": "triage",  # Route directly to triage
+                "next_agent": "triage",
                 "should_end": False,
                 "intent": "triage",
                 "language": metadata.get("language", "en"),
@@ -615,8 +817,11 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             }
         
         try:
-            # Process the input
-            decision, user_message = self.process(user_input)
+            # Process the input WITH conversation context
+            decision, user_message = self.process(
+                user_input, 
+                conversation_metadata=conversation_metadata
+            )
             
             # Prepare result - preserve existing state fields
             result = {
@@ -634,13 +839,13 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
                         "intent": decision.intent.value,
                         "confidence": decision.confidence,
                         "needs_clarification": decision.needs_clarification,
-                        "router_response": decision.response,  # Keep router response for tracing
-                        "routing_to": decision.route_to  # Explicit routing target for LangSmith
+                        "router_response": decision.response,
+                        "routing_to": decision.route_to
                     }
                 }
             }
             
-            # Preserve location from state (important for direct facility requests)
+            # Preserve location from state
             if "user_location" in state:
                 result["user_location"] = state["user_location"]
                 print(f"📍 Preserving user_location in router: {state['user_location']}")
@@ -668,28 +873,6 @@ Example: {{"intent": "medical_qa", "confidence": 0.9, "needs_clarification": fal
             }
 
 # ============================================================
-# LANGGRAPH ROUTING FUNCTION
-# ============================================================
-def gatekeeper_routing_decision(state: Dict[str, Any]) -> str:
-    """
-    Simple routing decision for LangGraph
-    Returns: agent name or END
-    """
-    next_agent = state.get("next_agent")
-    
-    # Map to your agent nodes
-    if next_agent == "medical_qa":
-        return "medical_qa"
-    elif next_agent == "triage":
-        return "triage"
-    elif next_agent == "mental_health":
-        return "mental_health"
-    elif next_agent == "rumor":
-        return "rumor"
-    else:
-        return "END"  # Use string "END" for LangGraph
-
-# ============================================================
 # SIMPLE SINGLETON
 # ============================================================
 _agent_instance = None
@@ -709,31 +892,37 @@ def router_agent(state: Dict[str, Any]) -> Dict[str, Any]:
 # TEST
 # ============================================================
 if __name__ == "__main__":
-    print("🧪 Testing Simple Understanding Agent...")
+    print("🧪 Testing Improved Understanding Agent...")
     
     agent = UnderstandingAgent()
     
+    # Test with conversation context
     test_cases = [
-        ("Hello!", "greeting"),
-        ("I have chest pain", "triage"),
-        ("What is diabetes?", "medical_qa"),
-        ("I feel depressed", "mental_health"),
-        ("Do vaccines cause autism?", "rumor"),
-        ("What's the weather?", "out_of_scope"),
-        ("عندي وجع ف الصدر", "triage"),
-        ("شنوة مرض السكري؟", "medical_qa")
+        ("What is diabetes?", "medical_qa", {"agent": "general-info"}),
+        ("I have chest pain", "triage", {"agent": "symptoms-checker"}),
+        ("I feel depressed", "mental_health", {"agent": "mental-health"}),
+        ("Do vaccines cause autism?", "rumor", {"agent": "rumor-check"}),
+        ("Show me nearby pharmacies", "triage", {"agent": "orientation"}),
+        ("I have a cut on my arm", "wound_analyzer", {"agent": "wound-analyzer"}),
+        ("Analyze this image of a wound", "wound_analyzer", {}),
+        ("Look at this burn", "wound_analyzer", {}),
+        ("I have a skin rash", "wound_analyzer", {}),
+        ("Check this injury photo", "wound_analyzer", {}),
+        ("عندي جرح في رجلي", "wound_analyzer", {}),
+        ("شوف هادي الصورة ديال الجرح", "wound_analyzer", {})
     ]
     
-    for query, expected in test_cases:
+    for query, expected_intent, conversation_meta in test_cases:
         print(f"\n{'='*60}")
         print(f"📥 Input: {query}")
+        print(f"📋 Conversation metadata: {conversation_meta}")
         
-        decision, _ = agent.process(query)
+        decision, _ = agent.process(query, conversation_metadata=conversation_meta)
         
-        status = "✅" if decision.intent.value == expected else "❌"
-        print(f"{status} Expected: {expected}, Got: {decision.intent.value}")
+        status = "✅" if decision.intent.value == expected_intent else "❌"
+        print(f"{status} Expected: {expected_intent}, Got: {decision.intent.value}")
         print(f"Confidence: {decision.confidence:.2f}")
         print(f"Route to: {decision.route_to}")
         print(f"Response: {decision.response[:60]}...")
     
-    print("\n✅ Simple Understanding Agent test complete!")
+    print("\n✅ Improved Understanding Agent with Wound Analyzer support test complete!")

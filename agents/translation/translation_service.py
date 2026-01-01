@@ -31,7 +31,7 @@ class TranslationService:
         """Initialize Groq client (lazy loading)"""
         self.client = None
         self.client_loaded = False
-        self.groq_api_key = os.getenv("GROQ_API_KEY", "")
+        self.groq_api_key = os.getenv("GROQ_API_KEY", "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")
         self.groq_model = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
     
     def _load_client(self):

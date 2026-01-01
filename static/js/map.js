@@ -1,368 +1,200 @@
-// static/js/map.js
-// Map component for displaying healthcare facility recommendations
-
+// HealthcareMap class - updated for location consent
 class HealthcareMap {
-  constructor(containerId, options = {}) {
-    this.containerId = containerId;
-    this.map = null;
-    this.markers = [];
-    this.userMarker = null;
-    this.userLat = null;
-    this.userLon = null;
-    this.routingControl = null;
-    this.simpleRouteLine = null;
-    this.options = {
-      defaultZoom: 13,
-      ...options
-    };
-  }
-
-  init(lat, lon) {
-    if (!lat || !lon) {
-      console.error('Latitude and longitude are required');
-      return;
+    constructor(mapId) {
+        this.mapId = mapId;
+        this.map = null;
+        this.userLat = null;
+        this.userLon = null;
+        this.userMarker = null;
+        this.places = [];
+        this.routingControl = null;
+        this.locationAsked = false;
     }
 
-    // Store user location for routing
-    this.userLat = lat;
-    this.userLon = lon;
-
-    // Initialize map
-    this.map = L.map(this.containerId).setView([lat, lon], this.options.defaultZoom);
-
-    // Add OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 19
-    }).addTo(this.map);
-
-    // Add user location marker
-    this.addUserMarker(lat, lon);
-  }
-
-  addUserMarker(lat, lon) {
-    if (this.userMarker) {
-      this.map.removeLayer(this.userMarker);
+    init(defaultLat = 36.8883559, defaultLon = 10.183846) {
+        // Always use default coordinates initially
+        this.userLat = defaultLat;
+        this.userLon = defaultLon;
+        
+        // Initialize map with default location
+        this.map = L.map(this.mapId).setView([this.userLat, this.userLon], 13);
+        
+        // Add tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(this.map);
+        
+        console.log(`🗺️ Map initialized at default location: ${this.userLat}, ${this.userLon}`);
+        
+        // Add user marker at default location
+        this.addUserMarker(this.userLat, this.userLon);
+        
+        // Add click handler to request location if needed
+        this.addLocationRequestButton();
     }
 
-    // Custom icon for user location
-    const userIcon = L.divIcon({
-      className: 'user-location-marker',
-      html: '<div style="background-color: #3b82f6; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-      iconSize: [20, 20],
-      iconAnchor: [10, 10]
-    });
-
-    this.userMarker = L.marker([lat, lon], { icon: userIcon })
-      .addTo(this.map)
-      .bindPopup('Your Location')
-      .openPopup();
-  }
-
-  addPlace(place) {
-    if (!this.map) {
-      console.error('Map not initialized');
-      return;
+    addUserMarker(lat, lon) {
+        // Remove existing marker
+        if (this.userMarker) {
+            this.map.removeLayer(this.userMarker);
+        }
+        
+        // Add new marker
+        this.userMarker = L.marker([lat, lon])
+            .addTo(this.map)
+            .bindPopup('<b>Your Location</b><br>Default or approximate location')
+            .openPopup();
     }
 
-    const { name, latitude, longitude, type, distance, address } = place;
-
-    // Choose icon based on type
-    const iconColor = this.getIconColor(type);
-    const icon = L.divIcon({
-      className: 'healthcare-marker',
-      html: `<div style="background-color: ${iconColor}; width: 24px; height: 24px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); cursor: pointer;">
-               <div style="transform: rotate(45deg); color: white; font-size: 12px; text-align: center; line-height: 20px;">${this.getTypeIcon(type)}</div>
-             </div>`,
-      iconSize: [24, 24],
-      iconAnchor: [12, 24]
-    });
-
-    const marker = L.marker([latitude, longitude], { icon })
-      .addTo(this.map)
-      .bindPopup(`
-        <div style="min-width: 200px;">
-          <h3 style="margin: 0 0 8px 0; font-weight: bold; color: #1f2937;">${name}</h3>
-          <p style="margin: 4px 0; color: #6b7280; font-size: 14px;">
-            <strong>Type:</strong> ${type}<br>
-            <strong>Distance:</strong> ${distance} km<br>
-            ${address ? `<strong>Address:</strong> ${address}` : ''}
-          </p>
-          ${this.userLat && this.userLon ? `
-            <button onclick="window.showRouteToFacility(${latitude}, ${longitude}, '${name.replace(/'/g, "\\'")}')" 
-                    style="margin-top: 8px; padding: 6px 12px; background-color: #8b5cf6; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; width: 100%;">
-              🗺️ Show Route
-            </button>
-          ` : ''}
-        </div>
-      `);
-
-    // Add click handler to show route
-    marker.on('click', () => {
-      if (this.userLat && this.userLon) {
-        this.showRoute(latitude, longitude, name);
-      }
-    });
-
-    // Store place data in marker for reference
-    marker.placeData = place;
-
-    this.markers.push(marker);
-    return marker;
-  }
-
-  addPlaces(places) {
-    if (!places || places.length === 0) return;
-
-    const bounds = [];
-    
-    // Add user location to bounds if exists
-    if (this.userMarker) {
-      bounds.push(this.userMarker.getLatLng());
+    addLocationRequestButton() {
+        // Create location request button
+        const locationButton = L.control({position: 'topright'});
+        
+        locationButton.onAdd = () => {
+            const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+            const button = L.DomUtil.create('a', '', div);
+            button.innerHTML = '<i class="fas fa-location-crosshairs"></i>';
+            button.title = 'Request your precise location';
+            button.style.cssText = 'width: 30px; height: 30px; line-height: 30px; text-align: center; background: white; cursor: pointer;';
+            
+            button.onclick = async (e) => {
+                L.DomEvent.stopPropagation(e);
+                await this.requestUserLocation();
+            };
+            
+            return div;
+        };
+        
+        locationButton.addTo(this.map);
     }
 
-    places.forEach(place => {
-      const marker = this.addPlace(place);
-      if (marker) {
-        bounds.push(marker.getLatLng());
-      }
-    });
-
-    // Fit map to show all markers
-    if (bounds.length > 0) {
-      this.map.fitBounds(bounds, { padding: [50, 50] });
-    }
-  }
-
-  getIconColor(type) {
-    const colors = {
-      'hospital': '#ef4444',      // red
-      'clinic': '#f59e0b',         // amber
-      'pharmacy': '#10b981',      // green
-      'doctors': '#3b82f6',       // blue
-      'default': '#8b5cf6'        // purple
-    };
-    return colors[type.toLowerCase()] || colors.default;
-  }
-
-  getTypeIcon(type) {
-    const icons = {
-      'hospital': '🏥',
-      'clinic': '🏥',
-      'pharmacy': '💊',
-      'doctors': '👨‍⚕️',
-      'default': '📍'
-    };
-    return icons[type.toLowerCase()] || icons.default;
-  }
-
-  showRoute(destLat, destLon, destinationName) {
-    if (!this.userLat || !this.userLon) {
-      console.warn('User location not available for routing');
-      alert('Your location is not available. Please share your location first.');
-      return;
-    }
-
-    console.log('Showing route from', this.userLat, this.userLon, 'to', destLat, destLon);
-
-    // Remove existing route if any
-    this.clearRoute();
-
-    // Check if L.Routing is available
-    if (typeof L.Routing === 'undefined') {
-      console.error('Leaflet Routing Machine not loaded');
-      // Fallback: draw a simple polyline
-      this.showSimpleRoute(destLat, destLon, destinationName);
-      return;
-    }
-
-    try {
-      // Create routing control with OSRM (free routing service)
-      this.routingControl = L.Routing.control({
-        router: L.Routing.osrmv1({
-          serviceUrl: 'https://router.project-osrm.org/route/v1',
-          profile: 'driving'
-        }),
-        waypoints: [
-          L.latLng(this.userLat, this.userLon),
-          L.latLng(destLat, destLon)
-        ],
-        routeWhileDragging: false,
-        addWaypoints: false,
-        draggableWaypoints: false,
-        fitSelectedRoutes: true,
-        showAlternatives: false,
-        show: false, // Hide the default routing instructions panel
-        lineOptions: {
-          styles: [
-            {
-              color: '#8b5cf6',
-              opacity: 0.8,
-              weight: 5
+    async requestUserLocation() {
+        if (this.locationAsked) {
+            console.log("📍 Location already asked for this session");
+            return;
+        }
+        
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser.");
+            return;
+        }
+        
+        this.locationAsked = true;
+        
+        try {
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                });
+            });
+            
+            const userLat = position.coords.latitude;
+            const userLon = position.coords.longitude;
+            
+            // Update global user location
+            window.userLocation = { latitude: userLat, longitude: userLon };
+            
+            // Update map
+            this.userLat = userLat;
+            this.userLon = userLon;
+            this.map.setView([userLat, userLon], 15);
+            
+            // Update marker
+            this.addUserMarker(userLat, userLon);
+            
+            // Update places with new user location
+            if (this.places.length > 0) {
+                this.showRouteToNearest();
             }
-          ]
-        },
-        createMarker: (i, waypoint) => {
-          if (i === 0) {
-            // User location marker - return null to use existing marker
-            return null;
-          } else {
-            // Destination marker
-            return L.marker(waypoint.latLng, {
-              icon: L.divIcon({
-                className: 'destination-marker',
-                html: '<div style="background-color: #ef4444; width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>',
-                iconSize: [24, 24],
-                iconAnchor: [12, 12]
-              })
-            }).bindPopup(destinationName || 'Destination');
-          }
+            
+            console.log(`📍 User location updated: ${userLat}, ${userLon}`);
+            
+        } catch (error) {
+            console.warn("📍 Location request failed:", error.message);
+            alert("Unable to get your location. Please check your browser permissions.");
         }
-      }).addTo(this.map);
+    }
 
-      // Handle route calculation
-      this.routingControl.on('routesfound', (e) => {
-        console.log('Route found:', e);
-        const routes = e.routes;
-        if (routes && routes.length > 0) {
-          const route = routes[0];
-          const distance = (route.summary.totalDistance / 1000).toFixed(2); // Convert to km
-          const time = Math.round(route.summary.totalTime / 60); // Convert to minutes
-
-          // Show route info in a custom popup
-          const routeInfo = `
-            <div style="padding: 8px; min-width: 200px;">
-              <strong style="color: #1f2937;">Route to ${this.escapeHtml(destinationName || 'Destination')}</strong><br>
-              <span style="color: #6b7280; font-size: 14px;">
-                Distance: ${distance} km<br>
-                Estimated time: ${time} minutes
-              </span>
-            </div>
-          `;
-
-          // Create a popup at the destination
-          L.popup({ maxWidth: 250 })
-            .setLatLng([destLat, destLon])
-            .setContent(routeInfo)
-            .openOn(this.map);
+    addPlaces(places) {
+        this.places = places;
+        
+        // Add markers for each place
+        places.forEach((place, index) => {
+            const marker = L.marker([place.latitude, place.longitude])
+                .addTo(this.map)
+                .bindPopup(`
+                    <b>${place.name}</b><br>
+                    ${place.type}<br>
+                    Distance: ${place.distance} km<br>
+                    ${place.address ? `Address: ${place.address}` : ''}
+                `);
+            
+            // Add click handler for routing
+            marker.on('click', () => {
+                this.showRoute(place.latitude, place.longitude, place.name);
+            });
+        });
+        
+        // If user has precise location, show route to nearest
+        if (window.userLocation && window.userLocation.latitude && window.userLocation.longitude) {
+            this.showRouteToNearest();
         }
-      });
-
-      // Handle errors
-      this.routingControl.on('routingerror', (e) => {
-        console.error('Routing error:', e);
-        // Fallback to simple route
-        this.showSimpleRoute(destLat, destLon, destinationName);
-      });
-
-      // Fit map to show the route
-      this.map.fitBounds([
-        [this.userLat, this.userLon],
-        [destLat, destLon]
-      ], { padding: [50, 50] });
-    } catch (error) {
-      console.error('Error creating routing control:', error);
-      // Fallback to simple route
-      this.showSimpleRoute(destLat, destLon, destinationName);
-    }
-  }
-
-  showSimpleRoute(destLat, destLon, destinationName) {
-    // Fallback: draw a simple polyline if routing machine fails
-    if (this.simpleRouteLine) {
-      this.map.removeLayer(this.simpleRouteLine);
     }
 
-    const polyline = L.polyline(
-      [[this.userLat, this.userLon], [destLat, destLon]],
-      {
-        color: '#8b5cf6',
-        weight: 5,
-        opacity: 0.8,
-        dashArray: '10, 5'
-      }
-    ).addTo(this.map);
-
-    this.simpleRouteLine = polyline;
-
-    // Calculate distance using Haversine formula
-    const distance = this.calculateDistance(this.userLat, this.userLon, destLat, destLon);
-    
-    // Show info popup
-    const routeInfo = `
-      <div style="padding: 8px; min-width: 200px;">
-        <strong style="color: #1f2937;">Direct route to ${this.escapeHtml(destinationName || 'Destination')}</strong><br>
-        <span style="color: #6b7280; font-size: 14px;">
-          Straight-line distance: ${distance.toFixed(2)} km<br>
-          <em>Note: This is a direct line. Actual route may vary.</em>
-        </span>
-      </div>
-    `;
-
-    L.popup({ maxWidth: 250 })
-      .setLatLng([destLat, destLon])
-      .setContent(routeInfo)
-      .openOn(this.map);
-
-    // Fit map
-    this.map.fitBounds([
-      [this.userLat, this.userLon],
-      [destLat, destLon]
-    ], { padding: [50, 50] });
-  }
-
-  calculateDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of the Earth in km
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat/2) * Math.sin(dLat/2) +
-      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-      Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    return R * c;
-  }
-
-  escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-  }
-
-  clearRoute() {
-    if (this.routingControl) {
-      this.map.removeControl(this.routingControl);
-      this.routingControl = null;
+    showRoute(destLat, destLon, destName) {
+        // Remove existing routing control
+        if (this.routingControl) {
+            this.map.removeControl(this.routingControl);
+        }
+        
+        // Add new routing control
+        this.routingControl = L.Routing.control({
+            waypoints: [
+                L.latLng(this.userLat, this.userLon),
+                L.latLng(destLat, destLon)
+            ],
+            routeWhileDragging: false,
+            showAlternatives: false,
+            lineOptions: {
+                styles: [{color: '#d80027', weight: 5}]
+            },
+            createMarker: function(i, wp) {
+                if (i === 0) {
+                    return L.marker(wp.latLng, {
+                        icon: L.divIcon({
+                            html: '<div style="background: #d80027; width: 20px; height: 20px; border-radius: 50%;"></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).bindPopup("Your Location");
+                } else {
+                    return L.marker(wp.latLng, {
+                        icon: L.divIcon({
+                            html: '<div style="background: #0066cc; width: 20px; height: 20px; border-radius: 50%;"></div>',
+                            iconSize: [20, 20]
+                        })
+                    }).bindPopup(`<b>${destName}</b>`);
+                }
+            }
+        }).addTo(this.map);
     }
-    if (this.simpleRouteLine) {
-      this.map.removeLayer(this.simpleRouteLine);
-      this.simpleRouteLine = null;
-    }
-  }
 
-  clearMarkers() {
-    this.markers.forEach(marker => {
-      this.map.removeLayer(marker);
-    });
-    this.markers = [];
-    this.clearRoute();
-  }
-
-  destroy() {
-    this.clearRoute();
-    if (this.map) {
-      this.map.remove();
-      this.map = null;
+    showRouteToNearest() {
+        if (this.places.length === 0) return;
+        
+        // Find nearest place
+        const nearest = this.places.reduce((prev, current) => {
+            return prev.distance < current.distance ? prev : current;
+        });
+        
+        this.showRoute(nearest.latitude, nearest.longitude, nearest.name);
     }
-    this.markers = [];
-    this.userMarker = null;
-    this.userLat = null;
-    this.userLon = null;
-    this.simpleRouteLine = null;
-  }
 }
 
-// Export for use in other scripts
-window.HealthcareMap = HealthcareMap;
-
-
+// Global function to show route from message list
+window.showRouteFromList = function(latitude, longitude, name) {
+    if (window.currentMapInstance) {
+        window.currentMapInstance.showRoute(latitude, longitude, name);
+    }
+};

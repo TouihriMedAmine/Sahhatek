@@ -1,8 +1,9 @@
-# agents/graph/build_graph.py
+# agents/graph/build_graph.py - FINAL VERSION with Wound Analyzer
 import sys
 import os
 import logging
 from typing import Dict, Any
+from datetime import datetime
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -36,6 +37,8 @@ except ImportError as e:
             state["intent"] = "mental_health"
         elif any(word in user_input for word in ["true", "rumor", "myth"]):
             state["intent"] = "rumor"
+        elif any(word in user_input for word in ["wound", "cut", "bleeding", "burn", "rash", "skin"]):
+            state["intent"] = "wound_analyzer"  # Added wound keywords
         elif any(word in user_input for word in ["symptom", "pain", "fever", "cough"]):
             state["intent"] = "medical_qa"
         else:
@@ -49,9 +52,12 @@ try:
     print("✅ Imported Medical Q/A Agent")
 except ImportError as e:
     print(f"❌ Failed to import Medical Q/A Agent: {e}")
-    raise
+    def medical_qa_agent(state: Dict[str, Any]) -> Dict[str, Any]:
+        state["agent_output"] = "🏥 MEDICAL Q/A AGENT (Fallback): " + state.get("user_input", "")
+        state["current_agent"] = "medical_qa"
+        return state
 
-# Triage Agent - New node-based workflow
+# Triage workflow - New node-based workflow
 try:
     from agents.triage_agent.workflow import triage_workflow
     from agents.triage_agent.nodes import (
@@ -63,7 +69,6 @@ try:
     print("✅ Imported Triage Workflow (Node-based)")
 except ImportError as e:
     print(f"❌ Failed to import Triage Workflow: {e}")
-    # Fallback to old triage agent
     try:
         from agents.triage_agent.agent import triage_agent as triage_workflow
         print("⚠️ Using fallback triage agent")
@@ -77,21 +82,8 @@ try:
     print("✅ Imported Mental Health Agent")
 except ImportError as e:
     print(f"⚠️ Mental Health Agent not found: {e}")
-    # Fallback mental health agent
     def mental_health_agent(state: Dict[str, Any]) -> Dict[str, Any]:
-        """Mental health agent - can route to orientation with 'emergency' or 'therapist'"""
-        user_input = state.get("user_input", "").lower()
-        
-        # Check if it's an emergency or therapist recommendation
-        if "emergency" in user_input or "urgent" in user_input:
-            state["mental_health_recommendation"] = "emergency"
-            state["next_agent"] = "orientation"
-        elif "therapist" in user_input or "therapy" in user_input:
-            state["mental_health_recommendation"] = "therapist"
-            state["next_agent"] = "orientation"
-        else:
-            state["agent_output"] = "💙 MENTAL HEALTH AGENT: " + state.get("user_input", "")
-        
+        state["agent_output"] = "💙 MENTAL HEALTH AGENT: " + state.get("user_input", "")
         state["current_agent"] = "mental_health"
         return state
 
@@ -99,17 +91,58 @@ except ImportError as e:
 try:
     from agents.rumor.agent import rumor_verification_agent
     print("✅ Imported Rumor Verification Agent")
-    # Alias for consistency
     rumor_agent = rumor_verification_agent
 except ImportError as e:
     print(f"⚠️ Rumor Verification Agent not found: {e}")
-    # Fallback rumor agent
     def rumor_agent(state: Dict[str, Any]) -> Dict[str, Any]:
         state["agent_output"] = "🔍 RUMOR DETECTION AGENT: " + state.get("user_input", "")
         state["current_agent"] = "rumor"
         return state
 
-print("✅ All agents loaded")
+# Wound Analyzer Agent (NEW)
+try:
+    from agents.wound_analyzer.agent import wound_analyzer_agent
+    print("✅ Imported Wound Analyzer Agent")
+except ImportError as e:
+    print(f"⚠️ Wound Analyzer Agent not found: {e}")
+    # Fallback wound analyzer agent
+    def wound_analyzer_agent(state: Dict[str, Any]) -> Dict[str, Any]:
+        user_input = state.get("user_input", "").lower()
+        
+        # Extract wound info from metadata
+        metadata = state.get("metadata", {})
+        has_image = metadata.get("has_wound_image", False)
+        wound_type = metadata.get("wound_type", "")
+        
+        # Check for emergency wound keywords
+        emergency_keywords = ["bleeding heavily", "severe pain", "deep cut", "large burn", "broken bone", 
+                             "animal bite", "unconscious", "difficulty breathing"]
+        
+        is_emergency = any(keyword in user_input for keyword in emergency_keywords)
+        
+        if is_emergency:
+            state["wound_analysis"] = {
+                "severity": "high",
+                "urgency": "immediate",
+                "needs_urgent_referral": True,
+                "recommendation": "Seek emergency medical attention immediately"
+            }
+        else:
+            state["wound_analysis"] = {
+                "severity": "low_to_medium",
+                "urgency": "non_urgent",
+                "needs_urgent_referral": False,
+                "recommendation": "Monitor the wound and seek medical advice if symptoms worsen"
+            }
+        
+        state["agent_output"] = "🩹 WOUND ANALYZER AGENT: I've analyzed your wound concern. " + (
+            "This appears to be an emergency situation. Seek immediate medical attention." if is_emergency else
+            "Based on your description, this appears manageable with proper wound care."
+        )
+        state["current_agent"] = "wound_analyzer"
+        return state
+
+print("✅ All agents loaded (including Wound Analyzer)")
 
 # ------------------ BUILD THE GRAPH ------------------
 graph = StateGraph(AgentState)
@@ -135,14 +168,168 @@ graph.add_node("mental_health", mental_health_agent)
 # Rumor Verification Agent
 graph.add_node("rumor", rumor_agent)
 
-# Entry point
-graph.set_entry_point("router")
+# Wound Analyzer Agent (NEW)
+graph.add_node("wound_analyzer", wound_analyzer_agent)
 
-# ------------------ CONDITIONAL ROUTING ------------------
+# Entry point - CHANGED: Now we have a special entry decision
+graph.set_entry_point("entry_decision")
+
+# ------------------ ENTRY DECISION (IMPROVED VERSION) ------------------
+def entry_decision(state: AgentState) -> str:
+    """
+    Decide where to enter the graph.
+    IMPORTANT: This handles FORCED AGENT routing for card clicks.
+    """
+    print("=" * 60)
+    print("🔍 ENTRY DECISION - RECEIVED STATE:")
+    
+    # Get metadata
+    metadata = state.get("metadata", {})
+    conversation_metadata = metadata.get("conversation_metadata", {})
+    message_type = metadata.get("message_type", "regular")
+    direct_agent_request = metadata.get("direct_agent_request", False)
+    
+    print(f"   Message type: {message_type}")
+    print(f"   Direct agent request: {direct_agent_request}")
+    print(f"   Conversation metadata: {conversation_metadata}")
+    
+    # CRITICAL: Check if this conversation has a preferred agent from metadata
+    # This is set when a conversation is created via direct agent message
+    if conversation_metadata and "agent" in conversation_metadata:
+        preferred_agent = conversation_metadata["agent"]
+        print(f"🎯 PREFERRED AGENT DETECTED in conversation metadata: {preferred_agent}")
+        
+        # Map card agent names to graph nodes (UPDATED with wound analyzer)
+        agent_mapping = {
+            # Card agent names → Graph node names
+            "mental-health": "mental_health",
+            "symptoms-checker": "extraction",  # Start at extraction for triage workflow
+            "general-info": "medical_qa",
+            "rumor-check": "rumor",
+            "orientation": "orientation",
+            "wound-analyzer": "wound_analyzer",  # NEW: Wound analyzer mapping
+            
+            # Also support intent names
+            "mental_health": "mental_health",
+            "medical_qa": "medical_qa",
+            "triage": "extraction",
+            "rumor": "rumor",
+            "wound_analyzer": "wound_analyzer",  # NEW
+            "general": "router"
+        }
+        
+        mapped_agent = agent_mapping.get(preferred_agent)
+        
+        if mapped_agent:
+            print(f"📍 Mapping {preferred_agent} → {mapped_agent}")
+            
+            # Track in metadata for debugging
+            if "metadata" not in state:
+                state["metadata"] = {}
+            state["metadata"]["preferred_routing"] = {
+                "original_agent": preferred_agent,
+                "mapped_to": mapped_agent,
+                "timestamp": datetime.now().isoformat(),
+                "reason": "conversation_metadata"
+            }
+            
+            # Special handling for symptoms-checker/triage
+            if preferred_agent in ["symptoms-checker", "triage"]:
+                if "metadata" not in state:
+                    state["metadata"] = {}
+                state["metadata"]["is_triage_conversation"] = True
+                print(f"🔀 Setting is_triage_conversation flag for {preferred_agent}")
+            
+            # Special handling for wound analyzer
+            if preferred_agent == "wound-analyzer":
+                if "metadata" not in state:
+                    state["metadata"] = {}
+                state["metadata"]["is_wound_analysis"] = True
+                print(f"🔀 Setting is_wound_analysis flag")
+            
+            # Also set current_agent to help with tracking
+            state["current_agent"] = mapped_agent
+            
+            return mapped_agent
+    
+    # Check for forced agent routing (from direct_agent_message endpoint)
+    forced_from_meta = metadata.get("requested_agent")
+    forced_from_root = state.get("forced_agent")
+    
+    if forced_from_meta or forced_from_root:
+        forced_agent = forced_from_meta or forced_from_root
+        print(f"🎯 FORCED AGENT DETECTED: {forced_agent}")
+        
+        agent_mapping = {
+            "mental-health": "mental_health",
+            "symptoms-checker": "extraction",
+            "general-info": "medical_qa",
+            "rumor-check": "rumor",
+            "orientation": "orientation",
+            "wound-analyzer": "wound_analyzer",  # NEW
+            "mental_health": "mental_health",
+            "medical_qa": "medical_qa",
+            "triage": "extraction",
+            "rumor": "rumor",
+            "wound_analyzer": "wound_analyzer"  # NEW
+        }
+        
+        mapped_agent = agent_mapping.get(forced_agent)
+        
+        if mapped_agent:
+            print(f"📍 Mapping forced {forced_agent} → {mapped_agent}")
+            
+            # Track in metadata
+            if "metadata" not in state:
+                state["metadata"] = {}
+            state["metadata"]["forced_routing"] = {
+                "original_agent": forced_agent,
+                "mapped_to": mapped_agent,
+                "timestamp": datetime.now().isoformat(),
+                "was_forced": True
+            }
+            
+            # Clear forced_agent to prevent infinite loops
+            if "forced_agent" in state:
+                state["forced_agent"] = None
+            
+            # Set current_agent
+            state["current_agent"] = mapped_agent
+            
+            return mapped_agent
+    
+    # Default: start with router
+    print("🔄 No preferred or forced routing detected, starting with router")
+    state["current_agent"] = "router"
+    return "router"
+
+# Add entry decision node
+graph.add_node("entry_decision", lambda state: state)  # Just passes state through
+
+# Add conditional edges from entry decision (UPDATED with wound_analyzer)
+graph.add_conditional_edges(
+    "entry_decision",
+    entry_decision,
+    {
+        "router": "router",
+        "medical_qa": "medical_qa",
+        "extraction": "extraction",
+        "diagnosis": "diagnosis",
+        "triage": "triage",
+        "mental_health": "mental_health",
+        "rumor": "rumor",
+        "orientation": "orientation",
+        "wound_analyzer": "wound_analyzer",  # NEW
+        "triage_workflow": "triage_workflow",
+        END: END
+    }
+)
+
+# ------------------ CONDITIONAL ROUTING FROM ROUTER ------------------
 def gatekeeper_routing_decision(state: AgentState) -> str:
     """
-    Decide which agent to route to next.
-    IMPORTANT: Prioritize explicit next_agent from router over pending_questions
+    Decide which agent to route to next FROM ROUTER.
+    This is only used when we start with the router (general conversations).
     """
     logger = logging.getLogger(__name__)
     
@@ -152,38 +339,90 @@ def gatekeeper_routing_decision(state: AgentState) -> str:
     diagnosis_session_id = state.get("diagnosis_session_id")
     next_agent = state.get("next_agent")
     should_end = state.get("should_end", False)
+    intent = state.get("intent")
     
-    logger.info(f"🔀 Gatekeeper - next_agent: {next_agent}, pending_questions: {len(pending_questions)}")
+    # Get metadata
+    metadata = state.get("metadata", {})
+    conversation_metadata = metadata.get("conversation_metadata", {})
     
-    # CRITICAL: Check next_agent FIRST
-    # If router says go to mental_health/medical_qa/rumor, honor it (even if pending questions)
-    if next_agent in ["mental_health", "medical_qa", "rumor"]:
-        logger.info(f"🔀 PRIORITY: Router requested {next_agent} - honoring explicit routing")
-        return next_agent
+    print("=" * 60)
+    print("🔀 GATEKEEPER ROUTING DECISION:")
+    print(f"   User input: {user_input[:50]}...")
+    print(f"   Intent: {intent}")
+    print(f"   Next agent: {next_agent}")
+    print(f"   Conversation metadata: {conversation_metadata}")
+    print(f"   Pending questions: {len(pending_questions)}")
     
-    # Check for direct facility request - route to orientation
-    if next_agent == "orientation" and state.get("service_type"):
-        logger.info(f"📍 Direct facility request - routing to orientation")
-        return "orientation"
+    # CRITICAL: Check if this is a specialized conversation that should bypass router
+    # If conversation has an agent in metadata, skip router and go directly to that agent
+    if conversation_metadata and "agent" in conversation_metadata:
+        preferred_agent = conversation_metadata["agent"]
+        print(f"🎯 SPECIALIZED CONVERSATION DETECTED - bypassing router for: {preferred_agent}")
+        
+        # Map to graph node (UPDATED)
+        agent_mapping = {
+            "mental-health": "mental_health",
+            "symptoms-checker": "extraction",
+            "general-info": "medical_qa",
+            "rumor-check": "rumor",
+            "orientation": "orientation",
+            "wound-analyzer": "wound_analyzer"  # NEW
+        }
+        
+        mapped_agent = agent_mapping.get(preferred_agent)
+        
+        if mapped_agent:
+            print(f"📍 Routing directly to {mapped_agent} (bypassing router)")
+            
+            # Update metadata
+            if "metadata" not in state:
+                state["metadata"] = {}
+            state["metadata"]["router_bypassed"] = True
+            state["metadata"]["preferred_agent_used"] = preferred_agent
+            
+            return mapped_agent
     
-    # NOW check if user is answering a triage question
-    # Only if next_agent is None or "triage" AND we have pending questions
-    if pending_questions and user_input and diagnosis_session_id and (next_agent is None or next_agent == "triage"):
-        # User is answering a triage question - route directly to diagnosis
-        logger.info(f"🔀 Pending questions detected ({len(pending_questions)}) AND no explicit routing - routing to diagnosis")
+    # Check if user is answering a triage question
+    if pending_questions and user_input and diagnosis_session_id:
+        print(f"🔀 Answering triage question - routing to diagnosis")
         return "diagnosis"
     
-    if next_agent == "triage":
-        # Route to triage workflow start (extraction)
-        logger.info("🔄 Routing 'triage' to 'extraction' (triage workflow start)")
-        return "extraction"
+    # Check next_agent from router decision (UPDATED with wound_analyzer)
+    if next_agent:
+        print(f"🔀 Router requested {next_agent}")
+        
+        intent_mapping = {
+            "medical_qa": "medical_qa",
+            "mental_health": "mental_health",
+            "rumor": "rumor",
+            "triage": "extraction",
+            "wound_analyzer": "wound_analyzer"  # NEW
+        }
+        
+        mapped_agent = intent_mapping.get(next_agent, next_agent)
+        print(f"📍 Mapping {next_agent} → {mapped_agent}")
+        return mapped_agent
     
-    # End if should_end is True (for greeting or out of scope)
+    # Check intent from router (UPDATED)
+    if intent:
+        intent_mapping = {
+            "medical_qa": "medical_qa",
+            "mental_health": "mental_health",
+            "rumor": "rumor",
+            "triage": "extraction",
+            "wound_analyzer": "wound_analyzer"  # NEW
+        }
+        mapped_intent = intent_mapping.get(intent)
+        if mapped_intent:
+            print(f"🔄 Router intent '{intent}' - routing to '{mapped_intent}'")
+            return mapped_intent
+    
+    # ====== DEFAULT: End the graph ======
     if should_end:
-        logger.info(f"🔄 should_end=True, ending graph")
+        print(f"🔄 should_end=True, ending graph")
         return END
     
-    logger.info("🔄 No valid routing decision, ending graph")
+    print("🔄 No valid routing decision, ending graph")
     return END
 
 graph.add_conditional_edges(
@@ -191,12 +430,14 @@ graph.add_conditional_edges(
     gatekeeper_routing_decision,
     {
         "medical_qa": "medical_qa",
-        "extraction": "extraction",  # Triage workflow starts here
-        "diagnosis": "diagnosis",    # Route directly to diagnosis for Q&A answers
-        "triage": "extraction",      # Also handle "triage" routing
+        "extraction": "extraction",
+        "diagnosis": "diagnosis",
+        "triage": "triage",
         "mental_health": "mental_health",
         "rumor": "rumor",
-        "orientation": "orientation",  # Direct facility requests
+        "wound_analyzer": "wound_analyzer",  # NEW
+        "orientation": "orientation",
+        "triage_workflow": "triage_workflow",
         END: END
     }
 )
@@ -226,7 +467,7 @@ graph.add_edge("extraction", "diagnosis")
 
 # Diagnosis can loop back to itself if pending questions, or proceed to triage
 def diagnosis_router(state: AgentState):
-    """Route diagnosis node - END if question asked (wait for user), loop back if answer received, else proceed to triage"""
+    """Route diagnosis node"""
     import logging
     logger = logging.getLogger(__name__)
     
@@ -240,7 +481,6 @@ def diagnosis_router(state: AgentState):
         return END
     
     # If there are pending questions AND user provided input (answer), loop back to process answer
-    # But only if should_end is False (meaning we're processing an answer, not asking a question)
     if pending_questions and user_input and not should_end:
         logger.info("❓ Processing answer to pending question - looping back to diagnosis")
         return "diagnosis"
@@ -257,9 +497,9 @@ graph.add_conditional_edges(
     "diagnosis",
     diagnosis_router,
     {
-        "diagnosis": "diagnosis",  # Loop back to process answer
-        "triage": "triage",        # Proceed to triage when complete
-        END: END,                  # End when question asked (wait for user)
+        "diagnosis": "diagnosis",
+        "triage": "triage",
+        END: END,
     }
 )
 
@@ -281,12 +521,10 @@ graph.add_conditional_edges(
 # Mental health can route to orientation or end
 def mental_health_router(state: AgentState):
     """Route mental health to orientation if recommendation provided, otherwise end conversation"""
-    # If mental health recommends orientation (emergency/therapist), route there
     if state.get("mental_health_recommendation") in ["emergency", "therapist"]:
         logger.info("🔀 Mental health agent recommending orientation")
         return "orientation"
     
-    # Otherwise, end the conversation (mental health is complete)
     logger.info("✅ Mental health support complete - ending conversation")
     return END
 
@@ -299,44 +537,110 @@ graph.add_conditional_edges(
     }
 )
 
-# Add conditional edges for delegation
-for agent in ["medical_qa", "rumor"]:
-    # Standard agent routing for other agents
+# Wound analyzer routing - can end or route to orientation if urgent (NEW)
+def wound_analyzer_router(state: AgentState):
+    """Route after wound analysis"""
+    # Check if wound analysis indicates urgent referral
+    wound_analysis = state.get("wound_analysis", {})
+    
+    if wound_analysis.get("needs_urgent_referral"):
+        print("🔀 Wound analysis recommending urgent orientation")
+        return "orientation"
+    
+    # Check metadata for wound analysis
+    metadata = state.get("metadata", {})
+    if metadata.get("wound_analysis", {}).get("needs_urgent_referral"):
+        print("🔀 Wound analysis (metadata) recommending urgent orientation")
+        return "orientation"
+    
+    print("✅ Wound analysis complete - ending conversation")
+    return END
+
+graph.add_conditional_edges(
+    "wound_analyzer",
+    wound_analyzer_router,
+    {
+        "orientation": "orientation",
+        END: END,
+    }
+)
+
+# Add conditional edges for delegation (UPDATED)
+for agent in ["medical_qa", "rumor", "orientation"]:
     graph.add_conditional_edges(
         agent,
         agent_router,
         {
             "medical_qa": "medical_qa",
-            "triage": "extraction",  # Route to triage workflow start
+            "triage": "extraction",
             "mental_health": "mental_health",
             "rumor": "rumor",
+            "wound_analyzer": "wound_analyzer",  # NEW
+            "orientation": "orientation",
             END: END,
         }
     )
 
 # ------------------ COMPILE GRAPH ------------------
 app = graph.compile()
-print("🎉 LangGraph with Medical Gatekeeper compiled successfully!")
+print("🎉 LangGraph with Direct Agent Entry and Wound Analyzer compiled successfully!")
 
 # ------------------ TEST GRAPH ------------------
 if __name__ == "__main__":
     print("\n🧪 Testing the graph...")
+    
+    # Test 1: Direct agent conversation (wound analyzer)
+    print("\n🧪 Testing wound analyzer conversation...")
     test_state = {
-        "user_input": "What is an asthma attack?",
+        "user_input": "I have a deep cut on my arm",
         "intent": None,
         "messages": [],
         "current_agent": None,
         "next_agent": None,
         "agent_output": None,
-        "metadata": {}
-        # agent_registry will be injected automatically
+        "metadata": {
+            "message_type": "direct_agent",
+            "conversation_metadata": {
+                "agent": "wound-analyzer"
+            },
+            "has_wound_image": False,
+            "wound_type": "cut"
+        }
     }
 
     try:
         result = app.invoke(test_state)
         print(f"✅ Test passed!")
-        print(f"   Intent: {result.get('intent')}")
-        print(f"   Agent: {result.get('current_agent')}")
+        print(f"   Conversation agent: wound-analyzer")
+        print(f"   Current agent: {result.get('current_agent')}")
+        print(f"   Router bypassed: {result.get('metadata', {}).get('router_bypassed', False)}")
         print(f"   Output: {result.get('agent_output', '')[:100]}...")
+        
+        # Check wound analysis data
+        if "wound_analysis" in result:
+            print(f"   Wound analysis: {result['wound_analysis']}")
     except Exception as e:
         print(f"❌ Test failed: {e}")
+    
+    # Test 2: Regular message with wound keywords
+    print("\n🧪 Testing regular message with wound keywords...")
+    test_state2 = {
+        "user_input": "I have a burn on my hand from cooking",
+        "intent": None,
+        "messages": [],
+        "current_agent": None,
+        "next_agent": None,
+        "agent_output": None,
+        "metadata": {
+            "message_type": "regular"
+        }
+    }
+    
+    try:
+        result2 = app.invoke(test_state2)
+        print(f"✅ Test 2 passed!")
+        print(f"   Intent detected: {result2.get('intent')}")
+        print(f"   Current agent: {result2.get('current_agent')}")
+        print(f"   Output: {result2.get('agent_output', '')[:100]}...")
+    except Exception as e:
+        print(f"❌ Test 2 failed: {e}")

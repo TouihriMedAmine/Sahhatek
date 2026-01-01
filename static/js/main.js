@@ -1,5 +1,5 @@
-// static/js/main.js v7
-// Enhanced Chat Manager with Sidebar Integration
+// static/js/main.js v7 - FINAL VERSION
+// Enhanced Chat Manager with Sidebar Integration and Image Upload
 
 (() => {
   // DOM Elements
@@ -14,6 +14,7 @@
   let currentChatId = null;
   let conversations = [];
   let isProcessing = false;
+  let pendingImage = null;  // Store pending image data for wound analyzer
 
   // --- CSRF TOKEN ---
   function getCSRFToken() {
@@ -65,13 +66,18 @@
     }
   }
 
-  async function addMessage(conversationId, content, role = 'user', locationData = null) {
+  async function addMessage(conversationId, content, role = 'user', locationData = null, imageData = null) {
     try {
       const payload = { role, content };
       
       if (locationData) {
         payload.latitude = locationData.latitude;
         payload.longitude = locationData.longitude;
+      }
+      
+      // Add image data if provided
+      if (imageData) {
+        payload.image = imageData;
       }
       
       const res = await fetch(`/chat/api/conversations/${conversationId}/messages/add/`, {
@@ -408,7 +414,7 @@
     scrollToBottom();
   }
 
-  function appendMessage(role, content, metadata = null) {
+  function appendMessage(role, content, metadata = null, imageData = null) {
     if (!chatMessagesEl) return;
     
     const msgDiv = document.createElement('div');
@@ -417,11 +423,35 @@
     const bubble = document.createElement('div');
     bubble.className = `max-w-[80%] p-4 rounded-2xl ${role === 'user' ? 'bg-medical-primary text-white rounded-br-none' : 'bg-white border border-gray-200 text-medical-neutral rounded-bl-none shadow-sm'}`;
     
+    // Create content container
     const contentDiv = document.createElement('div');
     contentDiv.className = 'text-sm whitespace-pre-wrap';
     contentDiv.textContent = content;
     
     bubble.appendChild(contentDiv);
+    
+    // Add image preview if available
+    if (metadata && metadata.image) {
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'mt-3 mb-2';
+      const img = document.createElement('img');
+      img.src = metadata.image;
+      img.className = 'max-w-full h-auto rounded-lg border border-gray-200';
+      img.alt = 'Uploaded image';
+      imgDiv.appendChild(img);
+      bubble.appendChild(imgDiv);
+    } else if (imageData) {
+      // For new messages with images
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'mt-3 mb-2';
+      const img = document.createElement('img');
+      img.src = imageData;
+      img.className = 'max-w-full h-auto rounded-lg border border-gray-200';
+      img.alt = 'Uploaded image';
+      imgDiv.appendChild(img);
+      bubble.appendChild(imgDiv);
+    }
+    
     msgDiv.appendChild(bubble);
     chatMessagesEl.appendChild(msgDiv);
     
@@ -435,8 +465,14 @@
   }
 
   // --- MESSAGE SENDING ---
-  async function sendMessage(content) {
+  async function sendMessage(content, imageData = null) {
     if (!content.trim() || isProcessing) return;
+    
+    // Use pending image if no image is provided
+    if (!imageData && pendingImage) {
+      imageData = pendingImage;
+      pendingImage = null;
+    }
     
     if (!currentChatId) {
       // Create new conversation
@@ -449,13 +485,13 @@
     }
     
     // Add user message
-    appendMessage('user', content);
+    appendMessage('user', content, null, imageData);
     
     // Show typing indicator
     showTypingIndicator();
     
-    // Send to server
-    const result = await addMessage(currentChatId, content, 'user');
+    // Send to server (with optional image)
+    const result = await addMessage(currentChatId, content, 'user', null, imageData);
     
     // Remove typing indicator and add bot response
     removeTypingIndicator();
@@ -545,7 +581,7 @@
       'symptoms-checker': "Hello! I'm your symptoms checker. Please describe your symptoms in detail, and I'll help you understand possible causes and when to seek medical attention.",
       'orientation': "Hello! I'm your medical guidance assistant. I provide step-by-step instructions for medical procedures and first aid. How can I guide you today?",
       'rumor-check': "Hello! I'm your health fact checker. I can verify medical claims and provide evidence-based information. What health claim would you like me to check?",
-      'computer-vision': "Hello! I'm your wound analysis assistant. You can upload images of wounds, rashes, or skin conditions for analysis."
+      'computer-vision': "Hello! I'm your wound analysis assistant. You can upload images of wounds, rashes, or skin conditions for analysis. Click the upload button or drag and drop an image."
     };
     return messages[agentName] || "Hello! I'm your specialized health assistant. How can I help you today?";
   }
@@ -575,7 +611,9 @@
     const chatInputChat = document.getElementById('chatInput');
     
     function handleSend() {
-      const input = chatInterface.classList.contains('hidden') ? chatInput : chatInputChat;
+      // Get the correct input based on which interface is visible
+      const chatInterface = document.getElementById('chatInterface');
+      const input = chatInterface && !chatInterface.classList.contains('hidden') ? chatInputChat : chatInput;
       const content = input?.value.trim();
       if (content) {
         sendMessage(content);
@@ -589,7 +627,78 @@
     if (sendBtn) sendBtn.addEventListener('click', handleSend);
     if (sendChatBtn) sendChatBtn.addEventListener('click', handleSend);
     
-    // Enter key
+    // File upload for wound analyzer chat
+    try {
+      const fileInput = document.getElementById('fileInput');
+      const uploadBtnChat = document.getElementById('upload-btn-chat');
+      
+      console.log('🔍 Looking for upload elements:', { fileInput: !!fileInput, uploadBtnChat: !!uploadBtnChat });
+      
+      if (uploadBtnChat && fileInput) {
+        console.log('✅ Upload button and file input found, setting up handlers');
+        
+        uploadBtnChat.onclick = function(e) {
+          console.log('📁 Upload button clicked');
+          e.preventDefault();
+          e.stopPropagation();
+          fileInput.click();
+          return false;
+        };
+        
+        fileInput.onchange = function(e) {
+          console.log('📂 File changed event fired');
+          const file = this.files[0];
+          console.log('📂 File selected:', file?.name, file?.type);
+          
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              pendingImage = event.target.result;
+              console.log('✅ Image loaded:', pendingImage.substring(0, 50) + '...');
+              showNotification('Image attached. Type a message and send!', 'info');
+              
+              // Display image preview in input area
+              const previewContainer = document.getElementById('image-preview-container');
+              if (previewContainer) {
+                previewContainer.innerHTML = `
+                  <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+                    <div class="flex items-center">
+                      <img src="${pendingImage}" alt="Preview" class="w-10 h-10 object-cover rounded mr-2">
+                      <span class="text-sm text-gray-600">Image attached</span>
+                    </div>
+                    <button id="remove-image-btn" class="text-red-500 hover:text-red-700">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                `;
+                
+                // Add remove image handler
+                document.getElementById('remove-image-btn').addEventListener('click', function() {
+                  pendingImage = null;
+                  fileInput.value = '';
+                  previewContainer.innerHTML = '';
+                  showNotification('Image removed', 'info');
+                });
+              }
+            };
+            reader.onerror = function() {
+              console.error('❌ Error reading file');
+              showNotification('Error reading image file', 'error');
+            };
+            reader.readAsDataURL(file);
+          } else {
+            console.warn('⚠️ Not an image:', file?.type);
+            showNotification('Please select an image file', 'error');
+          }
+        };
+      } else {
+        console.warn('⚠️ Upload elements not found - fileInput:', !!fileInput, 'uploadBtnChat:', !!uploadBtnChat);
+      }
+    } catch(err) {
+      console.error('❌ Error setting up upload handler:', err);
+    }
+    
+    // Enter key handling
     if (chatInput) {
       chatInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -629,6 +738,13 @@
         }
       });
     }
+    
+    // Clear pending image when switching chats
+    document.addEventListener('chatSwitched', () => {
+      pendingImage = null;
+      const previewContainer = document.getElementById('image-preview-container');
+      if (previewContainer) previewContainer.innerHTML = '';
+    });
   }
 
   // --- INITIALIZATION ---
@@ -640,6 +756,21 @@
     
     // Set up event listeners
     initEventListeners();
+    
+    // Double-check upload handler (fallback)
+    setTimeout(() => {
+      const uploadBtnChat = document.getElementById('upload-btn-chat');
+      const fileInput = document.getElementById('fileInput');
+      if (uploadBtnChat && fileInput && !uploadBtnChat.onclick) {
+        console.log('🔧 Setting up upload handler fallback');
+        uploadBtnChat.onclick = function(e) {
+          console.log('📁 Upload button clicked (fallback)');
+          e.preventDefault();
+          fileInput.click();
+          return false;
+        };
+      }
+    }, 500);
     
     // Expose public API
     window.chatManager = {
@@ -656,7 +787,13 @@
         loadChatMessages(chatId);
       },
       sendMessage,
-      switchChat
+      switchChat,
+      attachImage: (imageData) => {
+        pendingImage = imageData;
+      },
+      clearPendingImage: () => {
+        pendingImage = null;
+      }
     };
     
     // Listen for UI events
@@ -665,6 +802,15 @@
         switchChat(e.detail.chatId);
       }
     });
+    
+    // Trigger chat switch from URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const chatId = urlParams.get('chat');
+    if (chatId) {
+      setTimeout(() => {
+        window.chatManager.loadChatFromUrl(chatId);
+      }, 1000);
+    }
   }
 
   // Start initialization

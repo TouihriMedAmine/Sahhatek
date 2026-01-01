@@ -1,0 +1,3529 @@
+[
+    {
+        "condition_name": "Asthma attack",
+        "category": "clinical/breathing",
+        "description": "Acute narrowing of the airways causing difficulty breathing, triggered by allergens, infection, exercise, or irritants.",
+        "causes": [
+            "Respiratory infections",
+            "Allergens (dust, pollen, animals)",
+            "Exercise",
+            "Cold air or smoke exposure"
+        ],
+        "risk_factors": [
+            "History of asthma",
+            "Previous severe attacks",
+            "Exposure to triggers (smoke, allergens)"
+        ],
+        "symptoms": {
+            "common": [
+                "Shortness of breath",
+                "Wheezing",
+                "Coughing",
+                "Tight chest"
+            ],
+            "danger_signs": [
+                "Difficulty speaking full sentences",
+                "Very fast breathing",
+                "Blue lips or nails",
+                "Silent chest (no air movement)"
+            ]
+        },
+        "first_aid_steps": [
+            "Help the person sit upright and stay calm.",
+            "Encourage slow, steady breathing.",
+            "Use their prescribed inhaler if available (e.g., salbutamol).",
+            "Loosen tight clothing.",
+            "Monitor breathing while waiting for improvement.",
+            "Call emergency medical services if danger signs appear or symptoms worsen."
+        ],
+        "what_not_to_do": [
+            "Do not make the person lie down.",
+            "Do not force deep breathing if it worsens symptoms.",
+            "Do not delay calling for help in severe cases."
+        ],
+        "when_to_call_emergency": [
+            "No improvement after using rescue inhaler.",
+            "Severe breathing difficulty or blue lips.",
+            "Unable to speak in full sentences."
+        ],
+        "prevention": [
+            "Avoid known triggers.",
+            "Use preventive inhalers as prescribed.",
+            "Carry a rescue inhaler at all times."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Breathing difficulties",
+            "IFRC First Aid Guidelines 2020 – Asthma"
+        ]
+    },
+    {
+        "condition_name": "Respiratory distress due to infection (pneumonia)",
+        "category": "clinical/breathing",
+        "description": "Difficulty breathing caused by inflammation and fluid in the lungs, often due to bacterial or viral infection.",
+        "causes": [
+            "Pneumonia",
+            "Severe chest infection",
+            "Influenza",
+            "COVID-19 or other viral infections"
+        ],
+        "risk_factors": [
+            "Young children and older adults",
+            "Chronic lung disease",
+            "Weakened immune system"
+        ],
+        "symptoms": {
+            "common": [
+                "Fast breathing",
+                "Cough with or without mucus",
+                "Fever or chills",
+                "Chest discomfort"
+            ],
+            "danger_signs": [
+                "Severe difficulty breathing",
+                "Blue lips or fingertips",
+                "Confusion or decreased alertness",
+                "Inability to drink or breastfeed (children)"
+            ]
+        },
+        "first_aid_steps": [
+            "Sit the person upright.",
+            "Reassure them and encourage calm breathing.",
+            "Loosen tight clothing.",
+            "If fever, encourage small sips of fluids.",
+            "Seek medical evaluation promptly.",
+            "Call emergency services if danger signs appear."
+        ],
+        "what_not_to_do": [
+            "Do not lie the person flat if breathing is difficult.",
+            "Do not give cough medicine to young children without advice.",
+            "Do not delay medical review for severe symptoms."
+        ],
+        "when_to_call_emergency": [
+            "Severe breathing difficulty.",
+            "Blue lips, confusion, or inability to drink.",
+            "Breathing pauses in children."
+        ],
+        "prevention": [
+            "Vaccination (influenza, pneumococcal).",
+            "Avoid smoke exposure.",
+            "Good hand hygiene."
+        ],
+        "references": [
+            "WHO BEC – Breathing assessment",
+            "IFRC 2020 First Aid – Respiratory distress"
+        ]
+    },
+    {
+        "condition_name": "Croup (laryngotracheobronchitis)",
+        "category": "clinical/breathing",
+        "description": "Viral infection causing swelling of the upper airway in young children, leading to a barking cough and noisy breathing.",
+        "causes": [
+            "Viral infections such as parainfluenza",
+            "Upper respiratory infections"
+        ],
+        "risk_factors": [
+            "Children aged 6 months to 5 years",
+            "History of previous croup"
+        ],
+        "symptoms": {
+            "common": [
+                "Barking cough",
+                "Hoarse voice",
+                "Noisy breathing (stridor)",
+                "Fever"
+            ],
+            "danger_signs": [
+                "Stridor at rest",
+                "Severe chest indrawing",
+                "Blue lips or drowsiness",
+                "Drooling or difficulty swallowing"
+            ]
+        },
+        "first_aid_steps": [
+            "Keep the child calm (crying worsens airway swelling).",
+            "Allow them to sit upright.",
+            "Offer cool or moist air (open window or humid environment).",
+            "Give fluids if tolerated.",
+            "Seek medical evaluation for moderate symptoms."
+        ],
+        "what_not_to_do": [
+            "Do not force the child to lie down.",
+            "Do not give cough syrups.",
+            "Do not panic or cause the child to cry."
+        ],
+        "when_to_call_emergency": [
+            "Stridor at rest.",
+            "Severe breathing difficulty.",
+            "Blue lips or lethargy."
+        ],
+        "prevention": [
+            "Hand hygiene and avoiding sick contacts.",
+            "Vaccination against influenza and measles."
+        ],
+        "references": [
+            "WHO BEC – Paediatric airway",
+            "IFRC 2020 – Breathing difficulties in children"
+        ]
+    },
+    {
+        "condition_name": "Hyperventilation / Panic attack",
+        "category": "clinical/breathing",
+        "description": "Rapid breathing due to anxiety or panic causing reduced carbon dioxide levels and sensations of breathlessness.",
+        "causes": [
+            "Sudden anxiety",
+            "Panic attack",
+            "Fear or emotional distress"
+        ],
+        "risk_factors": [
+            "History of anxiety or panic disorder",
+            "Stress or emotional trauma"
+        ],
+        "symptoms": {
+            "common": [
+                "Fast breathing",
+                "Chest tightness",
+                "Dizziness or tingling in hands",
+                "Feeling of choking"
+            ],
+            "danger_signs": [
+                "Fainting",
+                "Severe chest pain",
+                "Confusion (requires ruling out medical causes)"
+            ]
+        },
+        "first_aid_steps": [
+            "Encourage slow breaths: inhale 4 seconds → exhale 6 seconds.",
+            "Reassure the person and speak calmly.",
+            "Move to a quiet, safe space.",
+            "Encourage breathing with hands on the abdomen.",
+            "Stay with the person until symptoms improve."
+        ],
+        "what_not_to_do": [
+            "Do not force breathing into a bag (not recommended by WHO).",
+            "Do not leave the person alone if very anxious.",
+            "Do not tell them to 'stop panicking' — it worsens symptoms."
+        ],
+        "when_to_call_emergency": [
+            "Chest pain that could be cardiac.",
+            "Loss of consciousness.",
+            "Breathing difficulty not improving."
+        ],
+        "prevention": [
+            "Stress management techniques.",
+            "Avoiding known triggers.",
+            "Breathing exercises."
+        ],
+        "references": [
+            "WHO BEC – Approach to breathing",
+            "IFRC First Aid Guidelines 2020 – Panic attack"
+        ]
+    },
+    {
+        "condition_name": "Breathing difficulty from chest infection",
+        "category": "clinical/breathing",
+        "description": "Upper or lower respiratory infection causing coughing, mucus, and mild breathing difficulty.",
+        "causes": [
+            "Viral chest infections",
+            "Bronchitis",
+            "Common cold complications"
+        ],
+        "risk_factors": [
+            "Smoking",
+            "Chronic lung disease",
+            "Young children"
+        ],
+        "symptoms": {
+            "common": [
+                "Cough",
+                "Mild shortness of breath",
+                "Chest tightness",
+                "Fatigue"
+            ],
+            "danger_signs": [
+                "Severe breathing difficulty",
+                "High fever with fast breathing",
+                "Blue lips",
+                "Inability to drink (children)"
+            ]
+        },
+        "first_aid_steps": [
+            "Sit upright and breathe slowly.",
+            "Drink warm fluids.",
+            "Rest and avoid exertion.",
+            "Seek medical assessment if symptoms worsen."
+        ],
+        "what_not_to_do": [
+            "Do not lie flat if breathing is difficult.",
+            "Do not smoke or expose to smoke.",
+            "Do not take antibiotics without medical advice."
+        ],
+        "when_to_call_emergency": [
+            "Severe breathing difficulty.",
+            "Blue lips.",
+            "Signs of dehydration or inability to drink."
+        ],
+        "prevention": [
+            "Good hygiene and avoiding sick contacts.",
+            "Avoiding smoke exposure.",
+            "Staying hydrated during infections."
+        ],
+        "references": [
+            "WHO BEC – Breathing problems",
+            "IFRC First Aid 2020 – Respiratory infections with danger signs"
+        ]
+    },
+    {
+        "condition_name": "Chest pain – possible heart attack (myocardial infarction)",
+        "category": "clinical/cardiac",
+        "description": "A sudden blockage of blood flow to part of the heart muscle causing chest pain and shortness of breath. This is a time-critical medical emergency.",
+        "causes": [
+            "Coronary artery blockage from a blood clot",
+            "Coronary artery narrowing from atherosclerosis",
+            "Spasm of coronary arteries (rare)"
+        ],
+        "risk_factors": [
+            "High blood pressure",
+            "Diabetes",
+            "High cholesterol",
+            "Smoking",
+            "Family history of heart disease",
+            "Older age",
+            "Obesity and sedentary lifestyle"
+        ],
+        "symptoms": {
+            "common": [
+                "Chest pain or pressure (often described as tightness, heaviness, or squeezing)",
+                "Pain spreading to left arm, jaw, neck, or back",
+                "Shortness of breath",
+                "Sweating, nausea, or vomiting",
+                "Anxiety or sense of impending doom"
+            ],
+            "danger_signs": [
+                "Persistent chest pain lasting >10 minutes",
+                "Collapse or severe weakness",
+                "Severe shortness of breath",
+                "Cold, clammy skin"
+            ]
+        },
+        "first_aid_steps": [
+            "Stop the person’s activity and help them sit in a comfortable position with back supported.",
+            "Reassure them and encourage slow, steady breathing.",
+            "Loosen tight clothing around neck and chest.",
+            "If they have prescribed cardiac medication (e.g., nitroglycerin spray) help them use it.",
+            "Keep the person calm and still to reduce strain on the heart.",
+            "Call emergency medical services immediately, even if pain improves."
+        ],
+        "what_not_to_do": [
+            "Do not allow the person to walk or exert themselves.",
+            "Do not give food or drink.",
+            "Do not give aspirin unless this is advised by local guidelines and the person is fully conscious and not allergic.",
+            "Do not ignore mild chest pain if it recurs or persists."
+        ],
+        "when_to_call_emergency": [
+            "Chest pain lasting more than 10 minutes.",
+            "Chest pain accompanied by sweating, nausea, or shortness of breath.",
+            "Pain radiating to shoulder, arm, jaw, or back.",
+            "Any collapse or near-collapse."
+        ],
+        "prevention": [
+            "Control blood pressure, cholesterol, and blood sugar.",
+            "Stop smoking.",
+            "Maintain regular physical activity and a healthy diet.",
+            "Manage stress and avoid stimulant drugs."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Circulation assessment and chest pain",
+            "IFRC International First Aid Guidelines 2020 – Chest pain",
+            "ILCOR Consensus 2020 – Acute coronary syndrome first aid"
+        ]
+    },
+    {
+        "condition_name": "Cardiac arrest (adult)",
+        "category": "clinical/cardiac",
+        "description": "A sudden loss of heart function where the heart stops pumping blood, resulting in unresponsiveness and lack of normal breathing. Immediate CPR greatly improves survival.",
+        "causes": [
+            "Heart attack (most common cause)",
+            "Severe arrhythmias",
+            "Drowning",
+            "Severe trauma",
+            "Electrocution",
+            "Respiratory failure"
+        ],
+        "risk_factors": [
+            "Cardiovascular disease",
+            "Previous heart attack",
+            "Heart failure",
+            "Diabetes, hypertension, smoking"
+        ],
+        "symptoms": {
+            "common": [
+                "Sudden collapse",
+                "Unresponsiveness",
+                "No normal breathing or only gasping breaths"
+            ],
+            "danger_signs": [
+                "Absence of pulse (checked by trained providers)",
+                "No chest rise",
+                "Cyanosis (blue lips)"
+            ]
+        },
+        "first_aid_steps": [
+            "Check for responsiveness by tapping and shouting.",
+            "Call emergency medical services immediately.",
+            "Place the person flat on their back on a firm surface.",
+            "Start chest compressions at a rate of 100–120 per minute and depth of 5–6 cm.",
+            "Allow full chest recoil after each compression.",
+            "Continue CPR until an AED (defibrillator) is available or help arrives.",
+            "If AED is available, turn it on and follow voice instructions."
+        ],
+        "what_not_to_do": [
+            "Do not shake the person violently.",
+            "Do not delay CPR while checking for a pulse if untrained.",
+            "Do not stop CPR unless exhausted or replaced."
+        ],
+        "when_to_call_emergency": [
+            "Immediate – as soon as collapse and no breathing are identified."
+        ],
+        "prevention": [
+            "Manage cardiovascular risk factors.",
+            "Avoid drug misuse.",
+            "Avoid untreated chest pain episodes."
+        ],
+        "references": [
+            "ILCOR 2020 Adult CPR Guidelines",
+            "WHO Basic Emergency Care – Circulation and cardiac arrest",
+            "IFRC International First Aid Guidelines 2020 – CPR (adult)"
+        ]
+    },
+    {
+        "condition_name": "Cardiac arrest (child)",
+        "category": "clinical/cardiac",
+        "description": "In children, cardiac arrest is most often caused by respiratory failure or shock. Immediate CPR is essential to restore oxygen delivery.",
+        "causes": [
+            "Severe breathing problems",
+            "Drowning",
+            "Severe infection (sepsis)",
+            "Congenital heart disease",
+            "Trauma"
+        ],
+        "risk_factors": [
+            "Chronic lung disease",
+            "Congenital cardiac problems",
+            "Recent severe infection"
+        ],
+        "symptoms": {
+            "common": [
+                "Unresponsiveness",
+                "No normal breathing",
+                "Possible gasping only"
+            ],
+            "danger_signs": [
+                "No signs of circulation",
+                "Blue lips or extreme pallor",
+                "Limp and unresponsive body"
+            ]
+        },
+        "first_aid_steps": [
+            "Check for responsiveness and normal breathing.",
+            "Call emergency services immediately.",
+            "Start CPR: 30 chest compressions followed by 2 rescue breaths.",
+            "Compress one-third chest depth (about 4–5 cm).",
+            "If two trained rescuers: use 15 compressions to 2 breaths.",
+            "Use AED with pediatric pads if available; otherwise use adult pads."
+        ],
+        "what_not_to_do": [
+            "Do not delay CPR while searching for pulse.",
+            "Do not shake the child.",
+            "Do not give breaths too forcefully (risk of gastric inflation)."
+        ],
+        "when_to_call_emergency": [
+            "Immediately when child is unresponsive and not breathing normally."
+        ],
+        "prevention": [
+            "Supervise children around water.",
+            "Treat respiratory infections early.",
+            "Avoid choking hazards."
+        ],
+        "references": [
+            "ILCOR 2020 Pediatric CPR Guidelines",
+            "IFRC First Aid Guidelines 2020 – CPR (child)",
+            "WHO Basic Emergency Care – Pediatric emergencies"
+        ]
+    },
+    {
+        "condition_name": "Palpitations with collapse (suspected arrhythmia)",
+        "category": "clinical/cardiac",
+        "description": "A sudden abnormal heart rhythm that causes the heart to beat too fast or too slow, leading to dizziness, fainting, or collapse.",
+        "causes": [
+            "Supraventricular tachycardia",
+            "Ventricular tachycardia or fibrillation",
+            "Bradycardia from heart block",
+            "Electrolyte imbalance"
+        ],
+        "risk_factors": [
+            "Heart disease",
+            "Previous arrhythmias",
+            "Electrolyte disturbances",
+            "Use of stimulant drugs or certain medications"
+        ],
+        "symptoms": {
+            "common": [
+                "Palpitations (rapid or irregular heartbeat)",
+                "Dizziness or light-headedness",
+                "Shortness of breath",
+                "Chest discomfort"
+            ],
+            "danger_signs": [
+                "Sudden collapse",
+                "Unresponsiveness",
+                "Severe chest pain",
+                "Very slow or very fast pulse if detectable"
+            ]
+        },
+        "first_aid_steps": [
+            "Help the person sit or lie down safely.",
+            "Reassure them and encourage slow breathing.",
+            "Check responsiveness if they collapse.",
+            "If unresponsive and not breathing, begin CPR.",
+            "Call emergency medical services immediately.",
+            "Monitor breathing until help arrives."
+        ],
+        "what_not_to_do": [
+            "Do not allow the person to stand quickly.",
+            "Do not give stimulants, caffeine, or medications.",
+            "Do not ignore recurrent episodes."
+        ],
+        "when_to_call_emergency": [
+            "Collapse or near-collapse.",
+            "Palpitations with chest pain or breathlessness.",
+            "Palpitations lasting more than a few minutes."
+        ],
+        "prevention": [
+            "Avoid stimulant drugs and excess caffeine.",
+            "Manage underlying heart conditions.",
+            "Follow medical advice for chronic arrhythmias."
+        ],
+        "references": [
+            "WHO BEC – Circulation emergency assessment",
+            "IFRC First Aid Guidelines – Collapse and cardiac causes",
+            "ILCOR – First aid for arrhythmia-related collapse"
+        ]
+    },
+    {
+        "condition_name": "Fainting (syncope)",
+        "category": "clinical/unresponsiveness",
+        "description": "A brief, sudden loss of consciousness caused by reduced blood flow to the brain, typically followed by rapid recovery.",
+        "causes": [
+            "Standing up quickly",
+            "Heat exposure or dehydration",
+            "Emotional distress or pain",
+            "Prolonged standing",
+            "Low blood sugar",
+            "Heart rhythm abnormalities (less common but serious)"
+        ],
+        "risk_factors": [
+            "Hot environment",
+            "Dehydration",
+            "Prolonged standing",
+            "Fatigue or illness"
+        ],
+        "symptoms": {
+            "common": [
+                "Dizziness or light-headedness",
+                "Nausea",
+                "Blurred vision",
+                "Sweating or feeling warm",
+                "Brief loss of consciousness"
+            ],
+            "danger_signs": [
+                "Chest pain",
+                "Irregular heartbeat",
+                "Fainting during exertion",
+                "Prolonged confusion after the episode"
+            ]
+        },
+        "first_aid_steps": [
+            "Lay the person flat and raise their legs to improve blood flow.",
+            "Loosen tight clothing around the neck.",
+            "Reassure and allow them to recover slowly.",
+            "If fully awake, offer small sips of water.",
+            "Monitor for recurrent symptoms."
+        ],
+        "what_not_to_do": [
+            "Do not make the person sit or stand immediately.",
+            "Do not give food or drink if they are still drowsy.",
+            "Do not ignore fainting during exercise or with chest pain."
+        ],
+        "when_to_call_emergency": [
+            "Fainting with chest pain or palpitations.",
+            "Repeated fainting episodes.",
+            "No recovery within 1–2 minutes.",
+            "Fainting after injury or bleeding."
+        ],
+        "prevention": [
+            "Stay hydrated.",
+            "Avoid standing for long periods without movement.",
+            "Eat regular meals."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Altered mental status",
+            "IFRC First Aid Guidelines 2020 – Fainting"
+        ]
+    },
+    {
+        "condition_name": "Confusion or altered mental status (non-trauma)",
+        "category": "clinical/unresponsiveness",
+        "description": "A change in awareness, thinking, or behavior caused by illness, metabolic problems, infection, or drug effects.",
+        "causes": [
+            "Severe infection (sepsis)",
+            "Low or high blood sugar",
+            "Low oxygen levels",
+            "Stroke",
+            "Dehydration",
+            "Medication side effects or overdose",
+            "Alcohol or drug intoxication"
+        ],
+        "risk_factors": [
+            "Older age",
+            "Chronic illness (diabetes, heart disease)",
+            "Recent infection or fever",
+            "Polypharmacy (multiple medications)"
+        ],
+        "symptoms": {
+            "common": [
+                "Disorientation",
+                "Difficulty speaking clearly",
+                "Unusual behavior",
+                "Drowsiness"
+            ],
+            "danger_signs": [
+                "Unresponsiveness or inability to wake",
+                "Sudden confusion with weakness or slurred speech",
+                "Seizure",
+                "Breathing difficulty"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure the person is safe from harm and prevent falls.",
+            "Check for medical alert bracelet or known conditions.",
+            "Encourage them to sit or lie down in a safe position.",
+            "Monitor breathing and responsiveness.",
+            "If diabetic and conscious, offer a sugary drink.",
+            "Call emergency services for sudden or unexplained confusion."
+        ],
+        "what_not_to_do": [
+            "Do not give food or drink if consciousness is impaired.",
+            "Do not leave the person alone.",
+            "Do not assume confusion is due to alcohol unless confirmed."
+        ],
+        "when_to_call_emergency": [
+            "Sudden confusion with stroke-like symptoms.",
+            "Confusion with fever, severe headache, or stiff neck.",
+            "Confusion with chest pain or difficulty breathing.",
+            "Any confusion in a person who becomes unresponsive."
+        ],
+        "prevention": [
+            "Treat infections early.",
+            "Manage chronic medical conditions.",
+            "Avoid excessive alcohol and sedative medications."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Altered mental status",
+            "IFRC First Aid Guidelines 2020 – Unresponsiveness"
+        ]
+    },
+    {
+        "condition_name": "Heat exhaustion with fainting",
+        "category": "clinical/environmental",
+        "description": "A condition caused by prolonged exposure to heat, leading to dehydration, weakness, and possible fainting.",
+        "causes": [
+            "High temperatures combined with physical activity",
+            "Dehydration",
+            "Prolonged sun exposure"
+        ],
+        "risk_factors": [
+            "Hot climate",
+            "High humidity",
+            "Older adults and children",
+            "Outdoor workers"
+        ],
+        "symptoms": {
+            "common": [
+                "Heavy sweating",
+                "Weakness or dizziness",
+                "Headache",
+                "Nausea"
+            ],
+            "danger_signs": [
+                "Fainting",
+                "Confusion",
+                "Very fast pulse",
+                "Vomiting",
+                "Body temperature rising toward 40°C"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to a cool, shaded place.",
+            "Lay them down and raise legs if they faint.",
+            "Loosen clothing and apply cool wet cloths.",
+            "Encourage small sips of water or oral rehydration solution.",
+            "Allow rest until symptoms improve."
+        ],
+        "what_not_to_do": [
+            "Do not give ice-cold water to drink quickly.",
+            "Do not ignore confusion or vomiting.",
+            "Do not leave the person in a hot environment."
+        ],
+        "when_to_call_emergency": [
+            "Fainting that does not quickly improve.",
+            "Persistent vomiting or confusion.",
+            "Signs progressing toward heat stroke."
+        ],
+        "prevention": [
+            "Stay hydrated during hot weather.",
+            "Avoid intense activity in peak heat.",
+            "Wear light clothing."
+        ],
+        "references": [
+            "WHO BEC – Exposure emergencies (heat illness)",
+            "IFRC First Aid Guidelines 2020 – Heat exhaustion"
+        ]
+    },
+    {
+        "condition_name": "Severe dehydration causing altered mental status",
+        "category": "clinical/unresponsiveness",
+        "description": "A dangerously low level of body fluids leading to confusion, weakness, and potential shock.",
+        "causes": [
+            "Severe vomiting or diarrhea",
+            "Heat exposure",
+            "Poor fluid intake",
+            "High fever"
+        ],
+        "risk_factors": [
+            "Infants and young children",
+            "Older adults",
+            "Chronic illness",
+            "Hot climate conditions"
+        ],
+        "symptoms": {
+            "common": [
+                "Extreme thirst",
+                "Dry mouth and skin",
+                "Weakness",
+                "Dizziness"
+            ],
+            "danger_signs": [
+                "Confusion or drowsiness",
+                "Rapid heartbeat",
+                "Little or no urine",
+                "Cold, clammy skin",
+                "Sunken eyes (in children)"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to a cool place.",
+            "Lay them down and keep them comfortable.",
+            "If they are conscious and can swallow, give oral rehydration solution in small frequent sips.",
+            "Monitor breathing and responsiveness.",
+            "Seek urgent medical assessment."
+        ],
+        "what_not_to_do": [
+            "Do not give large amounts of fluid quickly.",
+            "Do not give sugary or caffeinated drinks.",
+            "Do not give fluids by mouth if the person is confused or vomiting continuously."
+        ],
+        "when_to_call_emergency": [
+            "Confusion, fainting, or lethargy.",
+            "Inability to keep fluids down.",
+            "No urination for many hours."
+        ],
+        "prevention": [
+            "Drink plenty of fluids in hot weather.",
+            "Use oral rehydration solution during illness with diarrhea or vomiting.",
+            "Monitor hydration in infants, older adults, and chronically ill people."
+        ],
+        "references": [
+            "WHO BEC – Shock and dehydration",
+            "IFRC First Aid Guidelines 2020 – Dehydration"
+        ]
+    },
+    {
+        "condition_name": "Diabetic coma (hyperglycemia)",
+        "category": "clinical/unresponsiveness",
+        "description": "A severe diabetic emergency caused by extremely high blood sugar levels, leading to dehydration, confusion, and possible coma.",
+        "causes": [
+            "Missed insulin or diabetes medication",
+            "Infection",
+            "Severe dehydration",
+            "Uncontrolled diabetes"
+        ],
+        "risk_factors": [
+            "Type 1 or insulin-dependent diabetes",
+            "History of diabetic ketoacidosis",
+            "Illness or infection"
+        ],
+        "symptoms": {
+            "common": [
+                "Extreme thirst",
+                "Frequent urination",
+                "Fruity breath smell",
+                "Nausea and vomiting"
+            ],
+            "danger_signs": [
+                "Confusion or drowsiness",
+                "Deep, rapid breathing",
+                "Vomiting with dehydration",
+                "Unresponsiveness"
+            ]
+        },
+        "first_aid_steps": [
+            "Check if the person has diabetes or medical ID.",
+            "If conscious, encourage small sips of water.",
+            "Keep the person in a safe position and monitor breathing.",
+            "Do not administer insulin (first aid providers must not).",
+            "Seek urgent medical help immediately."
+        ],
+        "what_not_to_do": [
+            "Do not give sugary drinks.",
+            "Do not give insulin.",
+            "Do not leave the person alone if confused or vomiting."
+        ],
+        "when_to_call_emergency": [
+            "Any confusion or decreased alertness.",
+            "Vomiting with dehydration.",
+            "Rapid breathing or fruity breath odor."
+        ],
+        "prevention": [
+            "Good diabetes management.",
+            "Monitor glucose during illness.",
+            "Stay hydrated."
+        ],
+        "references": [
+            "WHO BEC – Altered mental status causes",
+            "IFRC 2020 – Diabetic emergency (hyperglycemia)"
+        ]
+    },
+    {
+        "condition_name": "Heat stroke (sunstroke)",
+        "category": "clinical/environmental",
+        "description": "A life-threatening condition where the body’s temperature rises above 40°C and the cooling mechanisms fail, leading to confusion, organ failure, and possible coma.",
+        "causes": [
+            "Prolonged exposure to high temperatures",
+            "Physical exertion in hot environments",
+            "Dehydration during heat waves"
+        ],
+        "risk_factors": [
+            "Older adults and young children",
+            "Chronic illness (heart disease, diabetes)",
+            "Working outdoors in direct sun",
+            "Alcohol, certain medications (diuretics, some psychiatric drugs)"
+        ],
+        "symptoms": {
+            "common": [
+                "Very hot, dry or sometimes sweaty skin",
+                "Headache",
+                "Nausea or vomiting",
+                "Rapid pulse and breathing"
+            ],
+            "danger_signs": [
+                "Confusion, agitation, or strange behaviour",
+                "Loss of consciousness",
+                "Seizures",
+                "Body temperature suspected to be very high (hot to touch, no sweating in classic heat stroke)"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person immediately to a cool, shaded or air-conditioned place.",
+            "Lay them down and slightly raise the head and shoulders.",
+            "Remove excess clothing.",
+            "Cool the body rapidly: apply cool wet cloths, spray with cool water, fan the person, place ice packs in armpits/groin if available.",
+            "If conscious and able to swallow, give small frequent sips of cool water.",
+            "Monitor airway, breathing, and level of consciousness continuously until help arrives.",
+            "Call emergency medical services urgently."
+        ],
+        "what_not_to_do": [
+            "Do not give drinks to an unconscious or confused person.",
+            "Do not use ice-cold water immersion if it risks shock and is not supervised.",
+            "Do not give fever medicines (paracetamol) as they do not treat heat stroke.",
+            "Do not delay seeking emergency care once heat stroke is suspected."
+        ],
+        "when_to_call_emergency": [
+            "Any confusion, collapse, or seizure in a hot environment.",
+            "Very hot skin with altered behaviour or loss of consciousness.",
+            "No improvement after rapid cooling and rehydration."
+        ],
+        "prevention": [
+            "Avoid outdoor exertion during peak heat; rest in shade.",
+            "Drink water regularly during hot days, even without feeling thirsty.",
+            "Wear light, loose clothing and a hat in the sun.",
+            "Check on elderly, children, and outdoor workers during heat waves."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Exposure emergencies: heat illness",
+            "IFRC International First Aid Guidelines 2020 – Heat stroke"
+        ]
+    },
+    {
+        "condition_name": "Heat exhaustion",
+        "category": "clinical/environmental",
+        "description": "A condition caused by loss of salt and water through sweating in a hot environment, leading to weakness and feeling unwell but without the severe brain effects of heat stroke.",
+        "causes": [
+            "Working or exercising in hot weather",
+            "Inadequate fluid and salt intake during heat",
+            "Prolonged sun exposure"
+        ],
+        "risk_factors": [
+            "Outdoor workers (construction, agriculture)",
+            "Athletes and manual labourers",
+            "Wearing heavy or non-breathable clothing"
+        ],
+        "symptoms": {
+            "common": [
+                "Heavy sweating",
+                "Tiredness and weakness",
+                "Headache and dizziness",
+                "Thirst, nausea, or muscle cramps"
+            ],
+            "danger_signs": [
+                "Fainting or collapse",
+                "Confusion or difficulty thinking clearly",
+                "Persistent vomiting",
+                "Progression towards hot, dry skin and altered consciousness (heat stroke)"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to a cool, shaded or air-conditioned area.",
+            "Have them lie down with legs slightly elevated if feeling faint.",
+            "Remove or loosen tight clothing.",
+            "Give cool water or oral rehydration solution in small, frequent sips.",
+            "Apply cool wet cloths or sponge the skin with cool water.",
+            "Observe closely for any progression to heat stroke."
+        ],
+        "what_not_to_do": [
+            "Do not allow the person to continue physical activity.",
+            "Do not give very large amounts of water quickly.",
+            "Do not leave the person alone until they are fully recovered."
+        ],
+        "when_to_call_emergency": [
+            "No improvement after 30–60 minutes of rest and cooling.",
+            "Confusion, fainting, or repeated vomiting.",
+            "Any sign suggesting heat stroke (altered mental state, very hot skin)."
+        ],
+        "prevention": [
+            "Schedule heavy work for cooler times of day.",
+            "Encourage regular drinking of water in heat.",
+            "Provide shade and rest breaks for outdoor workers.",
+            "Use light-coloured, breathable clothing."
+        ],
+        "references": [
+            "WHO Basic Emergency Care – Heat-related emergencies",
+            "IFRC First Aid Guidelines 2020 – Heat exhaustion"
+        ]
+    },
+    {
+        "condition_name": "Drowning / near-drowning",
+        "category": "clinical/environmental",
+        "description": "Respiratory impairment from submersion or immersion in liquid, which can lead to lack of oxygen, cardiac arrest, and death if not managed quickly.",
+        "causes": [
+            "Swimming accidents",
+            "Falling into pools, wells, or the sea",
+            "Boating incidents",
+            "Alcohol use near water"
+        ],
+        "risk_factors": [
+            "Children left unsupervised near water",
+            "Poor swimming skills",
+            "Rough seas or strong currents",
+            "Seizure or sudden illness while in water"
+        ],
+        "symptoms": {
+            "common": [
+                "Coughing and difficulty breathing after being in water",
+                "Chest tightness",
+                "Vomiting water",
+                "Extreme tiredness"
+            ],
+            "danger_signs": [
+                "Unresponsiveness",
+                "Absence of normal breathing",
+                "Blue lips or face",
+                "Severe breathing distress even after leaving the water"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure your own safety before attempting rescue.",
+            "Remove the person from the water as safely as possible.",
+            "If unresponsive and not breathing normally, start CPR immediately.",
+            "If breathing, place them on their side (recovery position) and keep them warm.",
+            "Remove wet clothing and cover with dry blankets if available.",
+            "Monitor breathing and level of consciousness until emergency help arrives."
+        ],
+        "what_not_to_do": [
+            "Do not attempt a water rescue beyond your swimming ability.",
+            "Do not hold the person upside down or attempt to 'drain' water from lungs.",
+            "Do not leave the person alone after near-drowning; breathing problems can worsen."
+        ],
+        "when_to_call_emergency": [
+            "Any drowning or near-drowning episode.",
+            "Any breathing difficulty after being submerged.",
+            "Unresponsiveness or confusion after leaving the water."
+        ],
+        "prevention": [
+            "Supervise children closely near pools, beaches, or wells.",
+            "Teach swimming and water safety.",
+            "Avoid alcohol use around water activities.",
+            "Use life jackets on boats."
+        ],
+        "references": [
+            "WHO Drowning Prevention Guidelines",
+            "IFRC First Aid Guidelines 2020 – Drowning"
+        ]
+    },
+    {
+        "condition_name": "Hypothermia",
+        "category": "clinical/environmental",
+        "description": "A drop in body temperature below 35°C, which slows body functions and can lead to confusion, cardiac arrhythmias, and death.",
+        "causes": [
+            "Prolonged exposure to cold weather",
+            "Wet clothing in cold or windy conditions",
+            "Immersion in cold water"
+        ],
+        "risk_factors": [
+            "Older adults and infants",
+            "Outdoor workers and homeless persons",
+            "Alcohol or drug use",
+            "Inadequate clothing or heating"
+        ],
+        "symptoms": {
+            "common": [
+                "Shivering",
+                "Cold, pale skin",
+                "Slurred speech",
+                "Clumsiness or poor coordination"
+            ],
+            "danger_signs": [
+                "Stopped shivering despite feeling cold",
+                "Confusion or drowsiness",
+                "Slow, weak pulse and breathing",
+                "Unresponsiveness"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to a warm, sheltered place.",
+            "Remove wet clothing and gently dry the skin.",
+            "Wrap in warm blankets or clothing, covering head and neck.",
+            "Provide warm sweet drinks if fully conscious and able to swallow.",
+            "Warm the body gradually, starting with trunk rather than limbs.",
+            "Monitor breathing and consciousness and arrange urgent medical care for moderate or severe hypothermia."
+        ],
+        "what_not_to_do": [
+            "Do not rub the skin or massage limbs aggressively.",
+            "Do not use direct high heat (very hot water, heating pads) on cold skin.",
+            "Do not give alcohol.",
+            "Do not allow the person to walk or exert themselves."
+        ],
+        "when_to_call_emergency": [
+            "Any moderate or severe hypothermia signs (confusion, drowsiness, no shivering).",
+            "Unresponsiveness or very slow breathing.",
+            "Hypothermia in infants or older adults."
+        ],
+        "prevention": [
+            "Dress in layers in cold weather.",
+            "Keep clothing dry and protect from wind and rain.",
+            "Ensure safe heating indoors.",
+            "Limit time exposed to cold water."
+        ],
+        "references": [
+            "WHO BEC – Exposure emergencies: cold",
+            "IFRC First Aid Guidelines 2020 – Hypothermia"
+        ]
+    },
+    {
+        "condition_name": "Frostbite",
+        "category": "clinical/environmental",
+        "description": "Freezing injury to skin and underlying tissues due to extreme cold, often affecting fingers, toes, nose, and ears.",
+        "causes": [
+            "Exposure to very low temperatures",
+            "Contact with metal surfaces in freezing weather",
+            "Inadequate clothing or footwear in cold conditions"
+        ],
+        "risk_factors": [
+            "Outdoor work in winter or mountains",
+            "Poor circulation or vascular disease",
+            "Wet clothing or tight boots",
+            "Smoking"
+        ],
+        "symptoms": {
+            "common": [
+                "Cold, numb skin on affected area",
+                "Pale, hard, or waxy-looking skin",
+                "Tingling or burning on rewarming"
+            ],
+            "danger_signs": [
+                "Blisters after rewarming",
+                "Blackened or dead-looking tissue",
+                "Associated hypothermia or confusion"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to a warm environment.",
+            "Protect the affected area from further cold or trauma.",
+            "Rewarm the area gently using body heat (e.g., warm hands under armpits) or warm (not hot) water if available and refreezing can be avoided.",
+            "Keep the affected area still and elevated if possible.",
+            "Cover with loose, sterile dressings and seek medical care."
+        ],
+        "what_not_to_do": [
+            "Do not rub or massage frostbitten skin.",
+            "Do not use direct heat sources such as fires, stoves, or hot water.",
+            "Do not thaw if there is a risk of refreezing.",
+            "Do not break blisters."
+        ],
+        "when_to_call_emergency": [
+            "Suspected deep frostbite with blisters or blackened skin.",
+            "Combined frostbite and hypothermia.",
+            "Severe pain after rewarming."
+        ],
+        "prevention": [
+            "Wear insulated gloves, socks, and hats in cold weather.",
+            "Keep extremities dry and warm.",
+            "Avoid tight shoes and smoking in cold environments."
+        ],
+        "references": [
+            "IFRC First Aid Guidelines 2020 – Frostbite and cold injuries",
+            "WHO cold exposure safety recommendations"
+        ]
+    },
+    {
+        "condition_name": "Scorpion sting",
+        "category": "clinical/environmental",
+        "description": "A sting from a scorpion that can cause local pain and, in some cases, serious systemic symptoms such as breathing difficulty, sweating, and agitation.",
+        "causes": [
+            "Accidental contact with scorpions in homes, shoes, or bedding",
+            "Walking barefoot or handling stones, wood, or debris"
+        ],
+        "risk_factors": [
+            "Living or working in regions where scorpions are common",
+            "Children (more severe systemic effects)",
+            "Sleeping on the floor or outdoors without protection"
+        ],
+        "symptoms": {
+            "common": [
+                "Sharp pain at the sting site",
+                "Redness and mild swelling",
+                "Numbness or tingling around the sting"
+            ],
+            "danger_signs": [
+                "Excessive sweating and salivation",
+                "Fast heart rate and breathing",
+                "Agitation, restlessness, or muscle twitching",
+                "Breathing difficulty or drooling, especially in children"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person away from the scorpion and ensure scene safety.",
+            "Wash the sting site gently with soap and water if available.",
+            "Apply a cool compress to reduce pain (wrapped ice pack, not directly on skin).",
+            "Keep the affected limb at heart level and limit movement.",
+            "Monitor for any systemic symptoms, especially in children.",
+            "Seek medical care for all children or if any danger signs appear."
+        ],
+        "what_not_to_do": [
+            "Do not cut or suck the sting site.",
+            "Do not apply tight tourniquets.",
+            "Do not apply ice directly to the skin for long periods.",
+            "Do not give alcohol or unproven traditional remedies."
+        ],
+        "when_to_call_emergency": [
+            "Breathing difficulty, excessive drooling, or trouble swallowing.",
+            "Severe pain not improving with basic measures.",
+            "Any systemic symptoms in children."
+        ],
+        "prevention": [
+            "Shake out clothing, shoes, and bedding before use.",
+            "Wear shoes when walking outdoors, especially at night.",
+            "Avoid putting hands into dark crevices, stones, or wood piles."
+        ],
+        "references": [
+            "WHO – Guidelines for scorpion sting management in endemic regions",
+            "IFRC First Aid Guidelines – Bites and stings (regional adaptation)"
+        ]
+    },
+    {
+        "condition_name": "Jellyfish sting",
+        "category": "clinical/environmental",
+        "description": "A sting from jellyfish tentacles that injects venom into the skin, causing pain, redness, and sometimes more serious reactions.",
+        "causes": [
+            "Contact with jellyfish tentacles while swimming or walking in the sea",
+            "Handling washed-up jellyfish on the beach"
+        ],
+        "risk_factors": [
+            "Swimming in areas with jellyfish blooms",
+            "Bare skin exposure in the water",
+            "Children and people with allergies"
+        ],
+        "symptoms": {
+            "common": [
+                "Immediate burning or stinging pain",
+                "Red, raised welts in a linear or tentacle-like pattern",
+                "Itching or swelling around the area"
+            ],
+            "danger_signs": [
+                "Difficulty breathing or swallowing",
+                "Widespread rash or swelling",
+                "Dizziness, fainting, or confusion",
+                "Persistent, severe pain"
+            ]
+        },
+        "first_aid_steps": [
+            "Remove the person from the water safely.",
+            "Avoid rubbing the area, which can trigger more venom release.",
+            "Rinse the area with seawater (not fresh water) to remove tentacle fragments.",
+            "If available and recommended locally, apply vinegar to inactivate stingers (not for all species; follow local guidelines).",
+            "Carefully remove visible tentacles with tweezers or gloved fingers.",
+            "Immerse or rinse the area in warm water (not scalding) to reduce pain.",
+            "Seek medical care if pain is severe or any systemic symptoms develop."
+        ],
+        "what_not_to_do": [
+            "Do not rub sand or towels on the sting.",
+            "Do not rinse with fresh water if tentacles are still present.",
+            "Do not apply urine or unproven remedies.",
+            "Do not ignore breathing or allergic reactions."
+        ],
+        "when_to_call_emergency": [
+            "Any breathing difficulty or swelling of face or throat.",
+            "Widespread rash, dizziness, or collapse.",
+            "Stings over large body areas or in children."
+        ],
+        "prevention": [
+            "Check local warnings about jellyfish before swimming.",
+            "Avoid touching jellyfish, even washed up on shore.",
+            "Use protective swimwear where jellyfish are common."
+        ],
+        "references": [
+            "IFRC First Aid Guidelines 2020 – Marine stings",
+            "Regional Mediterranean safety recommendations for jellyfish stings"
+        ]
+    },
+    {
+        "condition_name": "Sunburn and heat cramps",
+        "category": "clinical/environmental",
+        "description": "Skin damage and painful muscle cramps caused by prolonged exposure to the sun and loss of salt and fluids through sweating.",
+        "causes": [
+            "Spending long periods in direct sunlight without protection",
+            "Heavy sweating during work or sport in hot weather",
+            "Inadequate fluid and salt intake in heat"
+        ],
+        "risk_factors": [
+            "Fair or sensitive skin",
+            "Outdoor work or sport during midday sun",
+            "Lack of sunscreen or protective clothing"
+        ],
+        "symptoms": {
+            "common": [
+                "Red, painful skin after sun exposure",
+                "Warm or tender skin to touch",
+                "Painful muscle cramps, especially in legs, arms, or abdomen",
+                "Fatigue and thirst"
+            ],
+            "danger_signs": [
+                "Large area blistering sunburn",
+                "Severe pain or swelling",
+                "Associated headache, nausea, or dizziness suggesting heat illness"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to shade or indoors.",
+            "Cool the skin with cool (not ice-cold) compresses or a cool bath.",
+            "Encourage drinking water or oral rehydration solution.",
+            "Gently stretch and massage muscles affected by cramps.",
+            "Use soothing lotions or aloe vera on sunburned areas if available.",
+            "Monitor for progression to heat exhaustion or heat stroke."
+        ],
+        "what_not_to_do": [
+            "Do not continue sun exposure once sunburn or cramps occur.",
+            "Do not burst blisters.",
+            "Do not apply ice directly to severely sunburned skin.",
+            "Do not use greasy creams that trap heat on fresh sunburn."
+        ],
+        "when_to_call_emergency": [
+            "Extensive blistering sunburn with fever or chills.",
+            "Cramps with vomiting, confusion, or signs of heat stroke.",
+            "Sunburn in infants or very young children with systemic symptoms."
+        ],
+        "prevention": [
+            "Avoid direct sun between late morning and mid-afternoon during summer.",
+            "Use broad-spectrum sunscreen and reapply regularly.",
+            "Wear hats, sunglasses, and long, light clothing.",
+            "Drink water regularly during heat and physical activity."
+        ],
+        "references": [
+            "IFRC First Aid Guidelines 2020 – Sunburn and heat cramps",
+            "WHO – Sun exposure and heat health guidance"
+        ]
+    },
+    {
+        "condition_name": "Chemical poisoning (cleaning products)",
+        "category": "clinical/poisoning",
+        "description": "Ingestion, inhalation, or skin contact with household cleaning chemicals such as acids, alkalis, disinfectants, and solvents can cause burns, breathing difficulty, and systemic toxicity.",
+        "causes": [
+            "Accidental ingestion of cleaning liquids",
+            "Mixing chemicals (e.g., bleach + acid releasing chlorine gas)",
+            "Inhalation of strong fumes in poorly ventilated areas",
+            "Skin or eye exposure to corrosive agents"
+        ],
+        "risk_factors": [
+            "Children accessing unsecured products",
+            "Cleaning in enclosed spaces",
+            "Lack of protective gloves or eye protection"
+        ],
+        "symptoms": {
+            "common": [
+                "Burning pain in mouth or throat",
+                "Drooling or difficulty swallowing",
+                "Coughing or choking",
+                "Eye or skin irritation"
+            ],
+            "danger_signs": [
+                "Breathing difficulty or wheezing",
+                "Vomiting blood or severe abdominal pain",
+                "Swollen lips or tongue",
+                "Altered mental status"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person to fresh air immediately for inhalation exposure.",
+            "Remove contaminated clothing and rinse skin with running water for at least 15 minutes.",
+            "If chemical is swallowed: Rinse mouth gently and give small sips of water or milk.",
+            "Keep the person seated upright to reduce aspiration risk.",
+            "Call emergency medical services and bring the chemical container if safe."
+        ],
+        "what_not_to_do": [
+            "Do not induce vomiting.",
+            "Do not give activated charcoal unless instructed by a professional.",
+            "Do not neutralize acids with alkalis or vice versa.",
+            "Do not allow the person to lie flat if vomiting."
+        ],
+        "when_to_call_emergency": [
+            "Any ingestion of corrosive chemicals.",
+            "Breathing difficulty or drooling.",
+            "Severe pain or vomiting blood.",
+            "Eye burns or large skin chemical burns."
+        ],
+        "prevention": [
+            "Store chemicals locked and out of children’s reach.",
+            "Use gloves and ventilation while cleaning.",
+            "Never mix bleach with acids or ammonia."
+        ],
+        "references": [
+            "WHO BEC – Poisoning module",
+            "IFRC First Aid Guidelines 2020 – Chemical poisoning"
+        ]
+    },
+    {
+        "condition_name": "Bleach or detergent ingestion",
+        "category": "clinical/poisoning",
+        "description": "Accidental ingestion of bleach, laundry detergent, or dishwashing liquids causes irritant or corrosive injury to the mouth, throat, and stomach.",
+        "causes": [
+            "Children drinking from detergent bottles",
+            "Transferring bleach into beverage bottles",
+            "Accidental swallowing during cleaning"
+        ],
+        "risk_factors": [
+            "Improper storage of chemicals",
+            "Diluted bleach stored in drinking containers",
+            "Poor child supervision"
+        ],
+        "symptoms": {
+            "common": [
+                "Burning in mouth or throat",
+                "Vomiting",
+                "Foaming or drooling",
+                "Nausea and abdominal discomfort"
+            ],
+            "danger_signs": [
+                "Difficulty breathing",
+                "Severe throat pain or drooling",
+                "Vomiting blood",
+                "Swollen lips or airway swelling"
+            ]
+        },
+        "first_aid_steps": [
+            "Rinse the mouth gently with water.",
+            "Give small sips of water or milk to dilute the chemical.",
+            "Keep the person sitting upright.",
+            "Monitor for difficulty breathing or increasing pain.",
+            "Seek medical evaluation even for mild symptoms."
+        ],
+        "what_not_to_do": [
+            "Do not induce vomiting (risk of re-burning the esophagus).",
+            "Do not give acidic drinks to neutralize bleach.",
+            "Do not give charcoal (ineffective for corrosives).",
+            "Do not delay transport for severe symptoms."
+        ],
+        "when_to_call_emergency": [
+            "Difficulty breathing or drooling.",
+            "Persistent vomiting.",
+            "Children ingesting any amount of concentrated bleach.",
+            "Any ingestion of industrial-strength bleach."
+        ],
+        "prevention": [
+            "Never transfer bleach or detergents into drink bottles.",
+            "Keep products out of reach and locked.",
+            "Use child-proof caps and labels."
+        ],
+        "references": [
+            "WHO – Household poisoning safety guidelines",
+            "IFRC 2020 – Ingestion poisoning"
+        ]
+    },
+    {
+        "condition_name": "Medication overdose",
+        "category": "clinical/poisoning",
+        "description": "Taking an excessive amount of prescribed or over-the-counter medication can cause life-threatening symptoms including respiratory depression, heart rhythm problems, and unconsciousness.",
+        "causes": [
+            "Accidental double-dosing",
+            "Child ingestion of adult medicine",
+            "Intentional overdose",
+            "Mixing multiple medications"
+        ],
+        "risk_factors": [
+            "Mental health conditions",
+            "Polypharmacy (many medications)",
+            "Lack of medication supervision in elderly or children"
+        ],
+        "symptoms": {
+            "common": [
+                "Nausea, vomiting, or stomach pain",
+                "Drowsiness or dizziness",
+                "Fast, slow, or irregular heartbeat"
+            ],
+            "danger_signs": [
+                "Difficulty breathing",
+                "Seizures",
+                "Unresponsiveness",
+                "Bluish lips or skin"
+            ]
+        },
+        "first_aid_steps": [
+            "Check the medication container for quantity taken.",
+            "Keep the person awake and sitting upright if possible.",
+            "Call emergency services immediately.",
+            "If unconscious but breathing, place in recovery position.",
+            "Provide medication packaging to responders for accurate treatment."
+        ],
+        "what_not_to_do": [
+            "Do not induce vomiting.",
+            "Do not give food, drink, or medication unless advised.",
+            "Do not leave the person alone."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected overdose of prescription medication.",
+            "Breathing problems or unconsciousness.",
+            "Children ingesting medication not prescribed to them."
+        ],
+        "prevention": [
+            "Keep medications securely stored.",
+            "Use pill organizers with supervision.",
+            "Avoid sharing medications."
+        ],
+        "references": [
+            "WHO BEC – Poisoning",
+            "IFRC First Aid Guidelines 2020 – Overdose"
+        ]
+    },
+    {
+        "condition_name": "Alcohol intoxication (emergency)",
+        "category": "clinical/poisoning",
+        "description": "Severe alcohol intoxication can depress breathing, cause vomiting with aspiration, hypoglycemia, and can lead to coma or death.",
+        "causes": [
+            "Binge drinking",
+            "Alcohol consumption on an empty stomach",
+            "Mixing alcohol with sedative medications or drugs"
+        ],
+        "risk_factors": [
+            "Young adults and adolescents",
+            "Alcohol dependency",
+            "Use with sedatives or opioids"
+        ],
+        "symptoms": {
+            "common": [
+                "Slurred speech",
+                "Unsteady walking",
+                "Vomiting",
+                "Confusion"
+            ],
+            "danger_signs": [
+                "Slow or irregular breathing",
+                "Cold or bluish skin",
+                "Repeated vomiting while drowsy",
+                "Unresponsiveness"
+            ]
+        },
+        "first_aid_steps": [
+            "Keep the person on their side (recovery position) to prevent choking.",
+            "Monitor breathing and level of responsiveness.",
+            "Keep the person warm with a blanket.",
+            "Check for medical bracelet (diabetes, epilepsy).",
+            "Call emergency services if danger signs appear."
+        ],
+        "what_not_to_do": [
+            "Do not give coffee, cold showers, or force walking.",
+            "Do not make them vomit.",
+            "Do not leave them alone, especially if vomiting or confused."
+        ],
+        "when_to_call_emergency": [
+            "Slow or shallow breathing.",
+            "Vomiting while drowsy or unconscious.",
+            "Seizures or low blood sugar symptoms."
+        ],
+        "prevention": [
+            "Do not drink on an empty stomach.",
+            "Do not mix alcohol with medications.",
+            "Know personal limits and avoid binge drinking."
+        ],
+        "references": [
+            "IFRC First Aid Guidelines – Alcohol emergency",
+            "WHO health guidance: alcohol poisoning"
+        ]
+    },
+    {
+        "condition_name": "Carbon monoxide poisoning",
+        "category": "clinical/poisoning",
+        "description": "Carbon monoxide is a colorless, odorless gas that prevents oxygen delivery in the blood, causing headache, confusion, fainting, and death.",
+        "causes": [
+            "Gas heaters or boilers malfunctioning",
+            "Indoor charcoal or wood burning",
+            "Car exhaust exposure in enclosed spaces"
+        ],
+        "risk_factors": [
+            "Using gas heaters in closed rooms",
+            "Poorly ventilated homes",
+            "Winter heating without airflow"
+        ],
+        "symptoms": {
+            "common": [
+                "Headache",
+                "Dizziness",
+                "Nausea",
+                "Weakness"
+            ],
+            "danger_signs": [
+                "Confusion",
+                "Loss of consciousness",
+                "Chest pain",
+                "Seizures",
+                "Cherry-red skin (late sign, unreliable clinically)"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person immediately to fresh air.",
+            "Open doors and windows to ventilate the area.",
+            "Loosen tight clothing and keep the person warm.",
+            "Monitor breathing and responsiveness.",
+            "Call emergency medical services immediately."
+        ],
+        "what_not_to_do": [
+            "Do not re-enter the contaminated area.",
+            "Do not allow the person to walk or exert themselves.",
+            "Do not give food or drink until fully awake."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected CO poisoning.",
+            "Confusion, fainting, or chest pain.",
+            "Multiple people sick at the same time in a closed space."
+        ],
+        "prevention": [
+            "Install CO detectors in homes.",
+            "Ensure proper ventilation for gas heaters.",
+            "Never use charcoal or gas devices inside enclosed spaces."
+        ],
+        "references": [
+            "WHO – Carbon monoxide poisoning",
+            "IFRC First Aid Guidelines 2020 – Toxic inhalation"
+        ]
+    },
+    {
+        "condition_name": "Severe food poisoning with dehydration",
+        "category": "clinical/poisoning",
+        "description": "Infection from contaminated food causing vomiting, diarrhea, and dehydration which can become life-threatening without rehydration.",
+        "causes": [
+            "Bacterial contamination (Salmonella, E. coli)",
+            "Spoiled food or improper refrigeration",
+            "Street food contamination",
+            "Viruses such as norovirus"
+        ],
+        "risk_factors": [
+            "Children and older adults",
+            "Immunocompromised individuals",
+            "Improper food handling",
+            "Hot climates increasing spoilage risk"
+        ],
+        "symptoms": {
+            "common": [
+                "Vomiting and diarrhea",
+                "Stomach cramps",
+                "Fever",
+                "Dehydration"
+            ],
+            "danger_signs": [
+                "Blood in stool or vomit",
+                "Persistent vomiting and inability to keep fluids down",
+                "Sunken eyes, dry mouth, little urine",
+                "Confusion or fainting"
+            ]
+        },
+        "first_aid_steps": [
+            "Give oral rehydration solution (ORS) in frequent small sips.",
+            "Encourage rest in a cool environment.",
+            "Offer light foods once vomiting improves.",
+            "Monitor hydration closely, especially in children.",
+            "Seek medical care for severe dehydration or danger signs."
+        ],
+        "what_not_to_do": [
+            "Do not use anti-diarrheal drugs in children or fever-with-diarrhea cases.",
+            "Do not give very sugary drinks which worsen dehydration.",
+            "Do not ignore signs of dehydration."
+        ],
+        "when_to_call_emergency": [
+            "Persistent vomiting preventing hydration.",
+            "Blood in stool.",
+            "Signs of severe dehydration or confusion.",
+            "Food poisoning in infants or elderly."
+        ],
+        "prevention": [
+            "Wash hands before eating or cooking.",
+            "Refrigerate food properly.",
+            "Avoid raw or undercooked meats.",
+            "Use clean water for drinking and cooking."
+        ],
+        "references": [
+            "WHO – Acute diarrheal disease management",
+            "IFRC First Aid Guidelines 2020 – Dehydration"
+        ]
+    },
+    {
+        "condition_name": "Severe abdominal pain (undifferentiated adult)",
+        "category": "clinical/medical",
+        "description": "Acute, intense abdominal pain that may indicate a serious underlying condition such as appendicitis, perforation, obstruction, pancreatitis, or abdominal bleeding.",
+        "causes": [
+            "Acute appendicitis",
+            "Bowel obstruction",
+            "Perforated peptic ulcer",
+            "Gallbladder disease (cholecystitis, biliary colic)",
+            "Pancreatitis",
+            "Kidney stones or urinary obstruction",
+            "Abdominal aortic aneurysm (rupture or leak)",
+            "Gynecological emergencies (ectopic pregnancy, ovarian torsion)",
+            "Severe gastroenteritis"
+        ],
+        "risk_factors": [
+            "Older age",
+            "History of ulcers, gallstones, or kidney stones",
+            "Heavy alcohol use (pancreatitis risk)",
+            "Known atherosclerotic disease or aneurysm",
+            "Recent abdominal surgery",
+            "Pregnancy in women of childbearing age"
+        ],
+        "symptoms": {
+            "common": [
+                "Moderate to severe abdominal pain, constant or colicky",
+                "Pain that may be localized (e.g., right lower quadrant, right upper quadrant) or diffuse",
+                "Nausea and/or vomiting",
+                "Loss of appetite",
+                "Bloating or abdominal distension",
+                "Change in bowel habits (constipation or diarrhea)"
+            ],
+            "danger_signs": [
+                "Sudden, severe pain with rigid (board-like) abdomen",
+                "Pain with signs of shock (pale, cold, clammy skin, fast weak pulse, low blood pressure)",
+                "Persistent vomiting, especially if green (bile) or bloody",
+                "Inability to pass gas or stool with severe distension",
+                "Black or bloody stool, or vomiting blood",
+                "Severe pain in a person >60 years old or with cardiovascular disease",
+                "Severe abdominal pain in a pregnant person"
+            ]
+        },
+        "first_aid_steps": [
+            "Assess ABC (airway, breathing, circulation) and look for signs of shock.",
+            "Help the person find a position of comfort, often lying on their back with knees bent or slightly on their side.",
+            "Encourage the person not to eat or drink in case surgery is needed.",
+            "Reassure and monitor for changes in pain, breathing, and consciousness.",
+            "Arrange urgent medical evaluation, especially if danger signs are present."
+        ],
+        "what_not_to_do": [
+            "Do not give food or drink, especially if surgery may be necessary.",
+            "Do not give painkillers or medications that could mask symptoms unless advised by a health professional.",
+            "Do not apply heat to the abdomen (can worsen bleeding or inflammation).",
+            "Do not ignore persistent, worsening, or severe pain."
+        ],
+        "when_to_call_emergency": [
+            "Any sudden, severe abdominal pain that does not improve quickly.",
+            "Abdominal pain with signs of shock or fainting.",
+            "Abdominal pain with vomiting blood, black or bloody stools.",
+            "Severe abdominal pain in pregnancy.",
+            "Abdominal pain with chest pain, shortness of breath, or confusion."
+        ],
+        "prevention": [
+            "Seek early care for persistent or recurrent abdominal symptoms.",
+            "Manage chronic conditions such as ulcers, gallstones, and diabetes.",
+            "Avoid excessive alcohol use.",
+            "Follow medical advice after abdominal surgery."
+        ],
+        "references": [
+            "WHO–ICRC Basic Emergency Care: ABCDE approach and abdominal pain assessment.",
+            "International First Aid Guidelines – Medical conditions and abdominal pain.",
+            "Acute Abdominal Pain in Adults: Evaluation and Diagnosis, American Academy of Family Physicians."
+        ]
+    },
+    {
+        "condition_name": "Suspected appendicitis",
+        "category": "clinical/medical",
+        "description": "Inflammation and possible infection of the appendix, typically causing progressively worsening abdominal pain that may lead to perforation and peritonitis if untreated.",
+        "causes": [
+            "Obstruction of the appendix lumen by stool, lymphoid tissue, or other material leading to infection and inflammation"
+        ],
+        "risk_factors": [
+            "Young age (commonly children, adolescents, young adults)",
+            "Family history of appendicitis",
+            "Previous similar episodes of right lower quadrant pain"
+        ],
+        "symptoms": {
+            "common": [
+                "Pain starting around the navel and moving to the right lower abdomen over hours",
+                "Pain that worsens with movement, coughing, or walking",
+                "Loss of appetite",
+                "Nausea and sometimes vomiting",
+                "Low-grade fever",
+                "Tenderness in the right lower quadrant"
+            ],
+            "danger_signs": [
+                "Sudden relief of severe pain followed by generalized abdominal pain (possible perforation)",
+                "Rigid, board-like abdomen with severe tenderness",
+                "High fever, chills, and signs of sepsis",
+                "Severe pain with vomiting and inability to pass gas or stool"
+            ]
+        },
+        "first_aid_steps": [
+            "Treat as a surgical emergency when appendicitis is strongly suspected.",
+            "Encourage the person to lie still in a comfortable position, usually on their back with knees bent.",
+            "Do not give food or drink; prepare for possible surgery.",
+            "Reassure and monitor for signs of shock or worsening pain.",
+            "Arrange urgent transport to a medical facility for evaluation and surgical assessment."
+        ],
+        "what_not_to_do": [
+            "Do not give strong painkillers without medical advice, as they can mask severity.",
+            "Do not give laxatives or enemas.",
+            "Do not apply heat to the abdomen.",
+            "Do not delay medical evaluation if appendicitis is suspected."
+        ],
+        "when_to_call_emergency": [
+            "Right lower abdominal pain that worsens over a few hours, especially with fever and vomiting.",
+            "Severe abdominal pain with guarding or rigidity.",
+            "Any suspected appendicitis in children, pregnant people, or older adults.",
+            "Sudden collapse or signs of shock in a person with abdominal pain."
+        ],
+        "prevention": [
+            "No specific prevention; early recognition and treatment reduce complications.",
+            "Seek medical care for persistent or recurring abdominal pain rather than self-medicating repeatedly."
+        ],
+        "references": [
+            "WHO–ICRC Basic Emergency Care: Approach to abdominal pain and surgical emergencies.",
+            "Acute Abdominal Pain in Adults: Evaluation and Diagnosis, American Academy of Family Physicians.",
+            "Standard emergency medicine texts on appendicitis recognition and red flags."
+        ]
+    },
+    {
+        "condition_name": "Acute vomiting and diarrhea with dehydration",
+        "category": "clinical/medical",
+        "description": "Sudden onset of vomiting and diarrhea leading to loss of fluids and electrolytes, which can cause dehydration and shock if not treated promptly.",
+        "causes": [
+            "Viral gastroenteritis (e.g., norovirus, rotavirus)",
+            "Bacterial infections (e.g., Salmonella, Shigella, E. coli)",
+            "Food poisoning from contaminated food or water",
+            "Parasitic infections",
+            "Medication side effects or other gastrointestinal illness"
+        ],
+        "risk_factors": [
+            "Infants and young children",
+            "Older adults",
+            "People with chronic illness or weakened immune systems",
+            "Poor sanitation or unsafe drinking water",
+            "Hot climates increasing risk of dehydration"
+        ],
+        "symptoms": {
+            "common": [
+                "Frequent loose or watery stools",
+                "Vomiting",
+                "Abdominal cramps",
+                "Fever",
+                "Thirst and dry mouth"
+            ],
+            "danger_signs": [
+                "Very little or no urine, dark concentrated urine",
+                "Sunken eyes, dry tongue, loss of skin elasticity",
+                "Lethargy, confusion, or irritability",
+                "Blood in stool or vomit",
+                "Persistent vomiting preventing fluid intake"
+            ]
+        },
+        "first_aid_steps": [
+            "Begin oral rehydration early with oral rehydration solution (ORS) given in small, frequent sips.",
+            "Continue breastfeeding in infants; offer ORS between feeds as recommended.",
+            "Encourage small amounts of light food once vomiting lessens (e.g., rice, bread, bananas) if tolerated.",
+            "Keep the person in a cool environment and allow rest.",
+            "Monitor closely for signs of dehydration and worsening condition, especially in children and older adults.",
+            "Seek medical care promptly if danger signs develop."
+        ],
+        "what_not_to_do": [
+            "Do not give anti-diarrheal medicines to young children or in cases of bloody diarrhea or high fever.",
+            "Do not give very sugary drinks or undiluted juices as they can worsen diarrhea.",
+            "Do not withhold fluids because of diarrhea; controlled rehydration is essential.",
+            "Do not ignore signs of dehydration, especially in children."
+        ],
+        "when_to_call_emergency": [
+            "Persistent vomiting preventing fluids from being kept down.",
+            "Severe dehydration signs (no urine, sunken eyes, lethargy).",
+            "Blood in stool or vomit.",
+            "High fever with abdominal pain and vomiting.",
+            "Any concerning symptoms in infants or frail older adults."
+        ],
+        "prevention": [
+            "Handwashing with soap, especially before eating and after using the toilet.",
+            "Safe drinking water and careful food hygiene.",
+            "Vaccination where available (e.g., rotavirus in infants, depending on local policy).",
+            "Safe storage and cooking of food."
+        ],
+        "references": [
+            "WHO – Acute diarrhoeal disease management and rehydration guidance.",
+            "IFRC International First Aid Guidelines 2020 – Diarrhea, vomiting, and dehydration.",
+            "IFRC Epidemic Control for Volunteers – Diarrhoeal diseases."
+        ]
+    },
+    {
+        "condition_name": "High fever in a child with danger signs",
+        "category": "clinical/medical",
+        "description": "Fever in a child that is accompanied by general danger signs indicating possible serious infection such as pneumonia, sepsis, meningitis, malaria, or other life-threatening conditions.",
+        "causes": [
+            "Severe bacterial infections (pneumonia, sepsis, meningitis)",
+            "Severe malaria in endemic areas",
+            "Serious viral infections (e.g., measles with complications)",
+            "Urinary tract infection with systemic involvement",
+            "Other acute severe illnesses"
+        ],
+        "risk_factors": [
+            "Age under 5 years, especially under 2 months",
+            "Incomplete vaccination",
+            "Chronic illness or malnutrition",
+            "Recent contact with severe infectious disease"
+        ],
+        "symptoms": {
+            "common": [
+                "Fever (hot to the touch, measured temperature ≥ 38°C)",
+                "Irritability or fussiness",
+                "Poor appetite",
+                "Cough, runny nose, vomiting, or diarrhea depending on cause"
+            ],
+            "danger_signs": [
+                "Child unable to drink or breastfeed",
+                "Child vomits everything",
+                "History of convulsions or convulsing now",
+                "Child is lethargic or unconscious",
+                "Difficulty breathing, fast breathing, or chest indrawing",
+                "Stiff neck, severe headache, or light sensitivity",
+                "Fever with purplish rash or spots",
+                "Fever with severe abdominal pain or signs of shock"
+            ]
+        },
+        "first_aid_steps": [
+            "Assess for general danger signs and ABC (airway, breathing, circulation).",
+            "Remove excess clothing and keep the child comfortably cool (not chilled).",
+            "Offer fluids frequently (breast milk, ORS, or appropriate drinks) if the child can drink.",
+            "Use gentle measures to reduce discomfort (sponging with lukewarm water).",
+            "If available and appropriate, give age- and weight-adjusted fever medicine as advised by a health professional.",
+            "Arrange urgent medical assessment if any danger sign is present."
+        ],
+        "what_not_to_do": [
+            "Do not give aspirin to children.",
+            "Do not use cold baths or ice water (may cause shivering and discomfort).",
+            "Do not force the child to eat.",
+            "Do not wait several days if fever is high or persistent with no clear cause.",
+            "Do not rely only on fever medicine if danger signs are present."
+        ],
+        "when_to_call_emergency": [
+            "Any general danger sign: not able to drink, vomiting everything, convulsions, lethargic or unconscious.",
+            "Fever with difficulty breathing, chest indrawing, or grunting.",
+            "Fever with stiff neck, confusion, or seizures.",
+            "Fever with rash that does not blanch or with signs of shock (cold, mottled skin, weak pulse)."
+        ],
+        "prevention": [
+            "Ensure routine childhood vaccinations.",
+            "Seek early treatment for infections such as pneumonia, malaria, and urinary tract infections.",
+            "Promote good nutrition and hygiene.",
+            "Educate caregivers about danger signs and when to seek urgent care."
+        ],
+        "references": [
+            "WHO IMCI / IMNCI guidelines – General danger signs in sick children.",
+            "IFRC International First Aid Guidelines – Fever and when to seek medical care.",
+            "National and WHO guidance on severe childhood illness recognition."
+        ]
+    },
+    {
+        "condition_name": "Painful ear infection with red flags",
+        "category": "clinical/medical",
+        "description": "Acute infection or inflammation of the middle ear, usually following an upper respiratory infection, which can cause severe ear pain, fever, and sometimes complications such as perforation or spread of infection.",
+        "causes": [
+            "Viral or bacterial middle ear infection (acute otitis media)",
+            "Fluid build-up and infection after a cold or flu",
+            "Eustachian tube dysfunction in children after respiratory illness"
+        ],
+        "risk_factors": [
+            "Young age (especially under 5 years)",
+            "Recent upper respiratory infection",
+            "Exposure to tobacco smoke",
+            "Bottle-feeding while lying flat",
+            "Crowded living conditions or daycare attendance"
+        ],
+        "symptoms": {
+            "common": [
+                "Ear pain, often worse when lying down",
+                "Fever",
+                "Irritability, crying, or pulling at the ear in young children",
+                "Reduced hearing on the affected side"
+            ],
+            "danger_signs": [
+                "Severe ear pain with high fever and child appears very unwell",
+                "Swelling, redness, or tenderness behind the ear (possible mastoiditis)",
+                "Ear sticking out or being pushed forward by swelling behind it",
+                "Persistent vomiting or severe headache",
+                "Stiff neck, confusion, or any signs of meningitis",
+                "Discharge of blood or pus with increasing pain and fever"
+            ]
+        },
+        "first_aid_steps": [
+            "Assess overall condition: fever level, behaviour, and presence of danger signs.",
+            "Give comfort and keep the child or adult in a position of comfort (often semi-upright).",
+            "If advised previously by a health professional, use appropriate pain relief and fever control medicine according to age and weight.",
+            "Keep the ear dry; avoid inserting anything into the ear canal.",
+            "Arrange medical assessment for all suspected ear infections, especially in children or if fever is present."
+        ],
+        "what_not_to_do": [
+            "Do not insert cotton buds, oils, or other substances into the ear unless prescribed.",
+            "Do not ignore pain that persists more than 1–2 days or gets worse.",
+            "Do not rely on home remedies in the presence of danger signs.",
+            "Do not allow swimming or water entry into the ear until cleared by a health professional."
+        ],
+        "when_to_call_emergency": [
+            "Ear infection with severe headache, stiff neck, or confusion.",
+            "Swelling and redness behind the ear with ear pushed forward.",
+            "High fever with child appearing very ill or lethargic.",
+            "Any signs of meningitis or sepsis."
+        ],
+        "prevention": [
+            "Treat respiratory infections early and follow medical advice.",
+            "Avoid tobacco smoke exposure, especially for children.",
+            "Promote breastfeeding and proper feeding position.",
+            "Ensure childhood vaccinations, including pneumococcal and influenza if recommended."
+        ],
+        "references": [
+            "IFRC International First Aid Guidelines – Ear, nose, and throat complaints and danger signs.",
+            "WHO child health guidance – Ear infections and complications.",
+            "Standard paediatric references on acute otitis media and mastoiditis warning signs."
+        ]
+    },
+    {
+        "condition_name": "Severe sore throat with breathing difficulty",
+        "category": "clinical/medical",
+        "description": "A severe throat infection or inflammation that causes intense pain and can narrow the airway, leading to breathing difficulty. Conditions include severe tonsillitis, epiglottitis, peritonsillar abscess, or retropharyngeal abscess.",
+        "causes": [
+            "Bacterial tonsillitis or pharyngitis",
+            "Peritonsillar abscess (quinsy)",
+            "Epiglottitis (now less common where Hib vaccination is widespread)",
+            "Retropharyngeal abscess",
+            "Severe viral infections of the upper airway"
+        ],
+        "risk_factors": [
+            "Incomplete vaccination (especially against Haemophilus influenzae type b)",
+            "Recurrent throat infections",
+            "Recent untreated bacterial sore throat",
+            "Young children for epiglottitis and deep neck infections"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe sore throat, often worse on swallowing",
+                "Difficulty swallowing and drooling",
+                "Muffled or “hot potato” voice",
+                "Fever and general malaise"
+            ],
+            "danger_signs": [
+                "Breathing difficulty, noisy breathing (stridor), or rapid breathing",
+                "Drooling and inability or refusal to swallow saliva",
+                "Sitting leaning forward with neck extended to breathe easier (tripod position)",
+                "Severe pain on one side of the throat with deviation of the uvula (suggesting peritonsillar abscess)",
+                "Stridor at rest, cyanosis, or signs of exhaustion",
+                "Any signs of shock or altered consciousness"
+            ]
+        },
+        "first_aid_steps": [
+            "Recognize severe sore throat with breathing difficulty as a potential airway emergency.",
+            "Keep the person in the position they find easiest to breathe, usually sitting upright and leaning slightly forward.",
+            "Encourage the person to remain calm and avoid lying flat.",
+            "Do not force them to open the mouth if breathing is compromised, especially in children.",
+            "Monitor breathing, colour, and level of consciousness continuously.",
+            "Call emergency medical services urgently and prepare for rapid transport."
+        ],
+        "what_not_to_do": [
+            "Do not lie the person flat.",
+            "Do not attempt to examine the throat with a tongue depressor or object, especially in children with suspected epiglottitis.",
+            "Do not give food or drink to someone with significant swallowing difficulty.",
+            "Do not delay urgent medical evaluation when there are airway danger signs."
+        ],
+        "when_to_call_emergency": [
+            "Any sore throat with breathing difficulty, stridor, or noisy breathing.",
+            "Sore throat with drooling and inability to swallow.",
+            "Sore throat with voice change, severe unilateral pain, or neck swelling.",
+            "Sore throat with high fever and child appearing very ill or lethargic."
+        ],
+        "prevention": [
+            "Ensure routine childhood vaccinations including Hib and other recommended vaccines.",
+            "Early medical assessment and treatment of significant sore throat and tonsillitis.",
+            "Avoid smoking and second-hand smoke exposure, which irritate airways.",
+            "Educate caregivers on red flags of throat infections."
+        ],
+        "references": [
+            "IFRC First Aid Guidelines – Breathing problems and throat swelling.",
+            "WHO and paediatric emergency guidance on epiglottitis and upper airway obstruction.",
+            "Standard ENT and emergency medicine texts on peritonsillar abscess and sore throat red flags."
+        ]
+    },
+    {
+        "condition_name": "Febrile seizure (child)",
+        "category": "clinical/paediatric",
+        "description": "A seizure occurring in a child with fever, usually between 6 months and 5 years of age, without signs of meningitis or other acute brain disease. Most febrile seizures are brief and self-limiting but can be frightening and require assessment to exclude serious infection.",
+        "causes": [
+            "Rapid rise of body temperature due to viral or bacterial infection",
+            "Common childhood infections such as upper respiratory infections, otitis media, gastroenteritis or roseola",
+            "Less commonly, serious infections such as pneumonia or sepsis (fever cause needs evaluation)"
+        ],
+        "risk_factors": [
+            "Age between 6 months and 5 years",
+            "Family history of febrile seizures",
+            "Previous febrile seizure",
+            "High or rapidly rising fever"
+        ],
+        "symptoms": {
+            "common": [
+                "Child with fever suddenly becomes unresponsive or stares blankly",
+                "Rhythmic jerking of arms and legs or generalized stiffness",
+                "Up-rolling of eyes, drooling or foaming at the mouth",
+                "Episode usually lasts less than 5 minutes and is followed by drowsiness"
+            ],
+            "danger_signs": [
+                "Seizure lasting more than 5 minutes",
+                "Repeated seizures within the same illness or without full recovery in between",
+                "Focal seizure (twitching confined to one limb or one side of the body)",
+                "Difficulty breathing, blue lips or face",
+                "Persistent decreased level of consciousness more than 30–60 minutes after the seizure",
+                "Fever with stiff neck, severe headache, purpuric rash, or other meningitis / sepsis signs"
+            ]
+        },
+        "first_aid_steps": [
+            "Stay calm and note the start time of the seizure.",
+            "Gently place the child on a safe surface on their side (recovery position) with the head slightly extended to maintain airway.",
+            "Remove nearby hard or sharp objects to prevent injury and place something soft under the head.",
+            "Loosen tight clothing around the neck and avoid crowding around the child.",
+            "Do not restrain the child’s movements; allow the seizure to run its course.",
+            "After the seizure stops, continue to keep the child on their side, check breathing and colour, and monitor closely until fully awake.",
+            "Seek medical evaluation for all first-time febrile seizures or if cause of fever is unclear."
+        ],
+        "what_not_to_do": [
+            "Do not put anything in the child’s mouth (no spoon, fingers, or objects).",
+            "Do not attempt to forcibly hold the child down.",
+            "Do not give food, drink, or medication by mouth during the seizure or while the child is not fully awake.",
+            "Do not rapidly cool the child with ice baths or alcohol rubs (no evidence for preventing seizures and may cause harm)."
+        ],
+        "when_to_call_emergency": [
+            "Seizure lasting more than 5 minutes.",
+            "More than one seizure during the same illness or without full recovery between seizures.",
+            "Any difficulty breathing, persistent cyanosis, or irregular breathing after the seizure.",
+            "First-time seizure, especially in a child under 1 year.",
+            "Fever with stiff neck, severe headache, confusion, or purplish rash."
+        ],
+        "prevention": [
+            "Seek early medical assessment for children with high fever and appearing unwell.",
+            "Ensure routine vaccinations as per national programme to reduce serious infections.",
+            "Teach caregivers that most febrile seizures are benign but require evaluation to exclude serious illness.",
+            "Use antipyretics according to medical advice to improve comfort, while understanding they do not reliably prevent febrile seizures."
+        ],
+        "references": [
+            "WHO – Guidance on febrile seizures and serious childhood infections.",
+            "NHS – Febrile seizures: symptoms and emergency actions.",
+            "Royal Children’s Hospital Clinical Practice Guideline – Febrile seizure.",
+            "Red Cross First Aid – Febrile seizure: first aid steps.",
+            "International First Aid, Resuscitation and Education Guidelines 2020 – Seizures in children."
+        ]
+    },
+    {
+        "condition_name": "Severe dehydration in infants and young children",
+        "category": "clinical/paediatric",
+        "description": "A life-threatening loss of body fluid and salts in infants and young children, usually due to diarrhea, vomiting, or high fever, leading to shock and organ failure if not rapidly treated.",
+        "causes": [
+            "Acute diarrhea due to viral, bacterial, or parasitic infection",
+            "Combination of vomiting and diarrhea (gastroenteritis)",
+            "High fever with poor fluid intake",
+            "Excessive sweating in hot environments without adequate drinking"
+        ],
+        "risk_factors": [
+            "Age under 5 years, especially infants under 2 years",
+            "Malnutrition or low body weight",
+            "Chronic illness or immunosuppression",
+            "Hot climate (such as North Africa, including Tunisia) with poor access to safe fluids",
+            "Delayed care seeking and lack of oral rehydration solution (ORS)"
+        ],
+        "symptoms": {
+            "common": [
+                "Thirst and drinking eagerly if offered fluids (in early stages)",
+                "Dry mouth and tongue",
+                "Decreased urine output, fewer wet nappies",
+                "Tiredness or irritability"
+            ],
+            "danger_signs": [
+                "Lethargy or unconsciousness",
+                "Sunken eyes and very dry mouth and tongue",
+                "Infant not able to drink or drinks poorly or vomits everything",
+                "Skin pinch on abdomen goes back very slowly (more than 2 seconds)",
+                "Cold hands and feet, weak fast pulse, or other signs of shock",
+                "No urine for many hours"
+            ]
+        },
+        "first_aid_steps": [
+            "Recognize severe dehydration as a medical emergency requiring urgent professional treatment.",
+            "If the child is awake and can drink, start oral rehydration solution (ORS) immediately in small, frequent sips; continue while preparing for transport.",
+            "Continue breastfeeding for infants, offering breast milk frequently, and give ORS between feeds as recommended.",
+            "Keep the child warm but not overheated; avoid direct sun.",
+            "Monitor level of consciousness, breathing, and ability to drink during transfer.",
+            "Arrange urgent transport to a health facility where IV or NG rehydration can be provided."
+        ],
+        "what_not_to_do": [
+            "Do not give large volumes of water alone without salts (risk of electrolyte imbalance).",
+            "Do not give very sugary drinks or undiluted fruit juices, which can worsen diarrhea.",
+            "Do not delay seeking medical care when danger signs of dehydration are present.",
+            "Do not force fluids by mouth if the child is vomiting everything or has decreased consciousness (risk of aspiration)."
+        ],
+        "when_to_call_emergency": [
+            "Child is lethargic, difficult to wake, or unconscious.",
+            "Child is unable to drink or vomits everything.",
+            "No urine for many hours, very sunken eyes, and skin pinch goes back very slowly.",
+            "Signs of shock: cold extremities, fast weak pulse, mottled skin, or breathing difficulty.",
+            "Any severe dehydration in a young infant or child with comorbidities."
+        ],
+        "prevention": [
+            "Early use of ORS at home when diarrhea or vomiting starts.",
+            "Continued feeding and breastfeeding during diarrheal illness.",
+            "Handwashing, safe drinking water, and food hygiene to prevent diarrhea.",
+            "Vaccination where available (e.g., rotavirus) according to national immunization programmes.",
+            "Caregiver education about dehydration signs and when to seek urgent care."
+        ],
+        "references": [
+            "WHO IMCI / IMNCI Chart Booklet – Assessment and classification of dehydration.",
+            "WHO – Management of diarrhoeal disease and dehydration in children.",
+            "Integrated Management of Childhood Illness in Emergencies – dehydration danger signs.",
+            "National paediatric emergency care guidelines – severe dehydration and IV rehydration.",
+            "International First Aid Guidelines 2020 – Diarrhea, vomiting, and dehydration in children."
+        ]
+    },
+    {
+        "condition_name": "Foreign body in nose or ear (child)",
+        "category": "clinical/paediatric",
+        "description": "Insertion of small objects (such as beads, seeds, paper, small stones) into the nose or ear, common in young children and potentially leading to infection, bleeding, or, in the case of nasal objects, aspiration into the airway.",
+        "causes": [
+            "Child inserting objects into the nose out of curiosity or play",
+            "Child inserting objects into the ear canal",
+            "Insects entering the ear canal"
+        ],
+        "risk_factors": [
+            "Age between 2 and 6 years",
+            "Small household objects within reach (beads, seeds, toys, batteries)",
+            "Lack of supervision or older siblings playing with small parts"
+        ],
+        "symptoms": {
+            "common": [
+                "History or suspicion of child placing an object in the nose or ear",
+                "One-sided nasal blockage or discharge (sometimes foul-smelling) in nasal foreign body",
+                "Ear pain, itchiness, or reduced hearing",
+                "Visible object at the entrance of the nose or ear canal"
+            ],
+            "danger_signs": [
+                "Difficulty breathing or sudden coughing after nasal insertion (possible aspiration into airway)",
+                "Bleeding from the nose or ear after insertion",
+                "Severe pain, swelling, or redness around nose or ear",
+                "Button battery in nose or ear (tissue damage can occur quickly)",
+                "Fever, foul-smelling discharge, or signs of spreading infection"
+            ]
+        },
+        "first_aid_steps": [
+            "Stay calm and reassure the child; discourage further probing or rubbing.",
+            "If the child has a foreign body in the nose but is breathing comfortably, keep them sitting upright, encourage mouth breathing, and prevent them from sniffing hard.",
+            "If the foreign body is clearly visible at the nostril or outer ear and can be grasped easily with fingers (not tools) without pushing it deeper, a gentle removal attempt may be made by a trained person.",
+            "If removal is not easy, stop and arrange medical evaluation rather than repeated attempts.",
+            "If an insect is in the ear, gently tilt the head so the affected ear is upwards and, if advised and available, warm clean oil can sometimes be used by trained providers to float out the insect (only if no perforated eardrum is suspected).",
+            "Seek medical care for all cases where the object is not easily removed, where symptoms persist, or for any danger signs."
+        ],
+        "what_not_to_do": [
+            "Do not blindly probe the nose or ear with cotton buds, tweezers, hooks, or other tools.",
+            "Do not attempt multiple forced removals, which can push the object deeper or damage tissues.",
+            "Do not use liquids in the ear if there is a suspected perforated eardrum (pain, blood, or fluid after trauma).",
+            "Do not use the 'parent’s mouth' to suck out a nasal foreign body (infection and aspiration risk).",
+            "Do not delay urgent care if a button battery is suspected in the nose or ear."
+        ],
+        "when_to_call_emergency": [
+            "Difficulty breathing, sudden coughing, or choking after insertion (possible aspiration into airway).",
+            "Foreign body is a button battery in nose or ear (time-critical tissue damage).",
+            "Severe pain, bleeding, or signs of spreading infection (fever, swelling, redness).",
+            "Child becomes lethargic, has persistent vomiting, or shows any airway compromise."
+        ],
+        "prevention": [
+            "Keep small objects, especially button batteries, beads, and seeds, out of reach of young children.",
+            "Educate caregivers and older siblings about the danger of inserting objects into nose or ears.",
+            "Choose age-appropriate toys without detachable small parts for toddlers.",
+            "Supervise young children when playing with small craft materials or beads."
+        ],
+        "references": [
+            "International First Aid, Resuscitation and Education Guidelines 2020 – Eye, nose, ear, and airway foreign bodies.",
+            "Global First Aid Reference Centre – Foreign body in nose and ear first aid.",
+            "Standard paediatric and ENT emergency references on foreign body management in children."
+        ]
+    },
+    {
+        "condition_name": "Bronchiolitis (infant wheeze)",
+        "category": "clinical/paediatric/respiratory",
+        "description": "An acute viral infection of the lower respiratory tract in infants, causing inflammation and narrowing of small airways (bronchioles), leading to cough, wheeze, and difficulty breathing. Commonly caused by RSV and other respiratory viruses.",
+        "causes": [
+            "Respiratory syncytial virus (RSV)",
+            "Other respiratory viruses such as rhinovirus, parainfluenza, influenza, human metapneumovirus"
+        ],
+        "risk_factors": [
+            "Age under 2 years, especially under 6 months",
+            "Prematurity or low birth weight",
+            "Chronic lung disease or congenital heart disease",
+            "Exposure to tobacco smoke",
+            "Crowded living conditions, daycare attendance",
+            "Lack of breastfeeding"
+        ],
+        "symptoms": {
+            "common": [
+                "Starts as a cold: runny nose, mild cough, low-grade fever",
+                "Progresses to fast breathing and persistent cough",
+                "Wheezing or whistling sounds when breathing out",
+                "Feeding less than usual, difficulty feeding due to breathlessness",
+                "Irritability or tiredness"
+            ],
+            "danger_signs": [
+                "Very fast breathing for age (chest moving quickly)",
+                "Chest indrawing (skin between ribs or under ribs pulled in when breathing)",
+                "Grunting or head bobbing with breaths",
+                "Bluish lips or face (cyanosis)",
+                "Pauses in breathing (apnoea), especially in young infants",
+                "Inability to feed or drink, or vomiting everything",
+                "Lethargy, poor responsiveness, or signs of shock"
+            ]
+        },
+        "first_aid_steps": [
+            "Assess ABC (airway, breathing, circulation) and look for WHO/IMCI danger signs of severe respiratory distress.",
+            "Keep the infant in a position that eases breathing, usually slightly upright or held in caregiver’s arms.",
+            "Clear gentle nasal secretions with saline drops and a suction bulb if available and trained, especially before feeds.",
+            "Offer small, frequent feeds (breast milk or appropriate formula) if the infant can safely suck and swallow.",
+            "Monitor closely for worsening breathing, poor feeding, or episodes of apnoea.",
+            "Arrange urgent medical assessment if any danger sign is present or if infant is very young (under 3 months)."
+        ],
+        "what_not_to_do": [
+            "Do not lay a struggling, breathless infant flat if they breathe easier upright.",
+            "Do not give cough syrups or over-the-counter cold medicines to infants.",
+            "Do not smoke near the child or allow smoking in the home.",
+            "Do not delay seeking care in a young infant with feeding difficulty or fast breathing."
+        ],
+        "when_to_call_emergency": [
+            "Any infant with pauses in breathing, bluish lips or face, or severe chest indrawing.",
+            "Infant not able to feed or drink, or vomiting everything.",
+            "Very fast breathing with exhaustion, grunting, or head bobbing.",
+            "Marked lethargy, poor responsiveness, or signs of shock."
+        ],
+        "prevention": [
+            "Breastfeeding to improve immunity.",
+            "Avoiding tobacco smoke exposure.",
+            "Handwashing and limiting close contact with people who have colds.",
+            "Following national vaccination schedules (e.g., pertussis, influenza where recommended) to reduce respiratory illness burden."
+        ],
+        "references": [
+            "WHO – Pocket Book of Hospital Care for Children: Bronchiolitis and wheezing illness management.",
+            "WHO IMCI guidelines – Cough or difficult breathing in infants and young children.",
+            "Standard paediatric emergency references on bronchiolitis and RSV infection."
+        ]
+    },
+    {
+        "condition_name": "Pneumonia with danger signs (child)",
+        "category": "clinical/paediatric/respiratory",
+        "description": "An acute infection of the lungs causing inflammation and consolidation, presenting with cough and difficulty breathing. Pneumonia with danger signs indicates severe disease requiring urgent treatment and possible hospitalization.",
+        "causes": [
+            "Bacterial infections (e.g., Streptococcus pneumoniae, Haemophilus influenzae type b)",
+            "Viral infections (e.g., influenza, RSV, SARS-CoV-2)",
+            "Mixed viral-bacterial infections"
+        ],
+        "risk_factors": [
+            "Age under 5 years, especially infants",
+            "Incomplete vaccination (e.g., Hib, pneumococcal vaccine)",
+            "Malnutrition, low birth weight, HIV or other immunosuppression",
+            "Indoor air pollution, tobacco smoke exposure",
+            "Crowded housing and poor ventilation"
+        ],
+        "symptoms": {
+            "common": [
+                "Cough and/or difficulty breathing",
+                "Fever (may be absent in some cases)",
+                "Fast breathing for age (tachypnoea)",
+                "Reduced feeding, poor appetite, or vomiting"
+            ],
+            "danger_signs": [
+                "Chest indrawing (lower chest wall drawing in when the child breathes in)",
+                "Grunting, nasal flaring, or head bobbing",
+                "Stridor at rest or very severe wheeze with poor air entry",
+                "Inability to drink or breastfeed, or vomiting everything",
+                "Lethargy or unconsciousness",
+                "Bluish lips or face (central cyanosis)",
+                "Signs of shock: cold extremities, weak rapid pulse, prolonged capillary refill"
+            ]
+        },
+        "first_aid_steps": [
+            "Recognize pneumonia with danger signs as a medical emergency.",
+            "Assess airway and breathing; position the child with the head and upper body elevated to make breathing easier.",
+            "Loosen tight clothing and ensure fresh air; avoid smoke exposure.",
+            "If prescribed previously by a health professional, ensure the child receives their antibiotics as directed (do not initiate new antibiotics without medical advice).",
+            "Offer small, frequent sips of fluid if the child can drink safely; continue breastfeeding.",
+            "Arrange urgent transfer to a health facility for oxygen, antibiotics, and further management.",
+            "Monitor for changes in breathing, colour, and level of consciousness during transport."
+        ],
+        "what_not_to_do": [
+            "Do not lie a breathless child flat if they breathe better sitting or semi-upright.",
+            "Do not give cough suppressants that may interfere with clearing secretions.",
+            "Do not delay seeking medical care when danger signs are present.",
+            "Do not expose the child to tobacco smoke or indoor pollutants."
+        ],
+        "when_to_call_emergency": [
+            "Cough or difficulty breathing with any WHO general danger sign: not able to drink, vomiting everything, convulsions, lethargic or unconscious.",
+            "Fast breathing with chest indrawing, grunting, or nasal flaring.",
+            "Bluish lips or face or severe respiratory distress.",
+            "Any breathing difficulty in a young infant (under 2–3 months) even without clear fever."
+        ],
+        "prevention": [
+            "Complete childhood vaccination including Hib, pneumococcal, measles, and pertussis as per national schedule.",
+            "Good nutrition and breastfeeding to enhance immunity.",
+            "Reducing indoor air pollution: improved ventilation, cleaner cooking methods.",
+            "Avoiding tobacco smoke exposure in the home and car.",
+            "Early treatment of respiratory infections and caregiver education on pneumonia danger signs."
+        ],
+        "references": [
+            "WHO Integrated Management of Childhood Illness (IMCI) – Cough or difficult breathing and pneumonia classification.",
+            "WHO / UNICEF – Ending Preventable Child Deaths from Pneumonia and Diarrhoea.",
+            "International First Aid Guidelines 2020 – Breathing difficulty in children."
+        ]
+    },
+    {
+        "condition_name": "Croup (viral laryngotracheitis)",
+        "category": "clinical/paediatric/respiratory",
+        "description": "An acute viral infection causing swelling of the larynx and upper trachea in young children, leading to a characteristic barking cough, hoarse voice, and stridor. Usually mild but can cause significant airway obstruction in some cases.",
+        "causes": [
+            "Parainfluenza viruses (most common cause)",
+            "Other respiratory viruses such as RSV, influenza, measles virus, or SARS-CoV-2"
+        ],
+        "risk_factors": [
+            "Age between 6 months and 5 years (peak 1–3 years)",
+            "Recent upper respiratory tract infection",
+            "History of previous croup episodes"
+        ],
+        "symptoms": {
+            "common": [
+                "Recent runny nose and mild fever (typical viral prodrome)",
+                "Sudden onset of barking, “seal-like” cough, often at night",
+                "Hoarse voice",
+                "Noisy breathing (stridor) when crying or agitated"
+            ],
+            "danger_signs": [
+                "Stridor at rest (not only when crying)",
+                "Fast breathing, chest indrawing, or use of accessory muscles",
+                "Drooling, difficulty swallowing, or suspicion of alternative airway emergency (e.g., epiglottitis, foreign body)",
+                "Child becoming very agitated or, alternatively, very tired and quiet",
+                "Bluish lips or face (cyanosis)",
+                "Any general danger sign: not able to drink, lethargy, or decreased level of consciousness"
+            ]
+        },
+        "first_aid_steps": [
+            "Keep the child as calm as possible; crying or agitation worsens airway narrowing.",
+            "Allow the child to sit in a position they find easiest to breathe, often upright on a caregiver’s lap.",
+            "Provide a cool, well-ventilated environment; some children improve slightly with cool night air.",
+            "Offer small sips of fluid if the child can drink comfortably.",
+            "Observe closely for danger signs such as stridor at rest, chest indrawing, fatigue, or colour change.",
+            "Arrange medical assessment for all moderate or severe episodes or if stridor is present at rest."
+        ],
+        "what_not_to_do": [
+            "Do not force the child to lie flat.",
+            "Do not examine the throat with a tongue depressor at home (risk of worsening obstruction).",
+            "Do not give cough syrups or sedatives.",
+            "Do not delay care when there is stridor at rest or difficulty breathing."
+        ],
+        "when_to_call_emergency": [
+            "Stridor (noisy breathing) at rest with chest indrawing.",
+            "Bluish lips or face, or episodes of stopping breathing.",
+            "Extreme agitation or, conversely, sudden tiredness and reduced responsiveness.",
+            "Difficulty breathing with drooling and inability to swallow (consider epiglottitis or other airway emergency)."
+        ],
+        "prevention": [
+            "Routine childhood vaccinations including measles and influenza where recommended.",
+            "Early management of viral respiratory infections and avoidance of smoking exposure.",
+            "Educating caregivers to recognize barking cough and stridor and seek timely care."
+        ],
+        "references": [
+            "WHO Pocket Book of Hospital Care for Children – Stridor and croup management.",
+            "Paediatric emergency guidelines – Croup (acute laryngotracheobronchitis) recognition and severity grading.",
+            "International First Aid Guidelines 2020 – Breathing difficulties and upper airway obstruction in children."
+        ]
+    },
+    {
+        "condition_name": "Head injury in child (with red flag signs)",
+        "category": "trauma/paediatric",
+        "description": "Blunt injury to the head in an infant or child, often due to falls, road traffic incidents, or sports/play, which may cause scalp injury, concussion, or more serious brain injury with raised intracranial pressure.",
+        "causes": [
+            "Fall from bed, furniture, stairs, tree, rooftop or balcony",
+            "Road traffic collision (pedestrian, bicycle, motorcycle passenger without helmet)",
+            "Sports or play injuries (ball impact, collision with other children or objects)",
+            "Violence or non-accidental trauma"
+        ],
+        "risk_factors": [
+            "Age under 2 years (difficult to assess, thinner skull)",
+            "High-energy mechanisms (vehicle, fall from height, being struck by vehicle)",
+            "Not using helmets or seat belts/child restraints",
+            "Bleeding disorders or anticoagulant medication",
+            "Suspected non-accidental injury (injury not matching the history)"
+        ],
+        "symptoms": {
+            "common": [
+                "Scalp swelling or bruising at impact site",
+                "Crying immediately after injury, then settles and interacts normally",
+                "Mild headache or brief irritability",
+                "Single episode of vomiting but otherwise well"
+            ],
+            "danger_signs": [
+                "Loss of consciousness at the time of injury or afterward",
+                "Repeated vomiting (more than once) or persistent severe headache",
+                "Confusion, disorientation, or behaviour change (very irritable or unusually quiet)",
+                "Seizure after the injury",
+                "Weakness, difficulty walking, slurred speech, or unequal pupil size",
+                "Blood or clear fluid from nose or ears, or bruising around eyes/behind ears",
+                "Increasing drowsiness, difficulty waking the child",
+                "Any significant head injury in an infant under 1 year"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure the scene is safe (avoid further falls, traffic, etc.).",
+            "If the child is unconscious or not responding, open the airway carefully and assess breathing; start CPR if needed following paediatric BLS guidelines.",
+            "If the child is conscious, keep them lying flat or in a position of comfort while keeping the head and neck aligned; avoid unnecessary movement.",
+            "Control external bleeding on the scalp with gentle direct pressure using a clean cloth, avoiding heavy pressure over obvious skull deformity.",
+            "Monitor level of consciousness, breathing, and colour continuously while awaiting medical help.",
+            "If there is no danger sign and the child appears well, observe closely at home only with reliable caregivers and clear instructions on when to seek urgent care."
+        ],
+        "what_not_to_do": [
+            "Do not shake the child or try to keep them awake aggressively.",
+            "Do not give food, drink, or oral medication if the child is vomiting, drowsy, or confused.",
+            "Do not apply firm pressure over a depressed skull fracture or a penetrating object.",
+            "Do not ignore red flag symptoms such as repeated vomiting, worsening headache, or behaviour change.",
+            "Do not allow the child to return to sports or rough play the same day as a head injury."
+        ],
+        "when_to_call_emergency": [
+            "Any loss of consciousness, seizure, or persistent confusion after head trauma.",
+            "Repeated vomiting, severe or worsening headache, or increasing drowsiness.",
+            "Weakness in limbs, difficulty walking, or slurred speech.",
+            "Bleeding or clear fluid from nose or ears, major scalp wound, or suspected skull fracture.",
+            "Any significant head injury in infants or in a road traffic collision."
+        ],
+        "prevention": [
+            "Use helmets for bicycles, motorcycles, and sports where appropriate.",
+            "Use child restraints and seat belts correctly in vehicles.",
+            "Install window guards, balcony railings, and stair safety gates in homes.",
+            "Avoid leaving infants unattended on beds, sofas, or changing tables.",
+            "Community education about road safety and safe play environments."
+        ],
+        "references": [
+            "WHO – Child injury prevention and head trauma guidance.",
+            "Royal Children’s Hospital and major paediatric centres – Head injury and concussion in children.",
+            "IFRC International First Aid Guidelines 2020 – Head injury and unresponsiveness.",
+            "CDC HEADS UP – Concussion and brain injury red flag symptoms in children."
+        ]
+    },
+    {
+        "condition_name": "Scald burn in child (hot liquid/steam)",
+        "category": "trauma/paediatric/burn",
+        "description": "Thermal burn in infants or children caused by hot liquids, steam, or hot food, commonly affecting the upper body when hot tea, soup, or cooking liquid is spilled. Very frequent in domestic settings in North Africa.",
+        "causes": [
+            "Hot tea, coffee, or soup spilled from table or tray onto child",
+            "Boiling water or cooking oil spilled in the kitchen",
+            "Steam from pressure cookers or gas stoves",
+            "Pulling on tablecloths, electric kettle cords, or pot handles"
+        ],
+        "risk_factors": [
+            "Toddlers learning to walk and reach up to tables or stoves",
+            "Cooking at ground level or low tables where children play nearby",
+            "Unstable gas stoves or open fires used for cooking or heating",
+            "Crowded homes with little separation between cooking area and children",
+            "Lack of awareness of burn prevention and first aid"
+        ],
+        "symptoms": {
+            "common": [
+                "Red, painful skin in the area of contact with hot liquid",
+                "Blisters forming on the burned skin (partial-thickness burn)",
+                "Child crying, distressed, and resisting touch to the area"
+            ],
+            "danger_signs": [
+                "Burns involving face, neck, chest, hands, genitals, or major joints",
+                "Large-area burns (e.g. more than 10% of body in older child, smaller threshold in infants)",
+                "Burns that look white, charred, or painless (full-thickness burn)",
+                "Signs of inhalation injury: singed hairs, soot around mouth/nose, hoarse voice, breathing difficulty",
+                "Signs of shock: pale, cool skin, rapid weak pulse, lethargy"
+            ]
+        },
+        "first_aid_steps": [
+            "Immediately stop the burning process: remove the child safely from the heat source and remove soaked clothing or nappies around the burn unless stuck to the skin.",
+            "Cool the burned area as soon as possible with cool (not ice-cold) running clean water for about 20 minutes, avoiding chilling the child; keep the rest of the body warm.",
+            "After cooling, cover the burn with a clean, non-fluffy, non-adhesive dressing or cloth (for example, cling film / plastic wrap loosely placed, or a clean cloth).",
+            "Remove constricting items like jewellery near the burned area before swelling occurs, if easily removable.",
+            "Reassure the child and monitor for signs of breathing difficulty, especially when burns involve face or chest.",
+            "Seek medical care promptly for any moderate or severe burn, burns on face, hands, genitals, or joints, or in very young children."
+        ],
+        "what_not_to_do": [
+            "Do not apply ice directly to the burn (risk of further tissue damage and hypothermia).",
+            "Do not apply toothpaste, butter, oil, egg, flour, or traditional remedies to burns.",
+            "Do not break or puncture blisters.",
+            "Do not attempt to remove clothing that is stuck to the burn.",
+            "Do not immerse large burns in cold water baths (risk of hypothermia, especially in young children)."
+        ],
+        "when_to_call_emergency": [
+            "Burns to face, neck, chest, hands, feet, genitals, or circumferential burns around limbs or torso.",
+            "Any suspected inhalation injury or breathing difficulty.",
+            "Large-area burns or burns in infants and very young children.",
+            "Burns associated with signs of shock or altered level of consciousness."
+        ],
+        "prevention": [
+            "Keep hot liquids, kettles, and pots out of children’s reach; turn pot handles inward on the stove.",
+            "Avoid tablecloths or hanging cooker cords that children can pull.",
+            "Separate cooking areas from child play areas, especially in small homes.",
+            "Use stable gas stoves and supervise children closely in the kitchen.",
+            "Community education regarding scald prevention and correct burn first aid (cool water, no home remedies)."
+        ],
+        "references": [
+            "WHO – Burns fact sheet and burn prevention guidance.",
+            "UNICEF and paediatric burn safety resources – Burns and scalds in children.",
+            "NHS/paediatric guidelines – First aid for burns and scalds.",
+            "IFRC International First Aid Guidelines 2020 – Burns."
+        ]
+    },
+    {
+        "condition_name": "Accidental medication poisoning in child",
+        "category": "poisoning/paediatric",
+        "description": "Unintentional ingestion of prescription or over-the-counter medicines by a child, leading to potential toxicity. Common examples include painkillers, fever medicines, diabetes pills, blood pressure tablets, and sedatives.",
+        "causes": [
+            "Child finds and swallows tablets, capsules, or syrup left within reach",
+            "Medicines stored in unlabelled containers or not locked away",
+            "Adult medicines given to children in incorrect dose (dosing error)",
+            "Use of traditional or herbal remedies in excessive amounts"
+        ],
+        "risk_factors": [
+            "Age 1–5 years (curious and mobile; put objects in mouth)",
+            "Medicines stored in handbags, bedside tables, kitchen counters, or unlocked cupboards",
+            "Multiple family members on chronic medications (e.g., antihypertensives, diabetes medicines, sedatives)",
+            "Lack of child-resistant packaging or not using it properly"
+        ],
+        "symptoms": {
+            "common": [
+                "History or suspicion of child having access to medicines or empty blister packs nearby",
+                "Nausea, vomiting, abdominal pain, or drooling",
+                "Drowsiness, irritability, or unusual behaviour",
+                "Pale skin, sweating, or fast heart rate"
+            ],
+            "danger_signs": [
+                "Difficulty breathing or slow, irregular breathing",
+                "Loss of consciousness, seizures, or very deep drowsiness",
+                "Bluish lips or face, or signs of shock",
+                "Very abnormal behaviour, confusion, agitation, or hallucinations",
+                "Known ingestion of high-risk medicines (e.g., diabetes pills, opioids, heart medicines, high-dose paracetamol/acetaminophen)"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure the child and other people are safe; remove any remaining tablets or bottles from the child’s reach.",
+            "If the child is unconscious or not breathing normally, start paediatric basic life support and call emergency services.",
+            "If the child is awake, check what medicine might have been taken (name, strength, number of tablets) and when; keep packaging to show medical staff.",
+            "Call local poison control or emergency services for specific advice as soon as possible.",
+            "If the medicine has spilled on skin or in eyes, rinse with plenty of clean water for at least 15 minutes.",
+            "Monitor the child’s breathing, colour, and level of responsiveness continuously until help arrives."
+        ],
+        "what_not_to_do": [
+            "Do not induce vomiting unless explicitly instructed by poison control or a medical professional.",
+            "Do not give food, drink, milk, or home remedies to 'neutralize' the poison unless advised.",
+            "Do not wait for symptoms to appear if a dangerous amount may have been swallowed.",
+            "Do not give another medicine to 'counteract' the first one without medical advice."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected ingestion of a potentially dangerous medicine in a child (especially heart medicines, diabetes tablets, opioids, strong sedatives, or unknown pills).",
+            "Child is drowsy, confused, having seizures, or difficult to wake.",
+            "Breathing difficulty, blue lips, or signs of shock.",
+            "Large or unknown amount ingested, or if local poison control is not available."
+        ],
+        "prevention": [
+            "Store all medicines out of sight and reach of children, ideally in locked cupboards.",
+            "Keep medicines in original child-resistant containers with labels intact.",
+            "Never refer to medicine as 'candy' to encourage a child to take it.",
+            "Use correct dosing devices and follow paediatric dosing guidelines for prescribed and over-the-counter medicines.",
+            "Educate families about the dangers of adult medicines and traditional remedies in children."
+        ],
+        "references": [
+            "IFRC International First Aid, Resuscitation and Education Guidelines 2020 – Poisoning and intoxication.",
+            "Global First Aid Reference Centre – Poisoning first aid guidance.",
+            "WHO and paediatric toxicology references – Unintentional child poisoning and medication safety.",
+            "Regional injury prevention manuals for low- and middle-income countries, including North Africa."
+        ]
+    },
+    {
+        "condition_name": "Kerosene / hydrocarbon ingestion in child",
+        "category": "poisoning/paediatric",
+        "description": "Accidental swallowing of kerosene, petrol, paint thinner, or similar hydrocarbon fuels or solvents by a child, often from household storage containers. Major risk is aspiration into the lungs causing chemical pneumonitis and respiratory failure.",
+        "causes": [
+            "Child drinking kerosene or petrol stored in soft drink bottles or open containers",
+            "Child playing near stoves, lamps, or fuel containers and sucking on siphon tubes",
+            "Inhalation of fumes in poorly ventilated spaces (less common in young children but possible)"
+        ],
+        "risk_factors": [
+            "Use of kerosene or similar fuels in homes for cooking, heating, or lighting",
+            "Fuel stored in recycled beverage bottles or containers without proper labels",
+            "Crowded housing with limited safe storage space",
+            "Age under 5 years and unsupervised play"
+        ],
+        "symptoms": {
+            "common": [
+                "History or suspicion of child drinking from fuel container or bottle",
+                "Coughing or choking immediately after ingestion",
+                "Vomiting, sometimes with fuel odour on breath",
+                "Irritation of eyes, nose, or throat from fumes"
+            ],
+            "danger_signs": [
+                "Difficulty breathing, fast breathing, or noisy breathing",
+                "Wheezing, grunting, or signs of respiratory distress",
+                "Bluish lips or face (cyanosis)",
+                "Lethargy, decreased responsiveness, or seizures",
+                "Signs of shock: cold clammy skin, weak rapid pulse, poor perfusion"
+            ]
+        },
+        "first_aid_steps": [
+            "Immediately remove the child from exposure and take away the container of fuel; ensure good ventilation and no open flames nearby.",
+            "If the child is unconscious or not breathing normally, start paediatric basic life support and call emergency services.",
+            "If the child is awake and breathing, keep them calm and sitting or in a position of comfort; monitor breathing and colour closely.",
+            "If kerosene or fuel is on the skin or in the eyes, remove contaminated clothing and rinse the affected area with plenty of clean water for at least 15 minutes.",
+            "Contact poison control or emergency medical services urgently and follow their instructions.",
+            "Transport to a medical facility for observation and possible treatment of aspiration pneumonitis."
+        ],
+        "what_not_to_do": [
+            "Do not induce vomiting (high risk of aspiration of hydrocarbons into the lungs).",
+            "Do not give large amounts of water, milk, or oily liquids to drink unless specifically advised by a toxicology specialist.",
+            "Do not use home remedies such as giving oil, eggs, or other substances to 'neutralize' the poison.",
+            "Do not allow smoking, open flames, or sparks near the child with fuel on clothes or around the scene."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected kerosene, petrol, or solvent ingestion in a young child.",
+            "Child develops coughing, choking, breathing difficulty, or persistent vomiting after ingestion.",
+            "Child becomes drowsy, confused, or shows seizures or signs of shock.",
+            "Large or unknown amount has been swallowed, or inhalation of concentrated fumes in a closed space."
+        ],
+        "prevention": [
+            "Avoid storing kerosene, petrol, or solvents in drink bottles or food containers.",
+            "Keep all fuels and solvents in clearly labelled, child-resistant containers, locked away from children.",
+            "Educate families on the danger of hydrocarbon ingestion and harmful first-aid practices (such as inducing vomiting).",
+            "Promote safer cooking and lighting options where possible, and proper ventilation when using fuels indoors."
+        ],
+        "references": [
+            "WHO and paediatric toxicology resources – Hydrocarbon and kerosene poisoning in children.",
+            "MSD Manual and clinical guidelines – Hydrocarbon poisoning, aspiration pneumonitis and management.",
+            "International First Aid and Red Cross training materials – Poisoning and specific hydrocarbon exposures.",
+            "Regional studies from low- and middle-income countries where kerosene use in homes is common."
+        ]
+    },
+    {
+        "condition_name": "Low-voltage household electrical shock",
+        "category": "trauma/electrical",
+        "description": "Injury caused by contact with household electrical current (typically 110–240V), which may cause burns, muscle contractions, heart rhythm disturbances, or loss of consciousness.",
+        "causes": [
+            "Touching exposed wires or damaged electrical cables",
+            "Using electrical devices with wet hands",
+            "Faulty heaters, water boilers, or washing machines",
+            "Short circuits in old or poorly maintained installations"
+        ],
+        "risk_factors": [
+            "Old or damaged electrical wiring",
+            "Wet environments (bathroom, kitchen)",
+            "Children touching unprotected outlets",
+            "Metal jewelry or tools during electrical work"
+        ],
+        "symptoms": {
+            "common": [
+                "Sudden shock sensation",
+                "Pain or burning at entry/exit points",
+                "Muscle spasms",
+                "Tingling or numbness"
+            ],
+            "danger_signs": [
+                "Loss of consciousness",
+                "Irregular heartbeat or palpitations",
+                "Severe burns",
+                "Difficulty breathing"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure the scene is safe and disconnect power before touching the person.",
+            "Check responsiveness, airway, and breathing.",
+            "If unconscious and not breathing, begin CPR and call emergency services.",
+            "Cool minor burns with clean running water for 20 minutes.",
+            "Cover burns with a sterile non-stick dressing.",
+            "Monitor for chest pain, palpitations, confusion, or weakness."
+        ],
+        "what_not_to_do": [
+            "Do not touch the person while the power is still on.",
+            "Do not apply ice directly to burns.",
+            "Do not use butter, oil, or toothpaste on burns.",
+            "Do not assume the person is fine because injuries are not visible."
+        ],
+        "when_to_call_emergency": [
+            "Loss of consciousness at any moment.",
+            "Chest pain, palpitations, or irregular heartbeat.",
+            "Burns larger than a coin or involving the face/hands/genitals.",
+            "Difficulty breathing or persistent confusion."
+        ],
+        "prevention": [
+            "Use grounded plugs and avoid overloading outlets.",
+            "Keep electrical devices away from water.",
+            "Repair damaged cables immediately.",
+            "Install outlet covers in homes with children."
+        ],
+        "references": [
+            "WHO–ICRC Basic Emergency Care: Electrical injuries",
+            "IFRC First Aid Guidelines 2020 – Electrical injuries"
+        ]
+    },
+    {
+        "condition_name": "High-voltage electrical injury",
+        "category": "trauma/electrical",
+        "description": "Contact with electricity above 1000V, causing deep tissue damage, internal burns, cardiac arrest, and traumatic injuries from muscle contractions or falls.",
+        "causes": [
+            "Contact with power lines or transformers",
+            "Industrial equipment failure",
+            "Construction work accidents"
+        ],
+        "risk_factors": [
+            "Working at height near electrical cables",
+            "Handling metal tools near overhead lines",
+            "Wet clothing or sweat increasing conductivity"
+        ],
+        "symptoms": {
+            "common": [
+                "Deep burns at entry and exit points",
+                "Muscle rigidity",
+                "Confusion or agitation",
+                "Fall-related injuries"
+            ],
+            "danger_signs": [
+                "Cardiac arrest",
+                "Respiratory arrest",
+                "Severe internal burns",
+                "Massive muscle breakdown (rhabdomyolysis)"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure the power source is disconnected by professionals.",
+            "Do not approach within 10 meters of high-voltage lines until confirmed safe.",
+            "Check airway, breathing, and pulse immediately.",
+            "If no breathing, begin CPR and call emergency services.",
+            "Cover burns with sterile dressings without applying pressure.",
+            "Keep the person warm and monitor until help arrives."
+        ],
+        "what_not_to_do": [
+            "Do not attempt rescue if the area is still energized.",
+            "Do not move the person unless necessary for safety.",
+            "Do not remove stuck clothing from burns.",
+            "Do not apply water to deep burns."
+        ],
+        "when_to_call_emergency": [
+            "Any high-voltage exposure—always treated as an emergency.",
+            "Unconsciousness, breathing problems, or chest pain.",
+            "Severe burns or visible charring."
+        ],
+        "prevention": [
+            "Strict safety protocols in industrial and construction sites.",
+            "Use insulated tools and gloves.",
+            "Maintain safe distance from live power lines."
+        ],
+        "references": [
+            "WHO–ICRC Basic Emergency Care: Electrical injuries",
+            "IFRC First Aid Guidelines 2020 – Major trauma and burns"
+        ]
+    },
+    {
+        "condition_name": "Lightning strike injury",
+        "category": "trauma/electrical",
+        "description": "Direct or indirect exposure to lightning electrical discharge causing cardiac arrest, burns, shockwave trauma, and nervous system injury.",
+        "causes": [
+            "Being outdoors during thunderstorms",
+            "Standing under trees or metal structures",
+            "Using wired electronics during a storm"
+        ],
+        "risk_factors": [
+            "Outdoor workers (farmers, fishermen)",
+            "Hikers or beachgoers",
+            "Sheltering under trees"
+        ],
+        "symptoms": {
+            "common": [
+                "Confusion or memory loss",
+                "Lichtenberg figures (skin patterning)",
+                "Burns",
+                "Temporary paralysis (keraunoparalysis)"
+            ],
+            "danger_signs": [
+                "Cardiac arrest",
+                "Respiratory arrest",
+                "Severe confusion or seizures",
+                "Multiple trauma from blast effect"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure scene safety—lightning can strike again.",
+            "Check breathing and pulse immediately.",
+            "Begin CPR if needed—lightning victims have the highest CPR survival rates.",
+            "Treat burns with sterile dressings.",
+            "Stabilize the spine if fall or blast injury is suspected.",
+            "Keep the person warm and reassure them."
+        ],
+        "what_not_to_do": [
+            "Do not delay CPR—victims often recover if resuscitated fast.",
+            "Do not assume they are dead—brief cardiac arrest is common.",
+            "Do not move the person if there are signs of spinal injury."
+        ],
+        "when_to_call_emergency": [
+            "Always — lightning injuries are medical emergencies.",
+            "Any unconsciousness or breathing difficulty.",
+            "Visible burns or trauma."
+        ],
+        "prevention": [
+            "Avoid open spaces, beaches, and hilltops during storms.",
+            "Stay inside buildings or cars.",
+            "Do not use wired appliances during lightning storms."
+        ],
+        "references": [
+            "WHO–ICRC Basic Emergency Care: Trauma assessment",
+            "IFRC First Aid Guidelines 2020 – Lightning injuries"
+        ]
+    },
+    {
+        "condition_name": "Electrical burn with cardiac risk",
+        "category": "trauma/electrical",
+        "description": "Burn caused by electrical current passing through tissue, often deeper than surface burns and associated with heart rhythm disturbances.",
+        "causes": [
+            "Faulty water heaters",
+            "Damaged chargers or phones plugged into mains",
+            "Metal objects touching live wires"
+        ],
+        "risk_factors": [
+            "Wet skin or sweating",
+            "Children playing with sockets",
+            "Old ungrounded electrical systems"
+        ],
+        "symptoms": {
+            "common": [
+                "Burns at points of contact",
+                "Tingling or weakness",
+                "Pain around the burn",
+                "Scattered small burn marks"
+            ],
+            "danger_signs": [
+                "Irregular heartbeat",
+                "Chest pain",
+                "Loss of consciousness",
+                "Deep tissue damage"
+            ]
+        },
+        "first_aid_steps": [
+            "Move the person only once the power is off.",
+            "Assess airway, breathing, and pulse.",
+            "Cool superficial burns with running water for 20 minutes.",
+            "Cover burns with clean, sterile dressing.",
+            "Monitor for heart rhythm changes or chest pain.",
+            "Seek medical evaluation even for small burns—internal damage may be severe."
+        ],
+        "what_not_to_do": [
+            "Do not apply creams, oils, or toothpaste.",
+            "Do not break blisters.",
+            "Do not assume small surface burns mean minor injury."
+        ],
+        "when_to_call_emergency": [
+            "Chest pain or palpitations after shock.",
+            "Loss of consciousness.",
+            "Burns involving face, hands, or genitals.",
+            "Any electrical injury in children."
+        ],
+        "prevention": [
+            "Replace damaged sockets and water heaters.",
+            "Avoid using electrical devices near water.",
+            "Install proper grounding in homes."
+        ],
+        "references": [
+            "WHO BEC: Electrical injuries",
+            "IFRC 2020: Burns and electrical emergencies"
+        ]
+    },
+    {
+        "condition_name": "Thermal burns (hot water, flame, hot surfaces)",
+        "category": "clinical/trauma",
+        "description": "Injury to skin from heat exposure. Severe burns can cause shock, infection, and disability.",
+        "causes": [
+            "Boiling water",
+            "Hot oil",
+            "Flames",
+            "Metal surfaces",
+            "Household fires"
+        ],
+        "risk_factors": [
+            "Children",
+            "Elderly",
+            "Industrial workers"
+        ],
+        "symptoms": {
+            "common": [
+                "Red, painful skin",
+                "Blisters",
+                "Swelling",
+                "Peeling skin"
+            ],
+            "danger_signs": [
+                "Burns on face, hands, feet, or genitals",
+                "Electrical or chemical burns",
+                "Large burns (>10% body surface)",
+                "Difficulty breathing (smoke inhalation)"
+            ]
+        },
+        "first_aid_steps": [
+            "Cool the burned area under running cool water for 20 minutes.",
+            "Remove jewelry and tight clothing before swelling increases.",
+            "Cover burn with clean, non-stick dressing.",
+            "Keep patient warm to prevent hypothermia.",
+            "For large burns, lay flat and monitor for shock."
+        ],
+        "what_not_to_do": [
+            "Do not use ice directly.",
+            "Do not apply toothpaste, butter, or oils.",
+            "Do not break blisters.",
+            "Do not remove stuck clothing."
+        ],
+        "when_to_call_emergency": [
+            "Burns on face, hands, feet, or genitals.",
+            "Burns larger than the size of the patient’s palm.",
+            "Difficulty breathing, coughing soot.",
+            "Electrical or chemical burns."
+        ],
+        "prevention": [
+            "Safe handling of hot liquids.",
+            "Fire safety in kitchens.",
+            "Childproofing homes."
+        ],
+        "references": [
+            "WHO BEC – Burns",
+            "IFRC First Aid – Burn Management"
+        ]
+    },
+    {
+        "condition_name": "Open fracture (bone exposed through skin)",
+        "category": "clinical/trauma",
+        "description": "A fracture where the bone communicates with the external environment through a break in the skin. High risk for infection, neurovascular injury, severe bleeding, and compartment syndrome. Requires immediate protection, immobilization, and urgent surgical management.",
+        "causes": [
+            "Motorcycle and car crashes",
+            "Falls from height",
+            "Industrial machinery injuries",
+            "Direct trauma with high kinetic energy"
+        ],
+        "risk_factors": [
+            "Elderly (weak bone structure)",
+            "Osteoporosis",
+            "Peripheral vascular disease",
+            "Diabetes (poor wound healing)"
+        ],
+        "symptoms": {
+            "common": [
+                "Bone visible through wound",
+                "Open wound with bleeding",
+                "Severe local pain",
+                "Loss of limb function",
+                "Swelling and deformity"
+            ],
+            "danger_signs": [
+                "Absent distal pulses (arterial injury)",
+                "Numbness or paralysis of limb",
+                "Cold, pale extremity (ischemia)",
+                "Profuse bleeding leading to shock",
+                "Severe swelling with increasing pain (compartment syndrome)"
+            ]
+        },
+        "first_aid_steps": [
+            "Control bleeding using pressure AROUND the wound; avoid pressing directly on exposed bone.",
+            "Cover the wound with sterile moist dressing or clean cloth if sterile materials unavailable.",
+            "Do NOT attempt to realign the bone.",
+            "Immobilize with splints above and below the fracture.",
+            "Check distal circulation, movement, sensation regularly.",
+            "Keep patient warm and treat for shock.",
+            "Urgent transfer to a surgical-capable hospital; requires IV antibiotics and operative debridement."
+        ],
+        "what_not_to_do": [
+            "Do not push bone ends back inside.",
+            "Do not remove deeply embedded objects.",
+            "Do not irrigate vigorously in the field.",
+            "Do not allow patient to walk on limb.",
+            "Do not give anything orally."
+        ],
+        "when_to_call_emergency": [
+            "Any open fracture regardless of size.",
+            "Loss of pulses or sensation in the limb.",
+            "Persistent bleeding despite pressure.",
+            "Multiple injuries (polytrauma)."
+        ],
+        "prevention": [
+            "Use of protective equipment at workplaces.",
+            "Fall prevention at homes and construction sites.",
+            "Safe machinery handling."
+        ],
+        "references": [
+            "WHO BEC – Limb Trauma",
+            "ATLS 10th Edition – Open Fractures",
+            "Orthopaedic Trauma Association Guidelines"
+        ]
+    },
+    {
+        "condition_name": "Closed fracture (suspected bone break without open wound)",
+        "category": "clinical/trauma",
+        "description": "A break in the bone without skin penetration. Can cause significant internal bleeding, compartment syndrome, or neurovascular compromise. Requires immobilization and diagnostic imaging.",
+        "causes": [
+            "Falls",
+            "Blunt trauma",
+            "Sports injuries",
+            "Motor vehicle collisions"
+        ],
+        "risk_factors": [
+            "Osteoporosis or fragile bone",
+            "Advanced age",
+            "High-impact activities",
+            "Previous fractures"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe localized pain",
+                "Swelling and bruising",
+                "Deformity or abnormal limb position",
+                "Difficulty or inability to move the limb"
+            ],
+            "danger_signs": [
+                "Loss of pulses (arterial injury)",
+                "Severe pain unrelieved by immobilization (compartment syndrome)",
+                "Pins-and-needles or numbness (nerve injury)",
+                "Shortening or rotation of limb (displaced fracture)"
+            ]
+        },
+        "first_aid_steps": [
+            "Immobilize limb using splints above and below the fracture site.",
+            "Apply a padded soft dressing to prevent further injury.",
+            "Use cold compress wrapped in cloth for 20 minutes to reduce swelling.",
+            "Elevate limb if possible unless it worsens pain.",
+            "Monitor circulation, sensation, movement frequently.",
+            "Transport to medical facility for X-ray and orthopedic care."
+        ],
+        "what_not_to_do": [
+            "Do not attempt to straighten the limb.",
+            "Do not apply ice directly to skin.",
+            "Do not let patient move or bear weight on injured limb.",
+            "Do not massage or manipulate fracture site."
+        ],
+        "when_to_call_emergency": [
+            "Deformity with severe pain.",
+            "Absent pulse or numbness.",
+            "Severe swelling and tightness (suspected compartment syndrome)."
+        ],
+        "prevention": [
+            "Bone-strengthening diet and exercise.",
+            "Protective sports gear.",
+            "Fall-proof environments for elderly."
+        ],
+        "references": [
+            "WHO BEC – Injuries",
+            "IFRC 2020 – Fracture Management",
+            "ATLS – Orthopedic Trauma"
+        ]
+    },
+    {
+        "condition_name": "Head trauma with danger signs (suspected brain injury)",
+        "category": "clinical/trauma",
+        "description": "Traumatic impact to the head causing potential intracranial bleeding, contusion, or diffuse brain injury. Danger signs require immediate evaluation due to risk of rapid deterioration.",
+        "causes": [
+            "Vehicle collisions",
+            "Falls (especially elderly and children)",
+            "Sports injuries",
+            "Assault",
+            "Industrial accidents"
+        ],
+        "risk_factors": [
+            "Use of anticoagulants",
+            "Alcohol intoxication",
+            "Age > 65",
+            "Previous head injury",
+            "High-speed mechanism"
+        ],
+        "symptoms": {
+            "common": [
+                "Headache",
+                "Vomiting",
+                "Confusion",
+                "Scalp bleeding or swelling"
+            ],
+            "danger_signs": [
+                "Loss of consciousness",
+                "Seizures",
+                "Weakness on one side",
+                "Unequal pupils",
+                "Clear fluid from nose or ears (CSF leak)",
+                "Persistent drowsiness or agitation"
+            ]
+        },
+        "first_aid_steps": [
+            "Ensure cervical spine protection; keep patient still.",
+            "Lay patient on side if vomiting to protect airway.",
+            "Control scalp bleeding with gentle pressure.",
+            "Monitor airway, breathing, circulation continuously.",
+            "Check pupils, limb movement, and level of consciousness frequently.",
+            "Arrange urgent transfer to trauma center for CT scan."
+        ],
+        "what_not_to_do": [
+            "Do not shake or move the patient abruptly.",
+            "Do not give anything orally.",
+            "Do not remove penetrating objects.",
+            "Do not allow patient to sleep if deteriorating."
+        ],
+        "when_to_call_emergency": [
+            "Any loss of consciousness.",
+            "Vomiting more than once.",
+            "Seizures.",
+            "Weakness, confusion, or unequal pupils.",
+            "High-energy trauma mechanism."
+        ],
+        "prevention": [
+            "Helmet use.",
+            "Safe sports practices.",
+            "Fall prevention.",
+            "Avoid alcohol while driving."
+        ],
+        "references": [
+            "WHO BEC – Head Injury",
+            "ATLS – Head Trauma",
+            "IFRC 2020 – Head Injury First Aid"
+        ]
+    },
+    {
+        "condition_name": "Thermal burns (hot liquids, flame, hot surfaces)",
+        "category": "clinical/trauma",
+        "description": "Skin and tissue injury caused by heat exposure. Severity depends on depth, surface area, and body region. Risk of shock, infection, airway compromise, and disability.",
+        "causes": [
+            "Hot water/steam (common in children)",
+            "Hot oil burns",
+            "Cooking-related fires",
+            "Gas explosions",
+            "Industrial flames or heated metal"
+        ],
+        "risk_factors": [
+            "Children <5 years",
+            "Elderly",
+            "Industrial workers",
+            "Clothing that ignites easily (synthetic fabrics)"
+        ],
+        "symptoms": {
+            "common": [
+                "Painful red skin (superficial)",
+                "Blisters (partial thickness)",
+                "White or charred skin (full thickness)",
+                "Swelling"
+            ],
+            "danger_signs": [
+                "Burns on face, neck → airway risk",
+                "Circumferential limb burns (risk of compartment syndrome)",
+                "Burns >10% total body surface area",
+                "Inhalation injury (soot, hoarse voice, stridor)"
+            ]
+        },
+        "first_aid_steps": [
+            "Stop burning process immediately (remove from heat source).",
+            "Cool the burn with cool running water for 20 minutes; this reduces depth of burn.",
+            "Remove jewelry and tight clothing early.",
+            "Cover burn with sterile, non-adherent dressing.",
+            "Keep patient warm to prevent hypothermia.",
+            "If inhalation injury suspected: sit upright, provide high-flow oxygen if available.",
+            "Transport to burn-capable facility for severe burns."
+        ],
+        "what_not_to_do": [
+            "Do not apply ice directly (causes vasoconstriction).",
+            "Do not use toothpaste, butter, oil, or traditional remedies.",
+            "Do not break blisters.",
+            "Do not remove clothing stuck to the burn."
+        ],
+        "when_to_call_emergency": [
+            "Burns on face, hands, feet, genitals, or joints.",
+            "Burns > the size of the patient’s palm.",
+            "Electrical/chemical burns.",
+            "Signs of airway burn (soot, stridor)."
+        ],
+        "prevention": [
+            "Safe handling of hot liquids in kitchen.",
+            "Child-proofing hot-water areas.",
+            "Proper cylinder/gas storage.",
+            "Use of flame-retardant clothing in industry."
+        ],
+        "references": [
+            "WHO Burn Management Guidelines",
+            "IFRC 2020 – Burns",
+            "American Burn Association Emergency Care Guidelines"
+        ]
+    },
+    {
+        "condition_name": "Tension pneumothorax",
+        "category": "clinical/trauma",
+        "description": "Life-threatening chest injury where air enters the pleural space and cannot escape, causing lung collapse and shifting of the mediastinum. Rapidly fatal without immediate decompression.",
+        "causes": [
+            "Penetrating chest trauma",
+            "Blunt chest trauma with lung laceration",
+            "Rib fractures puncturing lung",
+            "Positive-pressure ventilation after trauma"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe shortness of breath",
+                "Chest pain on affected side",
+                "Rapid breathing",
+                "Distended neck veins"
+            ],
+            "danger_signs": [
+                "Absent breath sounds on one side",
+                "Severe hypotension (shock)",
+                "Tracheal deviation away from affected side",
+                "Cyanosis",
+                "Worsening respiratory distress"
+            ]
+        },
+        "first_aid_steps": [
+            "Provide high-flow oxygen if available.",
+            "Keep the patient sitting upright unless in shock.",
+            "Recognize classic triad: respiratory distress + absent breath sounds + hypotension.",
+            "Arrange immediate transport — this is a surgical emergency."
+        ],
+        "what_not_to_do": [
+            "Do not delay transfer for diagnostic imaging.",
+            "Do not lay the patient flat unless in profound shock."
+        ],
+        "when_to_call_emergency": [
+            "Any suspicion of tension pneumothorax.",
+            "Severe respiratory distress after chest trauma."
+        ],
+        "references": [
+            "ATLS 10th Edition – Thoracic Trauma",
+            "WHO Basic Emergency Care – Chest Injuries"
+        ]
+    },
+    {
+        "condition_name": "Open pneumothorax (sucking chest wound)",
+        "category": "clinical/trauma",
+        "description": "Air enters the pleural space through an open chest wound causing lung collapse. Characteristic ‘sucking’ sound with each breath. Fatal if not sealed quickly.",
+        "causes": [
+            "Stab wounds",
+            "Gunshot wounds",
+            "Impaled objects"
+        ],
+        "symptoms": {
+            "common": [
+                "Visible open chest wound",
+                "Sucking/air movement sound on breathing",
+                "Shortness of breath"
+            ],
+            "danger_signs": [
+                "Severe respiratory distress",
+                "Hypotension",
+                "Cyanosis",
+                "Decreased breath sounds on affected side"
+            ]
+        },
+        "first_aid_steps": [
+            "Cover the wound with an occlusive dressing taped on 3 sides to create a one-way valve.",
+            "If an object is embedded, do NOT remove it — secure it in place.",
+            "Provide oxygen if available.",
+            "Transport urgently to trauma care."
+        ],
+        "what_not_to_do": [
+            "Do not completely seal the wound on all 4 sides (may cause tension pneumothorax).",
+            "Do not remove impaled objects."
+        ],
+        "when_to_call_emergency": [
+            "All penetrating chest wounds.",
+            "Any sucking chest wound."
+        ],
+        "references": [
+            "ATLS – Penetrating Chest Trauma",
+            "WHO Emergency Care Guidelines"
+        ]
+    },
+    {
+        "condition_name": "Flail chest",
+        "category": "clinical/trauma",
+        "description": "Two or more adjacent ribs fractured in two places, producing a floating chest segment. Causes paradoxical chest movement and respiratory failure.",
+        "causes": [
+            "High-speed vehicle collisions",
+            "Crush injuries",
+            "Severe blunt chest trauma"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe chest pain",
+                "Paradoxical chest movement",
+                "Difficulty breathing"
+            ],
+            "danger_signs": [
+                "Respiratory failure",
+                "Cyanosis",
+                "Crepitus over ribs",
+                "Shock"
+            ]
+        },
+        "first_aid_steps": [
+            "Provide oxygen if available.",
+            "Place the patient in semi-sitting position unless shocked.",
+            "Stabilize flail segment with bulky dressing or folded cloth.",
+            "Transport urgently to trauma center."
+        ],
+        "what_not_to_do": [
+            "Do not bind the chest tightly.",
+            "Do not delay evacuation."
+        ],
+        "when_to_call_emergency": [
+            "Any paradoxical chest movement.",
+            "Severe respiratory distress."
+        ],
+        "references": [
+            "ATLS – Chest Wall Injury",
+            "WHO BEC – Chest Trauma"
+        ]
+    },
+    {
+        "condition_name": "Pelvic fracture with internal bleeding",
+        "category": "clinical/trauma",
+        "description": "High-energy trauma causing pelvic ring disruption, leading to massive life-threatening internal hemorrhage.",
+        "causes": [
+            "Car or motorcycle collisions",
+            "Pedestrian impacts",
+            "Falls from height"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe pelvic or lower abdominal pain",
+                "Leg rotation or shortening",
+                "Bruising over pelvic area"
+            ],
+            "danger_signs": [
+                "Shock despite no external bleeding",
+                "Blood in urine",
+                "Instability of pelvis",
+                "Altered mental status"
+            ]
+        },
+        "first_aid_steps": [
+            "Apply pelvic binder or wrap tightly using a bedsheet around pelvic area.",
+            "Lay patient flat.",
+            "Treat for shock (warmth, no oral fluids).",
+            "Urgent transfer to trauma center."
+        ],
+        "what_not_to_do": [
+            "Do not repeatedly press pelvis to check stability.",
+            "Do not allow patient to stand or move."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected pelvic fracture.",
+            "Signs of shock with no external bleeding."
+        ],
+        "references": [
+            "ATLS – Pelvic Trauma",
+            "WHO Trauma Guidelines"
+        ]
+    },
+    {
+        "condition_name": "Blunt abdominal trauma with suspected internal bleeding",
+        "category": "clinical/trauma",
+        "description": "Traumatic impact to the abdomen risking damage to spleen, liver, or internal organs. Bleeding may be hidden and rapidly fatal.",
+        "causes": [
+            "Road crashes",
+            "Assaults",
+            "Falls"
+        ],
+        "symptoms": {
+            "common": [
+                "Abdominal pain or tenderness",
+                "Bruising (seatbelt sign)",
+                "Abdominal distension"
+            ],
+            "danger_signs": [
+                "Severe hypotension",
+                "Rigid abdomen",
+                "Persistent vomiting",
+                "Dizziness or collapse"
+            ]
+        },
+        "first_aid_steps": [
+            "Lay patient flat.",
+            "Treat for shock.",
+            "Do not give anything orally.",
+            "Urgent transport for imaging/surgery."
+        ],
+        "what_not_to_do": [
+            "Do not apply pressure to abdomen.",
+            "Do not give oral medication or food."
+        ],
+        "when_to_call_emergency": [
+            "Suspected internal bleeding.",
+            "Abdominal pain after high-energy trauma."
+        ],
+        "references": [
+            "ATLS – Abdominal Trauma",
+            "WHO BEC Abdominal Injury"
+        ]
+    },
+    {
+        "condition_name": "Penetrating trauma",
+        "category": "clinical/trauma",
+        "description": "Injury caused by sharp objects entering the body. High risk of organ laceration, bleeding, and infection. Severity depends on trajectory and depth.",
+        "causes": [
+            "Knife wounds",
+            "Glass injuries",
+            "Sharp metal objects"
+        ],
+        "symptoms": {
+            "common": [
+                "Open wound",
+                "Bleeding",
+                "Localized pain"
+            ],
+            "danger_signs": [
+                "Shock",
+                "Evisceration (organs visible)",
+                "Sucking chest wound",
+                "Massive bleeding"
+            ]
+        },
+        "first_aid_steps": [
+            "Control bleeding with pressure around wound.",
+            "If object is embedded, leave in place and stabilize.",
+            "Cover wound with sterile dressing.",
+            "Treat for shock.",
+            "Urgent evacuation to trauma center."
+        ],
+        "what_not_to_do": [
+            "Do not pull out embedded objects.",
+            "Do not probe inside the wound."
+        ],
+        "when_to_call_emergency": [
+            "Any penetrating wound to chest, abdomen, neck."
+        ],
+        "references": [
+            "ATLS – Penetrating Trauma"
+        ]
+    },
+    {
+        "condition_name": "Compartment syndrome",
+        "category": "clinical/trauma",
+        "description": "Increased pressure within muscle compartments leading to ischemia and potential limb loss. Occurs after fractures, crush injuries, or burns.",
+        "causes": [
+            "Tibial fractures",
+            "Forearm fractures",
+            "Crush injuries",
+            "Tight bandages or casts"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe pain out of proportion",
+                "Pain on stretching muscles",
+                "Tense, swollen limb"
+            ],
+            "danger_signs": [
+                "Loss of sensation",
+                "Weak pulses",
+                "Paralysis",
+                "Severe, escalating pain"
+            ]
+        },
+        "first_aid_steps": [
+            "Loosen constrictive dressings.",
+            "Keep the limb at heart level.",
+            "Urgent transport for surgical fasciotomy."
+        ],
+        "what_not_to_do": [
+            "Do not elevate limb too high (reduces perfusion).",
+            "Do not apply ice."
+        ],
+        "when_to_call_emergency": [
+            "Any suspected compartment syndrome."
+        ],
+        "references": [
+            "Orthopaedic Trauma Association",
+            "ATLS – Extremity Trauma"
+        ]
+    },
+    {
+        "condition_name": "Crush injury and crush syndrome",
+        "category": "clinical/trauma",
+        "description": "Prolonged compression of muscles leading to muscle breakdown (rhabdomyolysis), hyperkalemia, kidney failure, and shock.",
+        "causes": [
+            "Collapsed buildings",
+            "Industrial machinery accidents",
+            "Road accidents"
+        ],
+        "symptoms": {
+            "common": [
+                "Severe swelling",
+                "Bruising",
+                "Weakness of limb"
+            ],
+            "danger_signs": [
+                "Dark tea-colored urine",
+                "Severe shock",
+                "Arrhythmias",
+                "Decreased urine output"
+            ]
+        },
+        "first_aid_steps": [
+            "Remove crushing object carefully only if safe.",
+            "Start fluid therapy if available.",
+            "Monitor for shock.",
+            "Urgent transfer for laboratory evaluation and treatment."
+        ],
+        "what_not_to_do": [
+            "Do not release a heavy crush suddenly (reperfusion shock).",
+            "Do not allow dehydration."
+        ],
+        "when_to_call_emergency": [
+            "Any crush injury lasting >30 minutes.",
+            "Crush with collapse or dark urine."
+        ],
+        "references": [
+            "WHO – Crush Syndrome Guidelines",
+            "ATLS – Special Trauma Situations"
+        ]
+    }
+]

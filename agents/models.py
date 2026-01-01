@@ -8,9 +8,13 @@ class Conversation(models.Model):
     is_deleted = models.BooleanField(default=False)
     is_pinned = models.BooleanField(default=False)
     triage_session_id = models.CharField(max_length=100, blank=True, null=True)
-
+    metadata = models.JSONField(default=dict, blank=True, null=True)  # ADD THIS LINE
+    
     def __str__(self):
         return f"{self.user.username} - {self.title}"
+
+    class Meta:
+        ordering = ['-created_at']  # Optional: add ordering
 
 class Message(models.Model):
     ROLE_CHOICES = (
@@ -22,7 +26,7 @@ class Message(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     is_deleted = models.BooleanField(default=False)
-    metadata = models.JSONField(default=dict, blank=True, null=True)  # Store diagnostic metadata
+    metadata = models.JSONField(default=dict, blank=True, null=True)
 
     def __str__(self):
         return f"{self.conversation.title} - {self.role}"

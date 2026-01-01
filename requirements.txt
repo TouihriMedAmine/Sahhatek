@@ -1,55 +1,130 @@
 # Core Django Framework
-Django==5.2.0
-django-tailwind==3.8.0
+Django==6.0
+django-tailwind==4.4.2
 
 # HTTP Client and API
-httpx==0.27.0
-requests==2.31.0
+httpx==0.28.1
+requests==2.32.5
+aiohttp==3.13.2
+fake-useragent==2.2.0
+duckduckgo_search==8.1.1
+ddgs==9.10.0
 
-# OpenAI API Client
+# OpenAI/LLM API Clients
 openai==1.12.0
+groq==1.0.0
 
 # Geocoding and Location Services
 geopy==2.4.1
 
+# Natural Language Processing and AI
+langchain-classic==1.0.1
+langchain-community==0.4.1
+langchain-core==1.2.5
+langchain-text-splitters==1.1.0
+langgraph==1.0.5
+langgraph-checkpoint==3.0.1
+langgraph-prebuilt==1.0.5
+langgraph-sdk==0.3.1
+langsmith==0.5.1
+chromadb==1.4.0
+
+# Machine Learning and Deep Learning
+tensorflow==2.20.0
+keras==3.13.0
+torch==2.9.1
+transformers==4.57.3
+sentence-transformers==5.2.0
+scikit-learn==1.8.0
+scipy==1.16.3
+numpy==2.2.6
+pandas==2.3.3
+opencv-python==4.12.0.88
+onnxruntime==1.23.2
+deepface==0.0.96
+mtcnn==1.0.0
+retina-face==0.0.17
+
 # Natural Language Processing
 spacy==3.8.1
-# Machine Learning and Embeddings
-sentence-transformers==2.2.2
-transformers==4.36.2
-torch==2.4.0
-torchvision==0.18.1
-torchaudio==2.4.0
-# Translation models (MarianMT for English-Arabic)
 sentencepiece==0.1.99
+langdetect==1.0.9
+arabic-reshaper==3.0.0
+tokenizers==0.22.1
 
 # Vector Search and Similarity
 faiss-cpu==1.13.1
-numpy==1.26.3
 rapidfuzz==3.6.1
 
-
-# String Matching and Fuzzy Search
-rapidfuzz==3.6.1
-
-# Web Framework (for unified_healthcare_api.py)
-flask==3.0.0
-flask-cors==4.0.0
-
-# FastAPI (optional, for alternative API server)
+# Web Frameworks
+flask==3.1.2
+flask-cors==6.0.2
+Werkzeug==3.1.4
+gunicorn==23.0.0
+uvicorn==0.40.0
 fastapi==0.109.0
-uvicorn[standard]==0.27.0
-pydantic==2.5.3
+
+# Pydantic and Data Validation
+pydantic==2.12.5
+pydantic_core==2.41.5
+pydantic-settings==2.12.0
 
 # Speech Recognition and Audio Processing
 vosk==0.3.45
 sounddevice==0.4.6
-arabic-reshaper==3.0.0
 pydub==0.25.1
-edge-tts>=6.1.0
+edge-tts==7.2.7
 
-# Gradio (for UI, optional)
+# Gradio (for UI)
 gradio==4.8.0
 
-# Additional Utilities
-python-dotenv==1.0.0
+# Database and ORM
+SQLAlchemy==2.0.45
+posthog==5.4.0
+
+# Authentication and Security
+bcrypt==5.0.0
+google-auth==2.45.0
+oauthlib==3.3.1
+requests-oauthlib==2.0.0
+
+# Utilities
+python-dotenv==1.2.1
+beautifulsoup4==4.14.3
+lxml==6.0.2
+rich==14.2.0
+tqdm==4.67.1
+pyyaml==6.0.3
+Pillow==12.0.0
+joblib==1.5.3
+tenacity==9.1.2
+backoff==2.2.1
+tabulate==0.9.0
+orjson==3.11.5
+huggingface-hub==0.36.0
+safetensors==0.7.0
+build==1.3.0
+fire==0.7.1
+typer==0.21.0
+
+# System and OS utilities
+psutil==5.9.0
+filelock==3.20.1
+distro==1.9.0
+certifi==2025.11.12
+
+# Wound Analyzer Requirements - FastAI Implementation
+torch>=2.0.0
+fastai>=2.7.0
+opencv-python>=4.8.0
+pillow>=10.0.0
+numpy>=1.24.0
+scikit-image>=0.20.0
+
+# Optional: For GPU support
+# cuda-toolkit>=11.8
+# cudnn>=8.6.0
+
+# Optional: For advanced image processing
+matplotlib>=3.7.0
+scipy>=1.10.0

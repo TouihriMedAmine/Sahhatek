@@ -1,7 +1,49 @@
 {
   "Nutrition": [],
   "Physical Activity": [],
-  "Mental Health": [],
+  "Mental Health": [
+    {
+      "claim": "Start rumor-check chat",
+      "created_at": "2025-12-31T21:43:59.002538",
+      "last_updated": "2025-12-31T21:43:59.002538",
+      "verdict": "NOT_CREDIBLE",
+      "score": 0,
+      "credibility_percentage": 0.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-31T21:43:59.002538",
+          "score": 0,
+          "credibility_percentage": 0.0,
+          "verdict": "NOT_CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "On the frontlines in the fight against dangerous misinformation | WHO | Regional Office for Africa",
+              "href": "https://www.afro.who.int/news/frontlines-fight-against-dangerous-misinformation",
+              "body": "On social media and in chat apps, we can all pause for a second and take a closer look at claims around the pandemic and COVID-19 vaccines. We can check if the information is from reputable sources like the World Health Organization before sharing it with our networks and we can challenge it if it seems spurious."
+            },
+            {
+              "title": "Chatty benches for spontaneous conversations - Age-Friendly World",
+              "href": "https://extranet.who.int/agefriendlyworld/chat-benches-for-spontaneous-conversations/",
+              "body": "August 8, 2022 - Watch a film about the chatty benches in Gothenburg About twenty chat benches have been placed in Gothenburg, Sweden . The idea is that the benches, which hav"
+            },
+            {
+              "title": "How to Address COVID-19 Vaccine Misinformation | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/vaccines/covid-19/health-departments/addressing-vaccine-misinformation.html",
+              "body": "Thought bubbles showing computer, mobile device, and chat windows. The spread of misinformation on social media and through other channels can affect COVID-19 vaccine confidence."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "Start rumor-check chat",
+        "timestamp": "2025-12-31T21:43:59.002538",
+        "steps": []
+      }
+    }
+  ],
   "Chronic Diseases": [],
   "Infectious Diseases": [
     {
@@ -288,6 +330,47 @@
       "process": {
         "rumor": "i heard that corona came from china ?",
         "timestamp": "2025-12-19T13:40:40.084484",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i Heart the there is a new virus in tunisia named K is it true ?",
+      "created_at": "2025-12-31T17:58:34.059727",
+      "last_updated": "2025-12-31T17:58:34.059727",
+      "verdict": "NOT_CREDIBLE",
+      "score": 0,
+      "credibility_percentage": 0.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2025-12-31T17:58:34.059727",
+          "score": 0,
+          "credibility_percentage": 0.0,
+          "verdict": "NOT_CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "COVID-19 variants | WHO COVID-19 dashboard - datadot",
+              "href": "https://data.who.int/dashboards/covid19/variants",
+              "body": "Since the beginning of the COVID-19 pandemic and with the evolution of the SARS-CoV-2 virus , multiple COVID-19 Variants of Concern (VOCs) and Variants of Interest (VOIs) have been designated by WHO based on their assessed potential for expansion and replacement of prior variants, for causing new waves with increased circulation, and for the need for adjustments to public health actions."
+            },
+            {
+              "title": "Coronavirus - World Health Organization (WHO)",
+              "href": "https://www.who.int/health-topics/coronavirus",
+              "body": "Coronavirus disease (COVID-19) is an infectious disease caused by the SARS-CoV-2 virus . Most people infected with the virus will experience mild to moderate respiratory illness and recover without requiring special treatment. However, some will become seriously ill and require medical attention."
+            },
+            {
+              "title": "New Parvovirus in Child with Unexplained Diarrhea, Tunisia - Volume 20, Number 11—November 2014 - Emerging Infectious Diseases journal - CDC",
+              "href": "https://wwwnc.cdc.gov/eid/article/20/11/14-0428_article",
+              "body": "We named this virus Tusavirus 1 for Tunisian stool-associated parvovirus. ... Figure. New parvovirus genome and phylogeny. A) Organization of the Tusavirus genome. Theoretical splicing for expression of viral protein (VP) 1 is shown."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i Heart the there is a new virus in tunisia named K is it true ?",
+        "timestamp": "2025-12-31T17:58:34.058725",
         "steps": []
       }
     }
