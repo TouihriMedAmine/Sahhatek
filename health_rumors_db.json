@@ -373,6 +373,88 @@
         "timestamp": "2025-12-31T17:58:34.058725",
         "steps": []
       }
+    },
+    {
+      "claim": "I heard on TikTok that the coronavirus really comes from China. Is that true?",
+      "created_at": "2026-01-02T21:54:58.627600",
+      "last_updated": "2026-01-02T21:54:58.627600",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2026-01-02T21:54:58.627600",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO Scientific advisory group issues report on origins of ...",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "Jun 27, 2025 · The work to understand the origins of SARS- CoV -2 remains unfinished. WHO welcomes any further evidence on the origins of COVID -19, and SAGO remains committed to reviewing any new information should it become available."
+            },
+            {
+              "title": "Virus origin / Origins of the SARS-CoV-2 virus",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/origins-of-the-virus",
+              "body": "Mar 30, 2021 · WHO-convened global study of origins of SARS-CoV-2: China Part Download Read More 30 March 2021"
+            },
+            {
+              "title": "About COVID-19 | Covid | CDC",
+              "href": "https://www.cdc.gov/covid/about/index.html",
+              "body": "Learn about COVID-19 and how it spreads About COVID-19 COVID-19 most often causes respiratory symptoms that can feel much like a cold, the flu, or pneumonia. COVID-19 may attack more than your lungs and respiratory system. Other parts of your body may also be affected by the disease. Most people with COVID-19 have mild symptoms, but some people become severely ill."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "I heard on TikTok that the coronavirus really comes from China. Is that true?",
+        "timestamp": "2026-01-02T21:54:58.627600",
+        "steps": []
+      }
+    },
+    {
+      "claim": "i hear in tiktok that corona virus came from china is that true",
+      "created_at": "2026-01-03T15:23:21.531850",
+      "last_updated": "2026-01-03T15:23:21.531850",
+      "verdict": "CREDIBLE",
+      "score": 45,
+      "credibility_percentage": 90.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2026-01-03T15:23:21.531850",
+          "score": 45,
+          "credibility_percentage": 90.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "Coronavirus (COVID-19) events as they happen",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/events-as-they-happen",
+              "body": "WHO welcomes the initial clinical trial results from the UK that show dexamethasone, a corticosteroid, can be lifesaving for patients who are ..."
+            },
+            {
+              "title": "WHO Scientific advisory group issues report on origins of ...",
+              "href": "https://www.who.int/news/item/27-06-2025-who-scientific-advisory-group-issues-report-on-origins-of-covid-19",
+              "body": "Jun 27, 2025 · The work to understand the origins of SARS-CoV-2 remains unfinished. WHO welcomes any further evidence on the origins of COVID -19, and SAGO remains committed to reviewing any new information should it become available."
+            },
+            {
+              "title": "CDC Museum COVID-19 Timeline | David J. Sencer CDC Museum | CDC",
+              "href": "https://www.cdc.gov/museum/timeline/covid19.html",
+              "body": "Jul 8, 2024 · This timeline provides information about select moments in the COVID-19 pandemic in the United States and around the world beginning from its known origins to today."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i hear in tiktok that corona virus came from china is that true",
+        "timestamp": "2026-01-03T15:23:21.531850",
+        "steps": []
+      }
     }
   ],
   "Preventive Medicine": [],

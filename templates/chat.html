@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
   
   <!-- Three.js for medical animations -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
   
   <style>
     /* Custom colors for medical theme */
@@ -1267,7 +1267,28 @@
     <span id="transcriptionText">Listening...</span>
   </div>
 
+  <!-- Avatar Widget -->
+  <div id="avatar-widget" class="fixed bottom-24 right-6 w-64 h-64 z-40 hidden transition-all duration-500 transform translate-y-10 opacity-0">
+      <div class="relative w-full h-full group">
+          <!-- Close Button -->
+          <button id="close-avatar-btn" class="absolute top-2 right-2 z-50 bg-white/80 hover:bg-white p-1.5 rounded-full text-gray-600 hover:text-red-500 transition-colors shadow-sm opacity-0 group-hover:opacity-100">
+              <i class="fas fa-times"></i>
+          </button>
+          
+          <!-- Canvas Container -->
+          <div class="w-full h-full bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 overflow-hidden ring-1 ring-white/30">
+              <canvas id="avatar-canvas" class="w-full h-full outline-none cursor-pointer" title="Click to change mood"></canvas>
+          </div>
+          
+          <!-- Simple Hint -->
+          <div class="absolute -bottom-8 left-0 right-0 text-center transition-opacity duration-300 opacity-0 group-hover:opacity-100">
+             <span class="text-xs text-gray-500 font-medium bg-white/80 px-2 py-1 rounded-full shadow-sm">Click avatar to change mood</span>
+          </div>
+      </div>
+  </div>
+
   <!-- External JavaScript -->
+  <script src="{% static 'js/avatar.js' %}"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
@@ -1297,6 +1318,62 @@
   let scrollObserver = null;
   let pendingImage = null;
   let languageSelectorVisible = false;
+  
+  // Avatar Instance
+  window.avatarInstance = null;
+  const avatarWidget = document.getElementById('avatar-widget');
+
+  function getAgentForCurrentChat() {
+    const conv = conversations.find(c => c.id === currentChatId);
+    return conv && conv.metadata ? conv.metadata.agent : null;
+  }
+  // --- AVATAR MANAGEMENT ---
+  function initAvatar() {
+      if (window.avatarInstance) return;
+      
+      try {
+          window.avatarInstance = new AvatarComponent('avatar-canvas', {
+              defaultTheme: 'welcome',
+              backgroundColor: 0xffffff,
+              naturalBlinkProbability: 0.25 // NEW: 25% chance to blink
+          });
+          
+          window.avatarInstance.renderer.setClearColor(0x000000, 0);
+          console.log("✅ Avatar Initialized with natural blinking");
+      } catch (e) {
+          console.error("Failed to init avatar:", e);
+      }
+      
+      document.getElementById('close-avatar-btn')?.addEventListener('click', () => {
+          toggleAvatar(false);
+      });
+  }
+
+  function toggleAvatar(show) {
+      if (!avatarWidget) return;
+      
+      if (show) {
+          // Make visible first so canvas has non-zero size
+          avatarWidget.classList.remove('hidden');
+          
+          // Initialize after visibility to read correct dimensions
+          setTimeout(() => {
+              if (!window.avatarInstance) initAvatar();
+              
+              // Ensure renderer resizes to actual canvas size
+              if (window.avatarInstance && typeof window.avatarInstance._onResize === 'function') {
+                  window.avatarInstance._onResize();
+              }
+              
+              avatarWidget.classList.remove('translate-y-10', 'opacity-0');
+          }, 50);
+      } else {
+          avatarWidget.classList.add('translate-y-10', 'opacity-0');
+          setTimeout(() => {
+              avatarWidget.classList.add('hidden');
+          }, 500);
+      }
+  }
 
   // --- CSRF TOKEN ---
   function getCSRFToken() {
@@ -1903,16 +1980,16 @@
     if (!chatMessagesEl) return;
     
     chatMessagesEl.innerHTML = `
-      <div class="flex items-center justify-center py-12">
-        <div class="flex flex-col items-center">
-          <div class="flex space-x-2 mb-2">
-            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse"></div>
-            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
-            <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
-          </div>
-          <span class="text-xs text-gray-500">Loading messages...</span>
+        <div class="flex items-center justify-center py-12">
+            <div class="flex flex-col items-center">
+                <div class="flex space-x-2 mb-2">
+                    <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse"></div>
+                    <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                    <div class="w-2 h-2 bg-medical-primary rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                </div>
+                <span class="text-xs text-gray-500">Loading messages...</span>
+            </div>
         </div>
-      </div>
     `;
     
     const messages = await fetchMessages(chatId);
@@ -1920,7 +1997,14 @@
     
     const conversation = conversations.find(c => c.id === chatId);
     if (conversation && chatTitleEl) {
-      chatTitleEl.textContent = conversation.title;
+        chatTitleEl.textContent = conversation.title;
+    }
+    
+    // NEW: Apply agent theme when loading chat
+    const agentFromMeta = conversation && conversation.metadata && conversation.metadata.agent;
+    if (agentFromMeta) {
+        console.log(`📂 Loading chat with agent: ${agentFromMeta}`);
+        applyAgentTheme(agentFromMeta);
     }
   }
 
@@ -2105,70 +2189,95 @@
 
   // UPDATED: appendMessage function
   function appendMessage(role, content, metadata = null, index = 0) {
-    if (!chatMessagesEl) return;
-    
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message-container ${role === 'user' ? 'user-message-container' : 'bot-message-container'} message-enter`;
-    messageDiv.style.animationDelay = `${index * 0.05}s`;
-    
-    if (role === 'assistant') {
-      let messageContent = content;
+      if (!chatMessagesEl) return;
       
-      if (metadata && metadata.recommendation) {
-        messageContent = formatRecommendationMessage(content, metadata.recommendation);
-      } else {
-        messageContent = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
-      }
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `message-container ${role === 'user' ? 'user-message-container' : 'bot-message-container'} message-enter`;
+      messageDiv.style.animationDelay = `${index * 0.05}s`;
       
-      messageDiv.innerHTML = `
-        <div class="message-avatar bot-avatar flex-shrink-0">
-          <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
-        </div>
-        <div class="message-bubble bot-bubble">
-          ${messageContent}
-          <div class="flex items-center justify-between mt-2">
-            <div class="text-xs text-gray-400">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-            <div class="flex items-center gap-1">
-              <button class="speak-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Read aloud">
-                <i class="fas fa-volume-up text-xs"></i>
-              </button>
-              <button class="copy-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Copy text">
-                <i class="fas fa-copy text-xs"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    } else {
-      let userMessageHTML = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
-      
-      if (metadata && metadata.image) {
-        const imageData = metadata.image;
-        if (imageData.includes('data:image')) {
-          userMessageHTML += `
-            <div class="mt-3 max-w-xs">
-              <img src="${imageData}" alt="Uploaded wound image" class="rounded-lg w-full border border-gray-300 shadow-sm">
-              <p class="text-xs text-gray-500 mt-1 text-center">Uploaded image for analysis</p>
-            </div>
+      if (role === 'assistant') {
+          let messageContent = content;
+          
+          if (metadata && metadata.recommendation) {
+              messageContent = formatRecommendationMessage(content, metadata.recommendation);
+          } else {
+              messageContent = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
+          }
+          
+          messageDiv.innerHTML = `
+              <div class="message-avatar bot-avatar flex-shrink-0">
+                  <img src="{% static 'img/logo.png' %}" alt="Sahatek" class="h-8 w-8">
+              </div>
+              <div class="message-bubble bot-bubble">
+                  ${messageContent}
+                  <div class="flex items-center justify-between mt-2">
+                      <div class="text-xs text-gray-400">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                      <div class="flex items-center gap-1">
+                          <button class="speak-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Read aloud">
+                              <i class="fas fa-volume-up text-xs"></i>
+                          </button>
+                          <button class="copy-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Copy text">
+                              <i class="fas fa-copy text-xs"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
           `;
-        }
+          
+          // NEW: CRITICAL - Detect agent and apply theme + show avatar
+          const msgAgent = (metadata && metadata.agent) ? metadata.agent : getAgentForCurrentChat();
+          
+          if (msgAgent) {
+              console.log(`💬 Assistant message from agent: ${msgAgent}`);
+              
+              // Store agent reference on message element
+              messageDiv.dataset.agent = msgAgent;
+              
+              // Apply theme (this will auto-show avatar)
+              applyAgentTheme(msgAgent);
+              
+              // NEW: Trigger natural blink (25% probability)
+              if (window.avatarInstance) {
+                  setTimeout(() => {
+                      window.avatarInstance.naturalBlink();
+                  }, 500); // Small delay for natural feel
+              }
+          } else {
+              console.warn('⚠️ No agent detected for assistant message');
+          }
+          
+      } else {
+          // User message rendering (unchanged)
+          let userMessageHTML = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
+          
+          if (metadata && metadata.image) {
+              const imageData = metadata.image;
+              if (imageData.includes('data:image')) {
+                  userMessageHTML += `
+                      <div class="mt-3 max-w-xs">
+                          <img src="${imageData}" alt="Uploaded wound image" class="rounded-lg w-full border border-gray-300 shadow-sm">
+                          <p class="text-xs text-gray-500 mt-1 text-center">Uploaded image for analysis</p>
+                      </div>
+                  `;
+              }
+          }
+          
+          userMessageHTML += `<div class="text-xs text-white/80 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
+          
+          messageDiv.innerHTML = `
+              <div class="message-bubble user-bubble">
+                  ${userMessageHTML}
+              </div>
+              <div class="message-avatar user-avatar-small flex-shrink-0">
+                  <i class="fas fa-user text-sm"></i>
+              </div>
+          `;
       }
       
-      userMessageHTML += `<div class="text-xs text-white/80 mt-2 text-right">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>`;
-      
-      messageDiv.innerHTML = `
-        <div class="message-bubble user-bubble">
-          ${userMessageHTML}
-        </div>
-        <div class="message-avatar user-avatar-small flex-shrink-0">
-          <i class="fas fa-user text-sm"></i>
-        </div>
-      `;
-    }
-    
-    chatMessagesEl.appendChild(messageDiv);
-    attachMessageButtons(messageDiv);
+      chatMessagesEl.appendChild(messageDiv);
+      attachMessageButtons(messageDiv);
   }
+
   
   function attachMessageButtons(messageDiv) {
     const speakBtn = messageDiv.querySelector('.speak-btn');
@@ -2176,7 +2285,10 @@
       speakBtn.addEventListener('click', () => {
         const text = messageDiv.querySelector('.text-sm')?.textContent;
         if (text) {
-          speakText(text);
+          const agent = messageDiv.dataset.agent || getAgentForCurrentChat();
+          if (agent) applyAgentTheme(agent);
+          if (avatarWidget && avatarWidget.classList.contains('hidden')) toggleAvatar(true);
+          speakText(text, agent);
         }
       });
     }
@@ -2194,29 +2306,54 @@
     }
   }
   
-  function speakText(text) {
+  function speakText(text, agent = null) {
     if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      const langMap = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
-      utterance.lang = langMap[currentLanguage] || 'en-US';
-      
-      const voices = speechSynthesis.getVoices();
-      const preferredVoice = voices.find(voice => 
-        voice.lang === utterance.lang && voice.name.includes('Female')
-      );
-      if (preferredVoice) {
-        utterance.voice = preferredVoice;
-      }
-      
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-      utterance.volume = 1.0;
-      
-      speechSynthesis.speak(utterance);
-      showNotification('Reading message aloud...', 'info');
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Apply agent theme if provided
+        if (agent) {
+            applyAgentTheme(agent);
+        }
+        
+        // Auto-show avatar if hidden
+        if (avatarWidget && avatarWidget.classList.contains('hidden')) {
+            toggleAvatar(true);
+        }
+        
+        // NEW: Avatar animation hooks
+        utterance.onstart = () => {
+            if (window.avatarInstance) {
+                window.avatarInstance.startSpeaking();
+                console.log('🗣️ Avatar started speaking');
+            }
+        };
+        
+        utterance.onend = () => {
+            if (window.avatarInstance) {
+                window.avatarInstance.stopSpeaking();
+                console.log('🤐 Avatar stopped speaking');
+            }
+        };
+        
+        const langMap = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
+        utterance.lang = langMap[currentLanguage] || 'en-US';
+        
+        const voices = speechSynthesis.getVoices();
+        const preferredVoice = voices.find(voice => 
+            voice.lang === utterance.lang && voice.name.includes('Female')
+        );
+        if (preferredVoice) {
+            utterance.voice = preferredVoice;
+        }
+        
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        
+        speechSynthesis.speak(utterance);
+        showNotification('Reading message aloud...', 'info');
     } else {
-      showNotification('Text-to-speech not supported in your browser', 'error');
+        showNotification('Text-to-speech not supported in your browser', 'error');
     }
   }
 
@@ -2322,47 +2459,117 @@
     return messages[agentName] || "Hello! I'm your specialized health assistant. How can I help you today?";
   }
 
+  function applyAgentTheme(agent) {
+    const themeMap = {
+      'mental-health': 'mental_health',
+      'symptoms-checker': 'medical_qa',
+      'general-info': 'welcome',
+      'orientation': 'triage',
+      'rumor-check': 'rumor',
+      'computer-vision': 'medical_qa'
+    };
+    
+    const theme = themeMap[agent] || 'welcome';
+    
+    console.log(`🎯 Applying theme for agent '${agent}': ${theme}`);
+    
+    // Update body CSS class for potential styling (OPTIONNEL mais recommandé)
+    const classMap = {
+      'mental-health': 'agent-theme-mental_health',
+      'symptoms-checker': 'agent-theme-medical_qa',
+      'general-info': 'agent-theme-welcome',
+      'orientation': 'agent-theme-triage',
+      'rumor-check': 'agent-theme-rumor',
+      'computer-vision': 'agent-theme-medical_qa'
+    };
+    
+    const cls = classMap[agent] || 'agent-theme-welcome';
+    document.body.classList.remove(
+      'agent-theme-welcome',
+      'agent-theme-medical_qa',
+      'agent-theme-triage',
+      'agent-theme-mental_health',
+      'agent-theme-rumor',
+      'agent-theme-neutral'
+    );
+    document.body.classList.add(cls);
+    
+    // Apply avatar theme
+    if (window.avatarInstance) {
+      window.avatarInstance.setTheme(theme);
+      
+      // ✅ NOUVEAU : Auto-show avatar if hidden
+      const avatarWidget = document.getElementById('avatar-widget');
+      if (avatarWidget && avatarWidget.classList.contains('hidden')) {
+        console.log('🎭 Auto-showing avatar for agent response');
+        toggleAvatar(true);
+      }
+    } else {
+      console.warn('⚠️ Avatar instance not initialized yet');
+    }
+  }
+
+  function getAgentForCurrentChat() {
+      const conv = conversations.find(c => c.id === currentChatId);
+      const agent = conv && conv.metadata ? conv.metadata.agent : null;
+      console.log(`🔍 Current chat agent:`, agent || 'none');
+      return agent;
+  }
+
   async function startAgentChat(agent, content = null, isSystemTrigger = false) {
     if (isProcessing) return false;
     
     console.log(`🎯 Starting agent chat: ${agent}`);
     
     try {
-      const conv = await createConversation(getAgentTitle(agent), { agent: agent });
-      if (!conv) throw new Error('Failed to create conversation');
-      
-      currentChatId = conv.id;
-      updateUrlWithChatId(currentChatId);
-      await loadAndRenderSidebar();
-      
-      if (window.uiManager) {
-        await window.uiManager.switchToChatInterface(currentChatId);
-      }
-      
-      if (chatMessagesEl) {
-        chatMessagesEl.innerHTML = '';
-        appendMessage('assistant', getAgentWelcomeMessage(agent), null, 0);
+        // Apply theme immediately
+        applyAgentTheme(agent);
+
+        const conv = await createConversation(getAgentTitle(agent), { agent: agent });
+        if (!conv) throw new Error('Failed to create conversation');
         
-        if (content && content.trim() && !isSystemTrigger) {
-          const locationData = window.userLocation || null;
-          const result = await addMessage(currentChatId, content, 'user', locationData, null);
-          
-          if (result && result.bot_message) {
-            setTimeout(() => {
-              appendMessage('assistant', result.bot_message.content, result.bot_message.metadata);
-            }, 500);
-          }
+        currentChatId = conv.id;
+        updateUrlWithChatId(currentChatId);
+        await loadAndRenderSidebar();
+        
+        if (window.uiManager) {
+            await window.uiManager.switchToChatInterface(currentChatId);
         }
         
-        scrollToBottom();
-      }
-      
-      showNotification(`${getAgentTitle(agent)} chat started`, 'success');
-      return true;
+        if (chatMessagesEl) {
+            chatMessagesEl.innerHTML = '';
+            const welcomeMsgContent = getAgentWelcomeMessage(agent);
+            
+            // Append welcome message with agent metadata
+            appendMessage('assistant', welcomeMsgContent, { agent: agent }, 0);
+            
+            // NEW: Auto-speak welcome if avatar is shown
+            if (window.avatarInstance && !avatarWidget.classList.contains('hidden')) {
+                setTimeout(() => {
+                    speakText(welcomeMsgContent, agent);
+                }, 800);
+            }
+            
+            if (content && content.trim() && !isSystemTrigger) {
+                const locationData = window.userLocation || null;
+                const result = await addMessage(currentChatId, content, 'user', locationData, null);
+                
+                if (result && result.bot_message) {
+                    setTimeout(() => {
+                        appendMessage('assistant', result.bot_message.content, result.bot_message.metadata);
+                    }, 500);
+                }
+            }
+            
+            scrollToBottom();
+        }
+        
+        showNotification(`${getAgentTitle(agent)} chat started`, 'success');
+        return true;
     } catch (error) {
-      console.error('Error starting agent chat:', error);
-      showNotification(`Failed to start ${getAgentTitle(agent)} chat`, 'error');
-      return false;
+        console.error('Error starting agent chat:', error);
+        showNotification(`Failed to start ${getAgentTitle(agent)} chat`, 'error');
+        return false;
     }
   }
 
@@ -2534,18 +2741,22 @@
     }
     
     // Talk with Avatar buttons
-    const talkAvatarBtn = document.getElementById('talk-avatar-btn');
-    const chatTalkAvatarBtn = document.getElementById('chat-talk-avatar-btn');
+    // Talk with Avatar buttons (UPDATED)
+    const talkAvatarBtns = [
+        document.getElementById('talk-avatar-btn'), 
+        document.getElementById('chat-talk-avatar-btn')
+    ];
     
-    function handleTalkAvatar() {
-      const avatarModal = document.getElementById('avatarModal');
-      if (avatarModal) {
-        avatarModal.style.display = 'flex';
-      }
-    }
-    
-    if (talkAvatarBtn) talkAvatarBtn.addEventListener('click', handleTalkAvatar);
-    if (chatTalkAvatarBtn) chatTalkAvatarBtn.addEventListener('click', handleTalkAvatar);
+    talkAvatarBtns.forEach(btn => {
+        if(btn) {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Toggle visibility
+                const isHidden = avatarWidget.classList.contains('hidden');
+                toggleAvatar(isHidden);
+            });
+        }
+    });
     
     // Avatar modal handlers
     const closeAvatarModal = document.getElementById('closeAvatarModal');
@@ -2795,9 +3006,7 @@
 
   // Window resize handler
   window.addEventListener('resize', () => {
-    if (sidebarOpen) {
-      closeSidebar();
-    }
+    if (window.uiManager) window.uiManager.handleResize();
   });
 
   // Initialize

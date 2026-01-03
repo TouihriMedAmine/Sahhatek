@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar Chat 3D</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        height: 90vh;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        overflow: hidden;
+      }
+
+      /* Avatar Section */
+      .avatar-section {
+        width: 400px;
+        background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+        border-right: 2px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .avatar-container {
+        width: 100%;
+        height: 400px;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #avatar-canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      .avatar-info {
+        text-align: center;
+        padding: 15px;
+        background: white;
+        border-radius: 10px;
+        width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      .avatar-info h2 {
+        color: #495057;
+        margin-bottom: 10px;
+        font-size: 20px;
+      }
+
+      .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #28a745;
+        margin-right: 8px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .avatar-controls {
+        margin-top: 15px;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .avatar-controls button {
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        background: #667eea;
+        color: white;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s;
+      }
+
+      .avatar-controls button:hover {
+        background: #5568d3;
+        transform: translateY(-2px);
+      }
+
+      /* Chat Section */
+      .chat-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: white;
+      }
+
+      .chat-header {
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-header h1 {
+        font-size: 24px;
+        margin-bottom: 5px;
+      }
+
+      .chat-header p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .messages-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f8f9fa;
+      }
+
+      .message {
+        margin-bottom: 15px;
+        display: flex;
+        animation: slideIn 0.3s ease-out;
+      }
+
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.user {
+        justify-content: flex-end;
+      }
+
+      .message-content {
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 15px;
+        word-wrap: break-word;
+      }
+
+      .message.bot .message-content {
+        background: white;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        border-bottom-left-radius: 5px;
+      }
+
+      .message.user .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-bottom-right-radius: 5px;
+      }
+
+      .message-time {
+        font-size: 11px;
+        opacity: 0.6;
+        margin-top: 5px;
+      }
+
+      .input-container {
+        padding: 20px;
+        background: white;
+        border-top: 1px solid #e0e0e0;
+        display: flex;
+        gap: 10px;
+      }
+
+      #message-input {
+        flex: 1;
+        padding: 12px 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        font-size: 14px;
+        outline: none;
+        transition: border-color 0.3s;
+      }
+
+      #message-input:focus {
+        border-color: #667eea;
+      }
+
+      #send-button {
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.3s;
+      }
+
+      #send-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      #send-button:active {
+        transform: translateY(0);
+      }
+
+      /* Scrollbar styling */
+      .messages-container::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .messages-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .messages-container::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 4px;
+      }
+
+      .messages-container::-webkit-scrollbar-thumb:hover {
+        background: #5568d3;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          flex-direction: column;
+          width: 100%;
+          height: 100vh;
+          border-radius: 0;
+        }
+
+        .avatar-section {
+          width: 100%;
+          height: 300px;
+          border-right: none;
+          border-bottom: 2px solid #dee2e6;
+        }
+
+        .avatar-container {
+          height: 200px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Avatar Section -->
+      <div class="avatar-section">
+        <div class="avatar-container">
+          <canvas id="avatar-canvas"></canvas>
+        </div>
+
+        <div class="avatar-info">
+          <h2>
+            <span class="status-indicator"></span>
+            Avatar Assistant
+          </h2>
+          <p style="color: #6c757d; font-size: 14px">
+            Prêt à discuter avec vous!
+          </p>
+
+          <div class="avatar-controls" style="flex-direction: column; align-items: center; gap: 5px;">
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                <button onclick="avatar.blink()">👁️ Cligner</button>
+                <button onclick="toggleSpeakingState()">🗣️ Parler</button>
+            </div>
+            
+            <div style="width: 100%; border-top: 1px solid #dee2e6; margin: 5px 0;"></div>
+
+            <!-- THEME SELECTION -->
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                <small style="width: 100%; text-align: center; color: #6c757d;">Thèmes</small>
+                <button onclick="avatar.setTheme('welcome')" style="background-color: #3498db;">🏥 Accueil</button>
+                <button onclick="avatar.setTheme('medical_qa')" style="background-color: #00897b;">🧪 Medical</button>
+                <button onclick="avatar.setTheme('triage')" style="background-color: #e53935;">🚑 Urgence</button>
+                <button onclick="avatar.setTheme('mental_health')" style="background-color: #8e24aa;">🧠 Mental</button>
+                <button onclick="avatar.setTheme('rumor')" style="background-color: #5e35b1;">🔍 Rumeur</button>
+                <button onclick="avatar.setTheme('neutral')" style="background-color: #7f8c8d;">😐 Neutre</button>
+            </div>
+            
+            <div style="width: 100%; border-top: 1px solid #dee2e6; margin: 5px 0;"></div>
+            
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                <small style="width: 100%; text-align: center; color: #6c757d;">Animations</small>
+                <button onclick="avatar.winkLeft()">😉 Oeil G</button>
+                <button onclick="avatar.winkRight()">😉 Oeil D</button>
+            </div>
+
+            <div style="width: 100%; border-top: 1px solid #dee2e6; margin: 5px 0;"></div>
+
+            <div style="display: flex; gap: 5px; flex-wrap: wrap; justify-content: center;">
+                <small style="width: 100%; text-align: center; color: #6c757d;"> Humeur </small>
+                <button onclick="avatar.setMood('happy')">😄 Joie</button>
+                <button onclick="avatar.setMood('sad')">😢 Triste</button>
+                <button onclick="avatar.setMood('serious')">😠 Sérieux</button>
+                <button onclick="avatar.setMood('surprised')">😲 Surpris</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Section -->
+      <div class="chat-section">
+        <div class="chat-header">
+          <h1>💬 Chat avec Avatar</h1>
+          <p>Discutez avec votre assistant virtuel</p>
+        </div>
+
+        <div class="messages-container" id="messages"></div>
+
+        <div class="input-container">
+          <input
+            type="text"
+            id="message-input"
+            placeholder="Tapez votre message..."
+            onkeypress="handleKeyPress(event)"
+          />
+          <button id="send-button" onclick="sendMessage()">Envoyer</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three.js Library (Updated for CapsuleGeometry support) -->
+
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js" defer></script>
+
+    <!-- Avatar 3D Script -->
+    <!-- Avatar 3D Script (Updated) -->
+    <script src="avatar.js"></script>
+    <script>
+        // Initialize Avatar
+        let avatar;
+        window.addEventListener('DOMContentLoaded', () => {
+            avatar = new AvatarComponent('avatar-canvas', {
+                defaultTheme: 'welcome'
+            });
+
+            // Helpers for UI
+            window.toggleSpeakingState = () => {
+                if (avatar.isSpeaking) avatar.stopSpeaking();
+                else avatar.startSpeaking();
+            };
+
+            // Theme cycling removed in favor of direct buttons
+        });
+
+        window.setAvatarAgent = (agent) => {
+            const themeMap = {
+                'mental-health': 'mental_health',
+                'symptoms-checker': 'medical_qa',
+                'general-info': 'welcome',
+                'orientation': 'triage',
+                'rumor-check': 'rumor',
+                'computer-vision': 'medical_qa'
+            };
+            const theme = themeMap[agent] || 'neutral';
+            if (avatar) avatar.setTheme(theme);
+        };
+    </script>
+
+    <!-- Chat Logic -->
+    <script>
+      // Chat functionality
+      const messagesContainer = document.getElementById("messages");
+      const messageInput = document.getElementById("message-input");
+
+      // Predefined bot responses
+      const botResponses = [
+        "Bonjour! Comment puis-je vous aider aujourd'hui?",
+        "C'est une excellente question!",
+        "Je comprends ce que vous voulez dire.",
+        "Intéressant! Pouvez-vous m'en dire plus?",
+        "Je suis là pour vous aider!",
+        "C'est noté! Autre chose?",
+        "Merci de partager ça avec moi.",
+        "Je vais réfléchir à ça...",
+      ];
+
+      let responseIndex = 0;
+
+      function addMessage(text, isUser = false) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${isUser ? "user" : "bot"}`;
+
+        const now = new Date();
+        const time =
+          now.getHours().toString().padStart(2, "0") +
+          ":" +
+          now.getMinutes().toString().padStart(2, "0");
+
+        messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${text}
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function sendMessage() {
+        const text = messageInput.value.trim();
+        if (!text) return;
+
+        // Add user message
+        addMessage(text, true);
+        messageInput.value = "";
+
+        // Avatar starts speaking
+        avatar.startSpeaking();
+
+        // Simulate bot response with delay
+        setTimeout(() => {
+          const response = botResponses[responseIndex % botResponses.length];
+          responseIndex++;
+
+          // Simulate typing effect
+          let currentText = "";
+          let charIndex = 0;
+
+          const typingInterval = setInterval(() => {
+            if (charIndex < response.length) {
+              currentText += response[charIndex];
+              charIndex++;
+
+              // Update last message
+              const messages =
+                messagesContainer.querySelectorAll(".message.bot");
+              if (messages.length > 0) {
+                const lastMessage = messages[messages.length - 1];
+                lastMessage.querySelector(".message-content").innerHTML =
+                  currentText +
+                  '<div class="message-time">' +
+                  new Date().getHours().toString().padStart(2, "0") +
+                  ":" +
+                  new Date().getMinutes().toString().padStart(2, "0") +
+                  "</div>";
+              }
+            } else {
+              clearInterval(typingInterval);
+              avatar.stopSpeaking();
+            }
+          }, 50);
+
+          addMessage("", false);
+        }, 800);
+      }
+
+      function handleKeyPress(event) {
+        if (event.key === "Enter") {
+          sendMessage();
+        }
+      }
+
+      // Welcome message
+      setTimeout(() => {
+        addMessage(
+          "Bonjour! Je suis votre assistant virtuel. Comment puis-je vous aider?",
+          false
+        );
+      }, 500);
+    </script>
+  </body>
+</html>

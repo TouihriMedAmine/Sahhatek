@@ -581,6 +581,7 @@ def add_message(request, conversation_id):
                 "id": bot_message.id,
                 "role": bot_message.role,
                 "content": bot_message.content,
+                "agent": current_agent,
                 "metadata": metadata
             }
         })
@@ -744,6 +745,7 @@ def direct_agent_message(request):
                     "id": bot_message.id,
                     "role": bot_message.role,
                     "content": bot_content,
+                    "agent": agent,  # ← CRITICAL: Add agent at top level
                     "metadata": metadata
                 }
             })
@@ -880,6 +882,7 @@ def direct_agent_message(request):
                 "id": bot_message.id,
                 "role": bot_message.role,
                 "content": bot_content,
+                "agent": agent,  # ← CRITICAL: Add agent at top level
                 "metadata": metadata
             }
         })
@@ -1194,6 +1197,7 @@ def process_audio_input(request, conversation_id):
                 "id": bot_message.id,
                 "role": bot_message.role,
                 "content": bot_message.content,
+                "agent": current_agent,  # ← CRITICAL: Add agent at top level
                 "metadata": metadata
             }
         })
