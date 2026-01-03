@@ -514,6 +514,9 @@ graph.add_conditional_edges(
 
 graph.add_edge("triage", "orientation")
 
+# Add edge from triage_workflow to END (fixes dead-end error)
+graph.add_edge("triage_workflow", END)
+
 # Orientation can end or route elsewhere
 def orientation_router(state: AgentState):
     """Route after orientation"""
