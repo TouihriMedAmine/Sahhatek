@@ -1014,7 +1014,7 @@
                       rows="3"
                       placeholder="Describe your symptoms or ask a health question..."
                       class="medical-input w-full bg-white shadow-lg text-gray-900 placeholder-gray-500 text-lg"></textarea>
-            <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+            <div class="absolute right-3 bottom-3 flex items-center space-x-2 z-10">
               <button id="voice-btn-welcome" class="p-3 text-gray-500 hover:text-medical-primary rounded-full hover:bg-gray-100 transition-colors relative group">
                 <div class="wave-container hidden">
                   <div class="wave-bar"></div>
@@ -1028,6 +1028,12 @@
                 <i class="fas fa-microphone text-lg"></i>
                 <span class="absolute -top-2 -right-2 w-5 h-5 bg-medical-primary text-white text-xs rounded-full flex items-center justify-center hidden">
                   <i class="fas fa-volume-up"></i>
+                </span>
+              </button>
+              <button id="translate-btn-welcome" class="p-3 text-gray-500 hover:text-medical-primary rounded-full hover:bg-gray-100 transition-colors relative group" title="Translate to Arabic">
+                <i id="translate-icon-welcome" class="fas fa-language text-lg"></i>
+                <span id="translate-loading-welcome" class="hidden">
+                  <i class="fas fa-spinner fa-spin text-lg"></i>
                 </span>
               </button>
               <button id="send-btn" class="top-button top-button-primary">
@@ -1225,7 +1231,7 @@
             <!-- Hidden file input for wound analyzer -->
             <input type="file" id="fileInput" class="hidden" accept="image/*">
             
-            <div class="absolute right-3 bottom-3 flex items-center space-x-2">
+            <div class="absolute right-3 bottom-3 flex items-center space-x-2 z-10">
               <!-- Upload button for wound analyzer -->
               <button id="upload-btn-chat" class="p-3 text-gray-500 hover:text-medical-primary rounded-full hover:bg-gray-100 transition-colors relative group" title="Upload image">
                 <i class="fas fa-paperclip text-lg"></i>
@@ -1244,6 +1250,12 @@
                 <i class="fas fa-microphone text-lg"></i>
                 <span class="absolute -top-2 -right-2 w-5 h-5 bg-medical-primary text-white text-xs rounded-full flex items-center justify-center hidden">
                   <i class="fas fa-volume-up"></i>
+                </span>
+              </button>
+              <button id="translate-btn-chat" class="p-3 text-gray-500 hover:text-medical-primary rounded-full hover:bg-gray-100 transition-colors relative group" title="Translate to Arabic">
+                <i id="translate-icon-chat" class="fas fa-language text-lg"></i>
+                <span id="translate-loading-chat" class="hidden">
+                  <i class="fas fa-spinner fa-spin text-lg"></i>
                 </span>
               </button>
               <button id="sendChatBtn" class="top-button top-button-primary px-4">
@@ -1363,6 +1375,13 @@
               // Ensure renderer resizes to actual canvas size
               if (window.avatarInstance && typeof window.avatarInstance._onResize === 'function') {
                   window.avatarInstance._onResize();
+              }
+              
+              // Apply any pending theme that was queued before initialization
+              if (window.pendingAvatarTheme && window.avatarInstance) {
+                  console.log(`🎨 Applying pending theme: ${window.pendingAvatarTheme}`);
+                  window.avatarInstance.setTheme(window.pendingAvatarTheme);
+                  window.pendingAvatarTheme = null;
               }
               
               avatarWidget.classList.remove('translate-y-10', 'opacity-0');
@@ -2058,7 +2077,7 @@
         html += `
           <div class="place-item cursor-pointer transition-all duration-200" 
                data-place-index="${index}" 
-               onclick="window.showRouteFromList(${place.latitude}, ${place.longitude}, '${safeName}')"
+               onclick="window.showRouteFromList(${place.latitude}, ${place.longitude}, '${safeName}', this)"
                title="Click to see route on map">
             <div class="flex justify-between items-start">
               <div class="flex-1">
@@ -2083,7 +2102,11 @@
       });
       html += `</div>`;
       
-      if (!recommendation.latitude || !recommendation.longitude) {
+      // Only show location button if location is not available (neither in recommendation nor user location)
+      const hasLocationForMap = (recommendation.latitude && recommendation.longitude) || 
+                                 (window.userLocation && window.userLocation.latitude && window.userLocation.longitude);
+      
+      if (!hasLocationForMap) {
         html += `
           <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-3">
             <p class="text-sm text-blue-700 mb-2">📍 Share your location to see the route on the map</p>
@@ -2094,37 +2117,63 @@
         `;
       }
       
-      if (recommendation.latitude && recommendation.longitude) {
+      // Always try to show map if we have location (either from recommendation or user location)
+      const hasLocation = (recommendation.latitude && recommendation.longitude) || 
+                          (window.userLocation && window.userLocation.latitude && window.userLocation.longitude);
+      
+      if (hasLocation) {
         const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         html += `<div id="${mapId}" class="healthcare-map"></div>`;
         
         setTimeout(() => {
           initializeRecommendationMap(mapId, recommendation);
         }, 100);
+      } else if (recommendation.places && recommendation.places.length > 0) {
+        // If we have places but no location, show location request button
+        // Only show if location is not already available
+        const hasLocationForMap = (recommendation.latitude && recommendation.longitude) || 
+                                   (window.userLocation && window.userLocation.latitude && window.userLocation.longitude);
+        
+        if (!hasLocationForMap) {
+          html += `
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg mt-3">
+              <p class="text-sm text-blue-700 mb-2">📍 Share your location to see facilities on the map</p>
+              <button onclick="window.requestLocation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                Share Location
+              </button>
+            </div>
+          `;
+        }
       }
       
       html += `</div>`;
-    } else if (!recommendation.latitude || !recommendation.longitude) {
-      html += `
-        <div class="recommendation-card mt-4">
-          <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p class="text-sm text-blue-700 mb-2">📍 Share your location to see nearby healthcare facilities on the map</p>
-            <button onclick="window.requestLocation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-              Share Location
-            </button>
-          </div>
-        </div>
-      `;
-    } else if (recommendation.latitude && recommendation.longitude) {
-      html += `<div class="recommendation-card mt-4">`;
-      html += `<p class="text-sm text-gray-600 mb-3">No nearby facilities found in your area. Try expanding your search radius.</p>`;
-      const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      html += `<div id="${mapId}" class="healthcare-map"></div>`;
-      html += `</div>`;
+    } else {
+      // Check if location is available (either from recommendation or user location)
+      const hasLocationForMap = (recommendation.latitude && recommendation.longitude) || 
+                                 (window.userLocation && window.userLocation.latitude && window.userLocation.longitude);
       
-      setTimeout(() => {
-        initializeRecommendationMap(mapId, recommendation);
-      }, 100);
+      if (!hasLocationForMap) {
+        html += `
+          <div class="recommendation-card mt-4">
+            <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p class="text-sm text-blue-700 mb-2">📍 Share your location to see nearby healthcare facilities on the map</p>
+              <button onclick="window.requestLocation()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+                Share Location
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (recommendation.latitude && recommendation.longitude) {
+        html += `<div class="recommendation-card mt-4">`;
+        html += `<p class="text-sm text-gray-600 mb-3">No nearby facilities found in your area. Try expanding your search radius.</p>`;
+        const mapId = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        html += `<div id="${mapId}" class="healthcare-map"></div>`;
+        html += `</div>`;
+        
+        setTimeout(() => {
+          initializeRecommendationMap(mapId, recommendation);
+        }, 100);
+      }
     }
     
     return html;
@@ -2196,12 +2245,25 @@
       messageDiv.style.animationDelay = `${index * 0.05}s`;
       
       if (role === 'assistant') {
+          // Generate unique ID for this message
+          const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+          messageDiv.dataset.messageId = messageId;
+          messageDiv.dataset.originalContent = content; // Store original English content
+          messageDiv.dataset.isTranslated = 'false';
+          
           let messageContent = content;
           
           if (metadata && metadata.recommendation) {
               messageContent = formatRecommendationMessage(content, metadata.recommendation);
+              messageDiv.dataset.hasRecommendation = 'true';
+              messageDiv.dataset.metadata = JSON.stringify(metadata);
           } else {
-              messageContent = `<div class="text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
+              messageContent = `<div class="message-content text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(content)}</div>`;
+          }
+          
+          // CRITICAL: Always store metadata on message element for agent detection
+          if (metadata) {
+              messageDiv.dataset.metadata = JSON.stringify(metadata);
           }
           
           messageDiv.innerHTML = `
@@ -2216,6 +2278,11 @@
                           <button class="speak-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Read aloud">
                               <i class="fas fa-volume-up text-xs"></i>
                           </button>
+                          <button class="translate-response-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" 
+                                  data-message-id="${messageId}"
+                                  title="Translate to Arabic">
+                              <i class="fas fa-language text-xs"></i>
+                          </button>
                           <button class="copy-btn p-1.5 text-gray-400 hover:text-medical-primary rounded-lg transition-colors" title="Copy text">
                               <i class="fas fa-copy text-xs"></i>
                           </button>
@@ -2225,15 +2292,74 @@
           `;
           
           // NEW: CRITICAL - Detect agent and apply theme + show avatar
-          const msgAgent = (metadata && metadata.agent) ? metadata.agent : getAgentForCurrentChat();
+          // Try multiple sources for agent detection
+          let msgAgent = null;
+          
+          // Agent name mapping: backend agent names → frontend agent names
+          const agentNameMap = {
+              "medical_qa": "general-info",
+              "mental_health": "mental-health",
+              "triage": "symptoms-checker",
+              "rumor": "rumor-check",
+              "wound_analyzer": "wound-analyzer",
+              "orientation": "orientation",
+              "diagnosis": "symptoms-checker",  // Diagnosis is part of triage flow
+              "extraction": "symptoms-checker",  // Extraction is part of triage flow
+              "router": "general-info"  // Router defaults to general info
+          };
+          
+          if (metadata) {
+              console.log('🔍 Checking metadata for agent:', Object.keys(metadata));
+              
+              // 1. First try metadata.agent (if set directly)
+              if (metadata.agent) {
+                  msgAgent = agentNameMap[metadata.agent] || metadata.agent;
+                  console.log(`✅ Found metadata.agent: ${metadata.agent} → ${msgAgent}`);
+              }
+              
+              // 2. Try metadata.agent_used (PRIMARY FIELD from backend - this is what's actually sent)
+              if (!msgAgent && metadata.agent_used) {
+                  const backendAgent = metadata.agent_used;
+                  msgAgent = agentNameMap[backendAgent] || backendAgent;
+                  console.log(`✅ Found metadata.agent_used: ${backendAgent} → ${msgAgent}`);
+              }
+              
+              // 3. Try metadata.understanding_agent.routing_to
+              if (!msgAgent && metadata.understanding_agent) {
+                  const routingTo = metadata.understanding_agent.routing_to;
+                  if (routingTo) {
+                      msgAgent = agentNameMap[routingTo] || routingTo;
+                      console.log(`✅ Found routing_to: ${routingTo} → ${msgAgent}`);
+                  }
+              }
+              
+              // 4. Try routing_info.requested_agent
+              if (!msgAgent && metadata.routing_info) {
+                  const routingInfo = metadata.routing_info;
+                  if (routingInfo.requested_agent) {
+                      msgAgent = agentNameMap[routingInfo.requested_agent] || routingInfo.requested_agent;
+                      console.log(`✅ Found requested_agent: ${routingInfo.requested_agent} → ${msgAgent}`);
+                  }
+              }
+          }
+          
+          // Fallback to conversation metadata (but this should be last resort)
+          if (!msgAgent) {
+              msgAgent = getAgentForCurrentChat();
+              if (msgAgent) {
+                  console.log(`✅ Using conversation agent: ${msgAgent}`);
+              } else {
+                  console.warn('⚠️ No agent found in message metadata or conversation');
+              }
+          }
           
           if (msgAgent) {
               console.log(`💬 Assistant message from agent: ${msgAgent}`);
               
-              // Store agent reference on message element
+              // Store agent reference on message element (CRITICAL for TTS)
               messageDiv.dataset.agent = msgAgent;
               
-              // Apply theme (this will auto-show avatar)
+              // Apply theme IMMEDIATELY (this will auto-show avatar and change appearance)
               applyAgentTheme(msgAgent);
               
               // NEW: Trigger natural blink (25% probability)
@@ -2243,7 +2369,11 @@
                   }, 500); // Small delay for natural feel
               }
           } else {
-              console.warn('⚠️ No agent detected for assistant message');
+              // Only log warning if it's a new message (not when loading old messages)
+              // Old messages might not have agent metadata, which is fine
+              if (index === 0) {  // Only warn for most recent message
+                  console.log('ℹ️ No agent metadata found for message (this is normal for older messages)');
+              }
           }
           
       } else {
@@ -2282,13 +2412,204 @@
   function attachMessageButtons(messageDiv) {
     const speakBtn = messageDiv.querySelector('.speak-btn');
     if (speakBtn) {
-      speakBtn.addEventListener('click', () => {
-        const text = messageDiv.querySelector('.text-sm')?.textContent;
-        if (text) {
-          const agent = messageDiv.dataset.agent || getAgentForCurrentChat();
-          if (agent) applyAgentTheme(agent);
+      speakBtn.addEventListener('click', async () => {
+        // Get current text (translated or original) - USE THE CURRENTLY DISPLAYED TEXT
+        const isTranslated = messageDiv.dataset.isTranslated === 'true';
+        
+        // Extract text from the message bubble to get the CURRENTLY DISPLAYED message
+        // IMPORTANT: This will be the translated Arabic text if the message is translated
+        let textToSpeak = '';
+        const messageBubble = messageDiv.querySelector('.message-bubble');
+        if (messageBubble) {
+          // Get the content div directly from the original (not cloned) to get current state
+          const contentDiv = messageBubble.querySelector('.message-content') || messageBubble.querySelector('.text-sm');
+          if (contentDiv) {
+            // Get the currently displayed text (will be Arabic if translated)
+            textToSpeak = contentDiv.textContent || contentDiv.innerText || '';
+            console.log(`📝 Extracted from contentDiv: ${textToSpeak.substring(0, 50)}...`);
+          }
+          
+          // If we still don't have text, try cloning and cleaning
+          if (!textToSpeak || textToSpeak.trim().length < 10) {
+            const bubbleClone = messageBubble.cloneNode(true);
+            
+            // Remove UI elements that shouldn't be read
+            bubbleClone.querySelectorAll('button').forEach(btn => btn.remove());
+            bubbleClone.querySelectorAll('.text-xs.text-gray-400').forEach(ts => ts.remove()); // Timestamp
+            bubbleClone.querySelectorAll('.recommendation-card').forEach(card => card.remove()); // Recommendation cards
+            bubbleClone.querySelectorAll('.places-list').forEach(list => list.remove()); // Places list
+            bubbleClone.querySelectorAll('iframe').forEach(iframe => iframe.remove()); // Maps
+            
+            // Get the main content area
+            const clonedContentDiv = bubbleClone.querySelector('.message-content') || bubbleClone.querySelector('.text-sm');
+            if (clonedContentDiv) {
+              textToSpeak = clonedContentDiv.textContent || clonedContentDiv.innerText || '';
+            } else {
+              // Fallback: get all text from the bubble
+              textToSpeak = bubbleClone.textContent || bubbleClone.innerText || '';
+            }
+          }
+        }
+        
+        // Only use originalContent as last resort if we really can't extract anything
+        // BUT: If message is translated, we should have Arabic text in the DOM, so this shouldn't happen
+        // IMPORTANT: If message is translated, NEVER use originalContent - we must use the displayed Arabic text
+        if (!textToSpeak || textToSpeak.trim().length < 5) {
+          if (!isTranslated) {
+            // Only use originalContent if message is NOT translated
+            const originalContent = messageDiv.dataset.originalContent;
+            if (originalContent) {
+              console.log('⚠️ Could not extract displayed text, using originalContent as fallback');
+              textToSpeak = originalContent;
+            }
+          } else {
+            // If translated but we can't extract text, something is wrong - try one more time
+            console.error('⚠️ Message is translated but could not extract Arabic text!');
+            // Try to get text from the entire bubble as last resort
+            if (messageBubble) {
+              const allText = messageBubble.textContent || messageBubble.innerText || '';
+              // Remove button text, timestamps, etc. by getting only the main content
+              const mainText = allText.split('\n').filter(line => 
+                line.trim().length > 0 && 
+                !line.includes(':') && // Exclude timestamps
+                !line.match(/^\d{1,2}:\d{2}/) // Exclude time patterns
+              ).join(' ').trim();
+              if (mainText && mainText.length > 10) {
+                textToSpeak = mainText;
+                console.log('✅ Extracted text from bubble fallback:', textToSpeak.substring(0, 50));
+              }
+            }
+          }
+        }
+        
+        // Log what we're about to speak
+        const detectedLang = detectLanguage(textToSpeak);
+        console.log(`🔊 Speaking ${isTranslated ? 'TRANSLATED (Arabic)' : 'ORIGINAL (English)'} text`);
+        console.log(`🔊 Detected language: ${detectedLang}`);
+        console.log(`🔊 Text preview: ${textToSpeak.substring(0, 100)}...`);
+        
+        if (textToSpeak && textToSpeak.trim()) {
+          // CRITICAL: Get agent from message element (stored when message was rendered)
+          // This ensures we use the correct agent for THIS specific message
+          let agent = messageDiv.dataset.agent;
+          
+          // If not found on message element, try to detect from message metadata
+          if (!agent && messageDiv.dataset.metadata) {
+              try {
+                  const msgMetadata = JSON.parse(messageDiv.dataset.metadata);
+                  if (msgMetadata.agent) {
+                      agent = msgMetadata.agent;
+                  } else if (msgMetadata.current_agent) {
+                      const currentAgentMap = {
+                          "medical_qa": "general-info",
+                          "mental_health": "mental-health",
+                          "triage": "symptoms-checker",
+                          "rumor": "rumor-check",
+                          "wound_analyzer": "wound-analyzer",
+                          "orientation": "orientation"
+                      };
+                      agent = currentAgentMap[msgMetadata.current_agent] || msgMetadata.current_agent;
+                  } else if (msgMetadata.agent_used) {
+                      agent = msgMetadata.agent_used;
+                  }
+              } catch (e) {
+                  console.warn('Could not parse message metadata:', e);
+              }
+          }
+          
+          // Last resort: use conversation agent
+          if (!agent) {
+              agent = getAgentForCurrentChat();
+          }
+          
+          // Apply theme BEFORE speaking (ensures correct avatar is shown)
+          if (agent) {
+              console.log(`🎤 Applying theme for TTS from message: ${agent}`);
+              applyAgentTheme(agent);
+          }
+          
           if (avatarWidget && avatarWidget.classList.contains('hidden')) toggleAvatar(true);
-          speakText(text, agent);
+          await speakText(textToSpeak, agent);
+        } else {
+          showNotification('No text to read', 'warning');
+        }
+      });
+    }
+    
+    // Translate button handler
+    const translateBtn = messageDiv.querySelector('.translate-response-btn');
+    if (translateBtn && !translateBtn.dataset.handlerAttached) {
+      translateBtn.dataset.handlerAttached = 'true';
+      translateBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const messageId = translateBtn.dataset.messageId;
+        const msgDiv = document.querySelector(`[data-message-id="${messageId}"]`);
+        
+        if (!msgDiv) return;
+        
+        const isTranslated = msgDiv.dataset.isTranslated === 'true';
+        const originalContent = msgDiv.dataset.originalContent;
+        
+        // Toggle translation
+        if (isTranslated) {
+          // Show original English
+          const contentDiv = msgDiv.querySelector('.message-content') || msgDiv.querySelector('.text-sm');
+          if (contentDiv && originalContent) {
+            if (msgDiv.dataset.hasRecommendation === 'true') {
+              // If it was a recommendation message, we need to restore the formatted version
+              try {
+                const metadata = JSON.parse(msgDiv.dataset.metadata || '{}');
+                const bubble = msgDiv.querySelector('.message-bubble');
+                if (bubble) {
+                  bubble.innerHTML = formatRecommendationMessage(originalContent, metadata.recommendation) + 
+                    bubble.querySelector('.flex.items-center.justify-between')?.outerHTML || '';
+                }
+              } catch (e) {
+                console.error('Error restoring recommendation:', e);
+                if (contentDiv) {
+                  contentDiv.innerHTML = escapeHtml(originalContent);
+                }
+              }
+            } else {
+              if (contentDiv) {
+                contentDiv.innerHTML = escapeHtml(originalContent);
+              }
+            }
+          }
+          msgDiv.dataset.isTranslated = 'false';
+          translateBtn.title = 'Translate to Arabic';
+          const icon = translateBtn.querySelector('i');
+          if (icon) icon.classList.remove('text-medical-primary');
+        } else {
+          // Translate to Arabic
+          translateBtn.disabled = true;
+          const originalIcon = translateBtn.innerHTML;
+          translateBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-xs"></i>';
+          
+          try {
+            const translated = await translateMessageText(originalContent, 'en', 'ar');
+            const contentDiv = msgDiv.querySelector('.message-content') || msgDiv.querySelector('.text-sm');
+            if (contentDiv) {
+              contentDiv.innerHTML = escapeHtml(translated);
+            } else if (msgDiv.dataset.hasRecommendation === 'true') {
+              // For recommendation messages, replace the entire content
+              const bubble = msgDiv.querySelector('.message-bubble');
+              if (bubble) {
+                const timeAndButtons = bubble.querySelector('.flex.items-center.justify-between');
+                bubble.innerHTML = `<div class="message-content text-sm whitespace-pre-wrap leading-relaxed">${escapeHtml(translated)}</div>` + 
+                  (timeAndButtons ? timeAndButtons.outerHTML : '');
+              }
+            }
+            msgDiv.dataset.isTranslated = 'true';
+            translateBtn.innerHTML = '<i class="fas fa-language text-xs text-medical-primary"></i>';
+            translateBtn.title = 'Show original English';
+          } catch (error) {
+            console.error('Translation error:', error);
+            showNotification('Failed to translate response', 'error');
+            translateBtn.innerHTML = originalIcon;
+          } finally {
+            translateBtn.disabled = false;
+          }
         }
       });
     }
@@ -2296,7 +2617,8 @@
     const copyBtn = messageDiv.querySelector('.copy-btn');
     if (copyBtn) {
       copyBtn.addEventListener('click', () => {
-        const text = messageDiv.querySelector('.text-sm')?.textContent;
+        const contentDiv = messageDiv.querySelector('.message-content') || messageDiv.querySelector('.text-sm');
+        const text = contentDiv?.textContent;
         if (text) {
           navigator.clipboard.writeText(text).then(() => {
             showNotification('Text copied to clipboard', 'success');
@@ -2306,54 +2628,135 @@
     }
   }
   
-  function speakText(text, agent = null) {
-    if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        
-        // Apply agent theme if provided
-        if (agent) {
-            applyAgentTheme(agent);
+  // Translation helper function
+  async function translateMessageText(text, sourceLang, targetLang) {
+    try {
+      const response = await fetch('/chat/api/translate/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          text: text,
+          source_lang: sourceLang,
+          target_lang: targetLang
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.translated_text) {
+        return data.translated_text;
+      }
+      return text; // Return original if translation fails
+    } catch (error) {
+      console.error('Translation error:', error);
+      return text; // Return original on error
+    }
+  }
+  
+  // Language detection function
+  function detectLanguage(text) {
+    // Simple Arabic detection: check for Arabic characters
+    const arabicPattern = /[\u0600-\u06FF]/;
+    return arabicPattern.test(text) ? 'ar' : 'en';
+  }
+  
+  async function speakText(text, agent = null) {
+    if (!text || !text.trim()) {
+      showNotification('No text to read', 'warning');
+      return;
+    }
+    
+    // Apply agent theme if provided
+    if (agent) {
+      applyAgentTheme(agent);
+    }
+    
+    // Auto-show avatar if hidden
+    if (avatarWidget && avatarWidget.classList.contains('hidden')) {
+      toggleAvatar(true);
+    }
+    
+    // Clean up the text
+    let textToSpeak = text.trim()
+      .replace(/\n\s*\n+/g, '\n')  // Multiple newlines to single
+      .replace(/[ \t]+/g, ' ')      // Multiple spaces to single
+      .replace(/\s*\n\s*/g, ' ');   // Single newlines to spaces (for better TTS flow)
+    
+    // Detect language
+    const language = detectLanguage(textToSpeak);
+    
+    console.log(`🔊 Speaking text (${language}): ${textToSpeak.substring(0, 100)}...`);
+    
+    // Show loading notification
+    showNotification('Generating speech...', 'info');
+    
+    try {
+      // Call TTS API with edge-tts
+      const response = await fetch('/chat/api/text-to-speech/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken()
+        },
+        body: JSON.stringify({
+          text: textToSpeak,
+          language: language
+          // Don't specify speaker - backend will choose appropriate default
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.audio) {
+        // Decode base64 audio
+        const audioData = atob(data.audio);
+        const audioArray = new Uint8Array(audioData.length);
+        for (let i = 0; i < audioData.length; i++) {
+          audioArray[i] = audioData.charCodeAt(i);
         }
         
-        // Auto-show avatar if hidden
-        if (avatarWidget && avatarWidget.classList.contains('hidden')) {
-            toggleAvatar(true);
-        }
+        // Create audio blob (Edge TTS returns MP3)
+        const audioBlob = new Blob([audioArray], { type: 'audio/mpeg' });
+        const audioUrl = URL.createObjectURL(audioBlob);
         
-        // NEW: Avatar animation hooks
-        utterance.onstart = () => {
-            if (window.avatarInstance) {
-                window.avatarInstance.startSpeaking();
-                console.log('🗣️ Avatar started speaking');
-            }
+        // Create and play audio
+        const audio = new Audio(audioUrl);
+        
+        // Avatar animation hooks
+        audio.onplay = () => {
+          if (window.avatarInstance) {
+            window.avatarInstance.startSpeaking();
+            console.log('🗣️ Avatar started speaking');
+          }
+          showNotification('Reading message aloud...', 'info');
         };
         
-        utterance.onend = () => {
-            if (window.avatarInstance) {
-                window.avatarInstance.stopSpeaking();
-                console.log('🤐 Avatar stopped speaking');
-            }
+        audio.onended = () => {
+          if (window.avatarInstance) {
+            window.avatarInstance.stopSpeaking();
+            console.log('🤐 Avatar stopped speaking');
+          }
+          // Clean up the object URL
+          URL.revokeObjectURL(audioUrl);
         };
         
-        const langMap = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
-        utterance.lang = langMap[currentLanguage] || 'en-US';
+        audio.onerror = (error) => {
+          console.error('Audio playback error:', error);
+          showNotification('Failed to play audio', 'error');
+          URL.revokeObjectURL(audioUrl);
+        };
         
-        const voices = speechSynthesis.getVoices();
-        const preferredVoice = voices.find(voice => 
-            voice.lang === utterance.lang && voice.name.includes('Female')
-        );
-        if (preferredVoice) {
-            utterance.voice = preferredVoice;
-        }
-        
-        utterance.rate = 1.0;
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
-        
-        speechSynthesis.speak(utterance);
-        showNotification('Reading message aloud...', 'info');
-    } else {
-        showNotification('Text-to-speech not supported in your browser', 'error');
+        // Play audio
+        await audio.play();
+      } else {
+        showNotification(data.message || 'Failed to generate speech', 'error');
+      }
+    } catch (error) {
+      console.error('TTS error:', error);
+      showNotification('Failed to generate speech. Please try again.', 'error');
     }
   }
 
@@ -2466,6 +2869,7 @@
       'general-info': 'welcome',
       'orientation': 'triage',
       'rumor-check': 'rumor',
+      'wound-analyzer': 'wound_analyzer',
       'computer-vision': 'medical_qa'
     };
     
@@ -2480,6 +2884,7 @@
       'general-info': 'agent-theme-welcome',
       'orientation': 'agent-theme-triage',
       'rumor-check': 'agent-theme-rumor',
+      'wound-analyzer': 'agent-theme-wound_analyzer',
       'computer-vision': 'agent-theme-medical_qa'
     };
     
@@ -2490,22 +2895,69 @@
       'agent-theme-triage',
       'agent-theme-mental_health',
       'agent-theme-rumor',
+      'agent-theme-wound_analyzer',
       'agent-theme-neutral'
     );
     document.body.classList.add(cls);
     
-    // Apply avatar theme
-    if (window.avatarInstance) {
-      window.avatarInstance.setTheme(theme);
+    // CRITICAL: Ensure avatar is initialized before applying theme
+    const avatarWidget = document.getElementById('avatar-widget');
+    
+    // Function to apply theme once avatar is ready
+    const applyThemeToAvatar = () => {
+      if (window.avatarInstance) {
+        window.avatarInstance.setTheme(theme);
+        console.log(`✅ Theme applied to avatar: ${theme}`);
+      } else {
+        console.warn('⚠️ Avatar instance still not ready');
+      }
+    };
+    
+    // If avatar is not initialized, initialize it first
+    if (!window.avatarInstance) {
+      console.log('🎭 Avatar not initialized, initializing now...');
       
-      // ✅ NOUVEAU : Auto-show avatar if hidden
-      const avatarWidget = document.getElementById('avatar-widget');
+      // Show avatar widget if hidden
+      if (avatarWidget && avatarWidget.classList.contains('hidden')) {
+        toggleAvatar(true);
+      }
+      
+      // Initialize avatar
+      if (typeof initAvatar === 'function') {
+        initAvatar();
+      }
+      
+      // Wait for avatar to be ready, then apply theme
+      // Check every 100ms for up to 2 seconds
+      let attempts = 0;
+      const maxAttempts = 20;
+      const checkInterval = setInterval(() => {
+        attempts++;
+        if (window.avatarInstance) {
+          clearInterval(checkInterval);
+          applyThemeToAvatar();
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval);
+          console.warn('⚠️ Avatar initialization timeout, theme will be applied when avatar is ready');
+          // Store pending theme to apply later
+          window.pendingAvatarTheme = theme;
+        }
+      }, 100);
+    } else {
+      // Avatar is already initialized, apply theme immediately
+      applyThemeToAvatar();
+      
+      // Auto-show avatar if hidden
       if (avatarWidget && avatarWidget.classList.contains('hidden')) {
         console.log('🎭 Auto-showing avatar for agent response');
         toggleAvatar(true);
       }
-    } else {
-      console.warn('⚠️ Avatar instance not initialized yet');
+    }
+    
+    // If there's a pending theme from a previous attempt, apply it now
+    if (window.pendingAvatarTheme && window.avatarInstance) {
+      window.avatarInstance.setTheme(window.pendingAvatarTheme);
+      window.pendingAvatarTheme = null;
     }
   }
 
@@ -2615,6 +3067,85 @@
     
     if (sendBtn) sendBtn.addEventListener('click', handleSend);
     if (sendChatBtn) sendChatBtn.addEventListener('click', handleSend);
+    
+    // Translate button handlers
+    const translateBtnWelcome = document.getElementById('translate-btn-welcome');
+    const translateIconWelcome = document.getElementById('translate-icon-welcome');
+    const translateLoadingWelcome = document.getElementById('translate-loading-welcome');
+    const translateBtnChat = document.getElementById('translate-btn-chat');
+    const translateIconChat = document.getElementById('translate-icon-chat');
+    const translateLoadingChat = document.getElementById('translate-loading-chat');
+    
+    async function handleTranslate(translateBtn, translateIcon, translateLoading, input) {
+      if (!translateBtn || !input) return;
+      
+      const text = input.value.trim();
+      
+      if (!text) {
+        showNotification('Please enter text to translate', 'warning');
+        return;
+      }
+      
+      // Show loading state
+      if (translateIcon) translateIcon.classList.add('hidden');
+      if (translateLoading) translateLoading.classList.remove('hidden');
+      translateBtn.disabled = true;
+      
+      try {
+        // Get CSRF token
+        const csrfToken = getCSRFToken();
+        
+        // Call translation API
+        const response = await fetch('/chat/api/translate/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken || ''
+          },
+          body: JSON.stringify({
+            text: text,
+            source_lang: 'en',
+            target_lang: 'ar'
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success && data.translated_text) {
+          // Replace input text with translated text
+          input.value = data.translated_text;
+          showNotification('Text translated to Arabic', 'success');
+          
+          // Auto-resize textarea
+          if (input.style.height !== 'auto') {
+            input.style.height = 'auto';
+          }
+          input.style.height = input.scrollHeight + 'px';
+        } else {
+          showNotification(data.message || 'Translation failed', 'error');
+        }
+      } catch (error) {
+        console.error('Translation error:', error);
+        showNotification('Failed to translate text. Please try again.', 'error');
+      } finally {
+        // Hide loading state
+        if (translateIcon) translateIcon.classList.remove('hidden');
+        if (translateLoading) translateLoading.classList.add('hidden');
+        translateBtn.disabled = false;
+      }
+    }
+    
+    if (translateBtnWelcome) {
+      translateBtnWelcome.addEventListener('click', async () => {
+        await handleTranslate(translateBtnWelcome, translateIconWelcome, translateLoadingWelcome, chatInput);
+      });
+    }
+    
+    if (translateBtnChat) {
+      translateBtnChat.addEventListener('click', async () => {
+        await handleTranslate(translateBtnChat, translateIconChat, translateLoadingChat, chatInputChat);
+      });
+    }
     
     // Enter key handling
     if (chatInput) {
@@ -3164,11 +3695,112 @@ function initMedicalAnimation() {
 // ============================================
 // GLOBAL FUNCTIONS FOR MAP INTEGRATION
 // ============================================
-window.showRouteFromList = function(lat, lng, placeName) {
+window.showRouteFromList = function(lat, lng, placeName, eventElement) {
+  // Try to find existing map instance first
   if (window.currentMapInstance) {
     window.currentMapInstance.showRouteToPlace(lat, lng, placeName);
+    return;
+  }
+  
+  // Try to find map instance from the clicked element
+  let placeItem = null;
+  if (eventElement) {
+    placeItem = eventElement.closest('.place-item');
+  } else if (window.event && window.event.target) {
+    placeItem = window.event.target.closest('.place-item');
+  }
+  
+  if (placeItem) {
+    const messageContainer = placeItem.closest('.message-container');
+    if (messageContainer) {
+      // First, try to find existing map instance for this message
+      const mapContainer = messageContainer.querySelector('.healthcare-map');
+      if (mapContainer && mapContainer.id) {
+        const mapId = mapContainer.id;
+        const mapInstance = window[`mapInstance_${mapId}`];
+        if (mapInstance) {
+          mapInstance.showRouteToPlace(lat, lng, placeName);
+          window.currentMapInstance = mapInstance;
+          return;
+        }
+      }
+      
+      // If no map exists but we have user location, create one
+      if (window.userLocation && window.userLocation.latitude && window.userLocation.longitude) {
+        let mapContainer = messageContainer.querySelector('.healthcare-map');
+        if (!mapContainer) {
+          // Create map container if it doesn't exist
+          const recommendationCard = messageContainer.querySelector('.recommendation-card');
+          if (recommendationCard) {
+            mapContainer = document.createElement('div');
+            mapContainer.className = 'healthcare-map';
+            mapContainer.style.height = '400px';
+            mapContainer.style.width = '100%';
+            mapContainer.id = `map-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+            recommendationCard.appendChild(mapContainer);
+          }
+        }
+        
+        if (mapContainer) {
+          const map = new HealthcareMap(mapContainer.id);
+          map.init(window.userLocation.latitude, window.userLocation.longitude);
+          window.currentMapInstance = map;
+          window[`mapInstance_${mapContainer.id}`] = map;
+          
+          // Get places from the message
+          const places = [];
+          messageContainer.querySelectorAll('.place-item').forEach((item) => {
+            const onclick = item.getAttribute('onclick');
+            if (onclick) {
+              const match = onclick.match(/window\.showRouteFromList\(([\d.]+),\s*([\d.]+),\s*'([^']+)'\)/);
+              if (match) {
+                places.push({
+                  name: match[3].replace(/\\'/g, "'").replace(/&quot;/g, '"'),
+                  latitude: parseFloat(match[1]),
+                  longitude: parseFloat(match[2])
+                });
+              }
+            }
+          });
+          
+          if (places.length > 0) {
+            map.addPlaces(places);
+          }
+          
+          // Show route after a short delay to ensure map is ready
+          setTimeout(() => {
+            map.showRouteToPlace(lat, lng, placeName);
+          }, 500);
+          return;
+        }
+      }
+    }
+  }
+  
+  // Last resort: request location if we don't have it
+  if (!window.userLocation || !window.userLocation.latitude) {
+    if (navigator.geolocation) {
+      const shouldRequest = confirm('Location is needed to show the route. Share your location?');
+      if (shouldRequest) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            window.userLocation = {
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude
+            };
+            showNotification('Location acquired! Please click the facility again.', 'success');
+          },
+          () => {
+            showNotification('Unable to get location. Please share your location manually.', 'error');
+          }
+        );
+      }
+    } else {
+      showNotification('Please share your location to see the route on the map.', 'info');
+    }
   } else {
-    alert('Please wait for the map to load or share your location first.');
+    // We have location but no map - this shouldn't happen, but show a helpful message
+    showNotification('Map is loading. Please try again in a moment.', 'info');
   }
 };
 

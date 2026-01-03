@@ -289,20 +289,32 @@ class UnderstandingAgent:
             "urgent_care": ["urgent care", "urgence", "طوارئ", "emergency room", "er"]
         }
         
+        # IMPROVED: Check for direct facility requests with better patterns
         facility_request_patterns = [
-            "show me", "where is", "find", "nearest", "closest", "nearby",
-            "أين", "أعطني", "أوجد", "أقرب", "أقرب", "قريب"
+            "where is", "where's", "where are", "show me", "find", "nearest", "closest", "nearby", "near me",
+            "location of", "directions to", "how to get to", "find me a", "find a", "show me the",
+            "أين", "أعطني", "أوجد", "أقرب", "قريب", "أقرب لي", "موقع", "عطني"
         ]
         
         # Check if user is asking for a facility
         is_facility_request = any(pattern in text_lower for pattern in facility_request_patterns)
         
-        if is_facility_request:
+        # Also check if facility keywords appear with location-related words
+        location_words = ["nearest", "closest", "nearby", "near", "where", "find", "show", "location", "directions", "أين", "أقرب", "موقع"]
+        has_location_word = any(word in text_lower for word in location_words)
+        has_facility_keyword = any(
+            keyword in text_lower 
+            for keywords in facility_keywords.values() 
+            for keyword in keywords
+        )
+        
+        # Check if it's a facility request (either explicit pattern OR location word + facility keyword)
+        if is_facility_request or (has_location_word and has_facility_keyword):
             # Extract facility type
             detected_facility = None
             for facility_type, keywords in facility_keywords.items():
                 if any(keyword in text_lower for keyword in keywords):
-                    detected_facility = facility_type.upper()
+                    # Map to service_type format
                     if facility_type == "pharmacy":
                         detected_facility = "PHARMACY"
                     elif facility_type == "hospital":
@@ -316,11 +328,12 @@ class UnderstandingAgent:
                     break
             
             if detected_facility:
-                print(f"🔍 Detected facility request: '{text}' - routing to orientation with {detected_facility}")
+                facility_display_name = detected_facility.lower().replace('_', ' ')
+                print(f"🔍 Detected facility request: '{text}' - routing directly to orientation with {detected_facility}")
                 return AgentDecision(
-                    intent=Intent.TRIAGE,
-                    route_to="orientation",
-                    response=self.language_responses.get(language, self.language_responses["en"])["routing"],
+                    intent=Intent.TRIAGE,  # Orientation uses triage intent
+                    route_to="orientation",  # Route directly to orientation node
+                    response=f"Finding nearest {facility_display_name}...",
                     confidence=0.95,
                     needs_clarification=False,
                     facility_type=detected_facility
@@ -713,6 +726,120 @@ Example: {{"intent": "wound_analyzer", "confidence": 0.9, "needs_clarification":
                     }
                 }
         
+        # CRITICAL: Check for facility requests and mental health requests FIRST (before pending questions check)
+        # This ensures these requests are handled even if there are pending triage questions
+        user_input_lower = user_input.lower().strip()
+        
+        # 1. Check for mental health requests FIRST
+        mental_health_keywords = [
+            "depressed", "depression", "anxious", "anxiety", "stressed", "stress", 
+            "sad", "overwhelmed", "suicidal", "suicide", "mental", "emotional",
+            "psychiatric", "psychology", "therapist", "therapy", "counseling",
+            "panic", "panic attack", "bipolar", "ptsd", "trauma", "grief",
+            "اكتئاب", "قلق", "توتر", "حزن", "نفسي", "عاطفي"
+        ]
+        
+        has_mental_health_keyword = any(keyword in user_input_lower for keyword in mental_health_keywords)
+        
+        if has_mental_health_keyword:
+            print(f"🧠 MENTAL HEALTH REQUEST DETECTED: '{user_input}' - routing directly to mental_health")
+            print(f"   (Bypassing pending questions check)")
+            return {
+                "agent_output": "I understand you're going through a difficult time. Let me connect you with our mental health specialist...",
+                "current_agent": "router",
+                "next_agent": "mental_health",
+                "should_end": False,
+                "intent": "mental_health",
+                "language": metadata.get("language", "en"),
+                "metadata": {
+                    **metadata,
+                    "understanding_agent": {
+                        "original_input": user_input,
+                        "detected_language": metadata.get("language", "en"),
+                        "intent": "mental_health",
+                        "confidence": 0.95,
+                        "needs_clarification": False,
+                        "router_response": "Routing to mental health specialist...",
+                        "routing_to": "mental_health",
+                        "mental_health_request": True
+                    },
+                    "mental_health_request": {
+                        "direct_request": True
+                    }
+                }
+            }
+        
+        # 2. Check for facility requests
+        facility_keywords = {
+            "pharmacy": ["pharmacy", "pharmacies", "pharmacie", "صيدلية", "صيدليات", "pharma"],
+            "hospital": ["hospital", "hospitals", "مستشفى", "مستشفيات", "hopital"],
+            "clinic": ["clinic", "clinics", "عيادة", "عيادات", "clinique"],
+            "doctor": ["doctor", "doctors", "طبيب", "أطباء", "medecin", "medecins"],
+            "urgent_care": ["urgent care", "urgence", "طوارئ", "emergency room", "er", "urgent"]
+        }
+        facility_request_patterns = [
+            "where is", "where's", "where are", "show me", "find", "nearest", "closest", "nearby", "near me",
+            "location of", "directions to", "how to get to", "find me a", "find a", "show me the",
+            "أين", "أعطني", "أوجد", "أقرب", "قريب", "أقرب لي", "موقع", "عطني"
+        ]
+        
+        # Check if this is a facility request
+        is_facility_request = any(pattern in user_input_lower for pattern in facility_request_patterns)
+        has_location_word = any(word in user_input_lower for word in ["nearest", "closest", "nearby", "near", "where", "find", "show", "location", "directions", "أين", "أقرب", "موقع"])
+        has_facility_keyword = any(
+            keyword in user_input_lower 
+            for keywords in facility_keywords.values() 
+            for keyword in keywords
+        )
+        
+        if is_facility_request or (has_location_word and has_facility_keyword):
+            # Extract facility type
+            detected_facility = None
+            for facility_type, keywords in facility_keywords.items():
+                if any(keyword in user_input_lower for keyword in keywords):
+                    if facility_type == "pharmacy":
+                        detected_facility = "PHARMACY"
+                    elif facility_type == "hospital":
+                        detected_facility = "HOSPITAL"
+                    elif facility_type == "clinic":
+                        detected_facility = "CLINIC"
+                    elif facility_type == "doctor":
+                        detected_facility = "DOCTOR"
+                    elif facility_type == "urgent_care":
+                        detected_facility = "URGENT_CARE"
+                    break
+            
+            if detected_facility:
+                facility_display_name = detected_facility.lower().replace('_', ' ')
+                print(f"🔍 FACILITY REQUEST DETECTED: '{user_input}' - routing directly to orientation with {detected_facility}")
+                print(f"   (Bypassing pending questions check)")
+                return {
+                    "agent_output": f"Finding nearest {facility_display_name}...",
+                    "current_agent": "router",
+                    "next_agent": "orientation",
+                    "should_end": False,
+                    "intent": "triage",  # Orientation uses triage intent
+                    "language": metadata.get("language", "en"),
+                    "service_type": detected_facility,  # CRITICAL: Set service_type for orientation
+                    "metadata": {
+                        **metadata,
+                        "understanding_agent": {
+                            "original_input": user_input,
+                            "detected_language": metadata.get("language", "en"),
+                            "intent": "triage",
+                            "confidence": 0.95,
+                            "needs_clarification": False,
+                            "router_response": f"Finding nearest {facility_display_name}...",
+                            "routing_to": "orientation",
+                            "facility_request": True
+                        },
+                        "facility_request": {
+                            "facility_type": detected_facility,
+                            "direct_request": True
+                        }
+                    }
+                }
+        
         # Check for pending questions or active triage session
         pending_questions = state.get("pending_questions", [])
         session_id = state.get("session_id")
@@ -852,10 +979,16 @@ Example: {{"intent": "wound_analyzer", "confidence": 0.9, "needs_clarification":
             if "user_input_location" in state:
                 result["user_input_location"] = state["user_input_location"]
             
-            # If this is a direct facility request, set service_type in state
+            # CRITICAL: If this is a direct facility request, set service_type in state
+            # This allows orientation node to immediately find the facility without triage
             if decision.facility_type:
                 result["service_type"] = decision.facility_type
                 print(f"📍 Setting service_type to {decision.facility_type} for direct facility request")
+                # Also add to metadata for tracking
+                result["metadata"]["facility_request"] = {
+                    "facility_type": decision.facility_type,
+                    "direct_request": True
+                }
             
             print(f"✅ Router → Next: {decision.route_to or 'END'}")
             return result

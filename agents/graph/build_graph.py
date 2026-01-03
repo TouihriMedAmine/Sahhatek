@@ -382,12 +382,8 @@ def gatekeeper_routing_decision(state: AgentState) -> str:
             
             return mapped_agent
     
-    # Check if user is answering a triage question
-    if pending_questions and user_input and diagnosis_session_id:
-        print(f"🔀 Answering triage question - routing to diagnosis")
-        return "diagnosis"
-    
-    # Check next_agent from router decision (UPDATED with wound_analyzer)
+    # CRITICAL: Check next_agent from router decision FIRST (before triage check)
+    # This ensures router's explicit routing (e.g., mental_health) takes priority
     if next_agent:
         print(f"🔀 Router requested {next_agent}")
         
@@ -396,12 +392,24 @@ def gatekeeper_routing_decision(state: AgentState) -> str:
             "mental_health": "mental_health",
             "rumor": "rumor",
             "triage": "extraction",
-            "wound_analyzer": "wound_analyzer"  # NEW
+            "wound_analyzer": "wound_analyzer",  # NEW
+            "orientation": "orientation"  # NEW - for direct facility requests
         }
         
         mapped_agent = intent_mapping.get(next_agent, next_agent)
         print(f"📍 Mapping {next_agent} → {mapped_agent}")
-        return mapped_agent
+        
+        # If router explicitly routes to a specialized agent (not triage), respect that
+        # Only allow triage override if router itself routes to triage
+        # Also allow orientation (for direct facility requests)
+        if mapped_agent not in ["extraction", "diagnosis"]:
+            print(f"✅ Router explicitly routed to {mapped_agent}, ignoring pending triage questions")
+            return mapped_agent
+    
+    # Check if user is answering a triage question (only if router didn't route elsewhere)
+    if pending_questions and user_input and diagnosis_session_id:
+        print(f"🔀 Answering triage question - routing to diagnosis")
+        return "diagnosis"
     
     # Check intent from router (UPDATED)
     if intent:
@@ -410,7 +418,8 @@ def gatekeeper_routing_decision(state: AgentState) -> str:
             "mental_health": "mental_health",
             "rumor": "rumor",
             "triage": "extraction",
-            "wound_analyzer": "wound_analyzer"  # NEW
+            "wound_analyzer": "wound_analyzer",  # NEW
+            "orientation": "orientation"  # NEW - for direct facility requests
         }
         mapped_intent = intent_mapping.get(intent)
         if mapped_intent:

@@ -632,23 +632,88 @@ Select 3-5 most relevant conditions. Return ONLY JSON:
                 }
                 
         except Exception as e:
+            # Check if it's a rate limit error
+            error_str = str(e).lower()
+            is_rate_limit = 'rate limit' in error_str or '429' in error_str or 'rate_limit' in error_str
+            
+            if is_rate_limit:
+                logger.warning(f"⚠️ Rate limit reached in diagnosis. Using fallback method.")
+                # Fallback: Use top condition from knowledge base without LLM
+                if conditions:
+                    top_condition = conditions[0]
+                    disease_name = top_condition.get("name", "unknown")
+                    
+                    # Calculate basic confidence from symptoms
+                    symptom_match = sum(1 for s in normalized_symptoms if s in top_condition.get("symptoms", []))
+                    total_symptoms = len(top_condition.get("symptoms", []))
+                    confidence = min(0.85, 0.5 + (symptom_match / max(total_symptoms, 1)) * 0.35)
+                    
+                    # Map severity based on condition
+                    severity = "moderate"
+                    if any(s in normalized_symptoms for s in ["high fever", "severe pain", "difficulty breathing"]):
+                        severity = "severe"
+                    elif all(s in ["mild", "slight"] for s in normalized_symptoms):
+                        severity = "mild"
+                    
+                    logger.info(f"✅ Fallback diagnosis: {disease_name} (confidence: {confidence:.2f})")
+                    
+                    return {
+                        "disease": disease_name,
+                        "severity": severity,
+                        "confidence": confidence,
+                        "current_agent": "diagnosis",
+                        "diagnosis_complete": True,
+                        "agent_output": (
+                            f"Based on your symptoms, I've identified a possible condition: **{disease_name}**.\n\n"
+                            f"⚠️ Note: Our AI analysis service is currently experiencing high demand. "
+                            f"I've provided an initial assessment based on your symptoms. "
+                            f"For a more detailed analysis, please try again in a few minutes or consult with a healthcare professional."
+                        )
+                    }
+            
             logger.error(f"Error in diagnosis: {e}", exc_info=True)
             return {
                 "disease": "unknown",
                 "severity": "moderate",
                 "confidence": 0.5,
                 "current_agent": "diagnosis",
-                "agent_output": f"Error in diagnosis: {str(e)}"
+                "agent_output": (
+                    f"I encountered an issue while analyzing your symptoms. "
+                    f"Please try again in a moment, or describe your symptoms in more detail."
+                )
             }
             
     except Exception as e:
+        # Check if it's a rate limit error at the outer level
+        error_str = str(e).lower()
+        is_rate_limit = 'rate limit' in error_str or '429' in error_str or 'rate_limit' in error_str
+        
+        if is_rate_limit:
+            logger.warning(f"⚠️ Rate limit reached. Using basic fallback.")
+            # Basic fallback - proceed to triage with generic recommendation
+            return {
+                "disease": "unknown",
+                "severity": "moderate",
+                "confidence": 0.6,
+                "current_agent": "triage",
+                "diagnosis_complete": True,
+                "agent_output": (
+                    "I'm experiencing high demand right now. Based on your symptoms, "
+                    "I recommend consulting with a healthcare professional for proper assessment. "
+                    "Please try again in a few minutes for AI-powered analysis."
+                )
+            }
+        
         logger.error(f"Error in diagnosis node: {e}", exc_info=True)
         return {
             "disease": "unknown",
             "severity": "moderate",
             "confidence": 0.5,
             "current_agent": "diagnosis",
-            "agent_output": f"Error: {str(e)}"
+            "agent_output": (
+                "I encountered an error while processing your request. "
+                "Please try again or provide more details about your symptoms."
+            )
         }
 
 
@@ -719,12 +784,51 @@ def triage_node(state: Dict[str, Any]) -> Dict[str, Any]:
         
         logger.info(f"✅ Triage recommendation: {service_type} (immediate_care={immediate_care})")
         
+        # Create user-friendly recommendation message
+        facility_names = {
+            "HOSPITAL": "hospital",
+            "PHARMACY": "pharmacy",
+            "CLINIC": "clinic",
+            "DOCTOR": "doctor",
+            "URGENT_CARE": "urgent care facility",
+            "STAY_HOME": "stay home and rest",
+            "MENTAL_HEALTH": "mental health facility"
+        }
+        
+        facility_name = facility_names.get(service_type, service_type.lower().replace("_", " "))
+        
+        # Get disease name for context
+        disease_name = state.get("disease", "your condition")
+        if disease_name and disease_name != "unknown":
+            disease_context = f"Based on your symptoms suggesting **{disease_name}**, "
+        else:
+            disease_context = "Based on your symptoms, "
+        
+        if immediate_care:
+            recommendation_msg = (
+                f"🚨 **Immediate Care Required**\n\n"
+                f"{disease_context}I recommend seeking **{facility_name}** care immediately. "
+                f"Your condition may require urgent medical attention.\n\n"
+                f"Let me help you find the nearest {facility_name}."
+            )
+        elif service_type == "STAY_HOME":
+            recommendation_msg = (
+                f"{disease_context}you can **stay home and rest**.\n\n"
+                f"Your condition appears to be mild and self-limiting. "
+                f"Monitor your symptoms and seek medical care if they worsen."
+            )
+        else:
+            recommendation_msg = (
+                f"{disease_context}I recommend visiting a **{facility_name}** for proper assessment and care.\n\n"
+                f"Let me help you find the nearest {facility_name}."
+            )
+        
         return {
             "service_type": service_type,
             "immediate_care": immediate_care,
             "recommendation_text": recommendation.get("recommendation_text", ""),
             "current_agent": "triage",
-            "agent_output": f"Recommended facility: {service_type}"
+            "agent_output": recommendation_msg
         }
     except Exception as e:
         logger.error(f"Error in triage node: {e}", exc_info=True)
@@ -911,8 +1015,17 @@ def orientation_node(state: Dict[str, Any]) -> Dict[str, Any]:
             elif service_type == "MENTAL_HEALTH":
                 facility_type_display = "mental health facility"
             
-            # Simple output - frontend will render clickable items
-            output = f"Found {len(facilities)} nearby {facility_type_display} facilities. Click on any facility below to see the route on the map."
+            # Combine triage recommendation with facility finding message
+            triage_message = state.get("agent_output", "")
+            if triage_message and "Recommended facility" not in triage_message and "Triage error" not in triage_message and "No disease" not in triage_message:
+                # Use the triage recommendation message as the main message
+                output = triage_message
+                if not output.endswith("\n\n"):
+                    output += "\n\n"
+                output += f"Found {len(facilities)} nearby {facility_type_display} facilities. Click on any facility below to see the route on the map."
+            else:
+                # Fallback if no triage message
+                output = f"Found {len(facilities)} nearby {facility_type_display} facilities. Click on any facility below to see the route on the map."
             
             # Format facilities as "places" for frontend compatibility
             # Frontend expects: {name, type, distance, latitude, longitude, address}

@@ -455,9 +455,92 @@
         "timestamp": "2026-01-03T15:23:21.531850",
         "steps": []
       }
+    },
+    {
+      "claim": "is it true that the corona virus came form china ?",
+      "created_at": "2026-01-03T20:25:20.897910",
+      "last_updated": "2026-01-03T20:25:20.897910",
+      "verdict": "CREDIBLE",
+      "score": 46,
+      "credibility_percentage": 92.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2026-01-03T20:25:20.897910",
+          "score": 46,
+          "credibility_percentage": 92.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "Coronavirus (COVID-19) events as they happen",
+              "href": "https://www.who.int/emergencies/diseases/novel-coronavirus-2019/events-as-they-happen",
+              "body": "The pandemic is accelerating in Africa – it took 98 days to reach 100 000 cases and only 18 days to move to 200 000 cases."
+            },
+            {
+              "title": "WHO Scientific advisory group issues report on origins of COVID-19",
+              "href": "",
+              "body": ""
+            },
+            {
+              "title": "CDC SARS Response Timeline | About | CDC",
+              "href": "https://archive.cdc.gov/www_cdc_gov/about/history/sars/timeline.htm",
+              "body": "Identifying the genetic sequence of a new virus is important to treatment and prevention efforts. The results came just 12 days after a team of scientists and technicians began working around the clock to grow cells taken from the throat culture of a SARS patient."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "is it true that the corona virus came form china ?",
+        "timestamp": "2026-01-03T20:25:20.897910",
+        "steps": []
+      }
     }
   ],
-  "Preventive Medicine": [],
+  "Preventive Medicine": [
+    {
+      "claim": "i heared from tiktok that water can increase yout life span",
+      "created_at": "2026-01-03T20:40:15.753547",
+      "last_updated": "2026-01-03T20:40:15.753547",
+      "verdict": "CREDIBLE",
+      "score": 40,
+      "credibility_percentage": 80.0,
+      "verification_count": 1,
+      "verifications": [
+        {
+          "timestamp": "2026-01-03T20:40:15.753547",
+          "score": 40,
+          "credibility_percentage": 80.0,
+          "verdict": "CREDIBLE",
+          "official_sources": 5,
+          "web_sources": 0,
+          "sources": [
+            {
+              "title": "WHO and TikTok to collaborate on more science-based information on ...",
+              "href": "https://www.who.int/news/item/26-09-2024-who-and-tiktok-to-collaborate-on-more-science-based-information-on-health-and-well-being",
+              "body": "Today, the World Health Organization (WHO) and TikTok , a platform for short-form mobile videos, announced a year-long collaboration aimed at providing people with reliable, science-based health information. This reflects WHO's commitment to leveraging multiple digital communication platforms to increase outreach to people globally, to promote health literacy, healthy behaviours and actions in ..."
+            },
+            {
+              "title": "Increased drinking-water consumption brings gains for health and the ...",
+              "href": "https://www.who.int/europe/news/item/19-03-2020-increased-drinking-water-consumption-brings-gains-for-health-and-the-environment",
+              "body": "Essential, vital, crucial, fundamental - all of these words describe the role of water in our lives. Access to safe, sufficient, affordable and acceptable drinking water is not only critical to human health and well-being, but it is a basic human right.Drinking water is also the healthiest and cheapest choice for hydration, with the lowest environmental impact. Compared to bottled water , tap ..."
+            },
+            {
+              "title": "About Water and Healthier Drinks | Healthy Weight and Growth | CDC",
+              "href": "https://www.cdc.gov/healthy-weight-growth/water-healthy-drinks/index.html",
+              "body": "About Water and Healthier Drinks Key points Getting enough water every day is important for your health. Drinking water can prevent dehydration and helps the body function normally. See tips for drinking more water throughout the day."
+            }
+          ]
+        }
+      ],
+      "process": {
+        "rumor": "i heared from tiktok that water can increase yout life span",
+        "timestamp": "2026-01-03T20:40:15.753547",
+        "steps": []
+      }
+    }
+  ],
   "Alternative Medicine": [
     {
       "claim": "in facebooki saw a person recovering fromi llness with only cucumber?",

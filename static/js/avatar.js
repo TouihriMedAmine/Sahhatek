@@ -47,6 +47,9 @@ class AvatarComponent {
             // 5. Rumor (Fact Checking)
             rumor: { name: 'Rumor', gradient: this._generateGradient('investigate') },
             
+            // 6. Wound Analyzer (Medical Analysis)
+            wound_analyzer: { name: 'Wound Analyzer', gradient: this._generateGradient('surgical') },
+            
             // Fallback
             neutral: { name: 'Neutral', gradient: this._generateGradient('neutral') }
         };
@@ -544,6 +547,12 @@ class AvatarComponent {
                     c.setRGB(0.4 + t*0.2, 0.4 + t*0.2, 0.8 + t*0.1);
                     break;
 
+                case 'surgical': // Wound Analyzer: Clean Blue-White (Sterile, medical)
+                    // Light blue to white gradient (sterile, clean look)
+                    c.setRGB(0.85 + t*0.1, 0.9 + t*0.05, 0.95 + t*0.05);
+                    if (t > 0.5) c.setRGB(0.7 + t*0.15, 0.75 + t*0.15, 0.9);
+                    break;
+
                 case 'neutral': 
                 default: 
                     c.setRGB(0.9, 0.9, 0.9);
@@ -909,6 +918,10 @@ class AvatarComponent {
             case 'rumor':
                 this._addMonocle();
                 break;
+            case 'wound_analyzer':
+                this._addSurgicalMask();
+                this._addSurgicalCap();
+                break;
         }
     }
 
@@ -1226,5 +1239,69 @@ class AvatarComponent {
         monocleGroup.add(chain);
 
         this.accessoriesGroup.add(monocleGroup);
+    }
+
+    _addSurgicalMask() {
+        // Surgical mask for Wound Analyzer - Medical professional look
+        const maskGroup = new THREE.Group();
+        
+        // Main mask body (light blue/white)
+        const maskGeo = new THREE.BoxGeometry(1.2, 0.6, 0.15);
+        const maskMat = new THREE.MeshPhongMaterial({ 
+            color: 0xe3f2fd, // Light blue
+            shininess: 20
+        });
+        const mask = new THREE.Mesh(maskGeo, maskMat);
+        mask.position.set(0, -0.3, 2.25);
+        maskGroup.add(mask);
+        
+        // Nose wire (top edge)
+        const wireGeo = new THREE.BoxGeometry(1.0, 0.05, 0.05);
+        const wireMat = new THREE.MeshPhongMaterial({ color: 0x90caf9 });
+        const wire = new THREE.Mesh(wireGeo, wireMat);
+        wire.position.set(0, 0.0, 2.3);
+        maskGroup.add(wire);
+        
+        // Ear loops (left and right)
+        const loopGeo = new THREE.TorusGeometry(0.15, 0.02, 8, 16);
+        const loopMat = new THREE.MeshPhongMaterial({ color: 0x64b5f6 });
+        
+        const leftLoop = new THREE.Mesh(loopGeo, loopMat);
+        leftLoop.position.set(-0.7, -0.3, 2.0);
+        leftLoop.rotation.y = 1.57;
+        maskGroup.add(leftLoop);
+        
+        const rightLoop = new THREE.Mesh(loopGeo, loopMat);
+        rightLoop.position.set(0.7, -0.3, 2.0);
+        rightLoop.rotation.y = 1.57;
+        maskGroup.add(rightLoop);
+        
+        this.accessoriesGroup.add(maskGroup);
+    }
+
+    _addSurgicalCap() {
+        // Surgical cap for Wound Analyzer
+        const capGroup = new THREE.Group();
+        
+        // Main cap (light blue, similar to nurse cap but different style)
+        const capGeo = new THREE.CylinderGeometry(0.9, 0.95, 0.4, 32);
+        const capMat = new THREE.MeshPhongMaterial({ 
+            color: 0xbbdefb, // Light blue
+            shininess: 10
+        });
+        const cap = new THREE.Mesh(capGeo, capMat);
+        cap.position.y = 1.85;
+        cap.rotation.x = -0.15;
+        capGroup.add(cap);
+        
+        // Contrast band (darker blue)
+        const bandGeo = new THREE.CylinderGeometry(0.96, 0.96, 0.08, 32);
+        const bandMat = new THREE.MeshBasicMaterial({ color: 0x64b5f6 });
+        const band = new THREE.Mesh(bandGeo, bandMat);
+        band.position.y = 1.7;
+        band.rotation.x = -0.15;
+        capGroup.add(band);
+        
+        this.accessoriesGroup.add(capGroup);
     }
 }
